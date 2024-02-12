@@ -107,6 +107,7 @@ def main(args):
     lr1 = 1e-3
     lr2 = 1e-5
     ensemble_method = None
+    independent = True
     # TODO: Rename voting to averaging
     if "ensemble_method" in config.keys():
         # Ensemble learning
