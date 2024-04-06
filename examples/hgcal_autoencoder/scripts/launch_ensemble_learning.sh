@@ -36,6 +36,11 @@
 # tmux new-session -d -s f01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/medium_fixed_mask_configs/config3 ./averaging"
 # tmux new-session -d -s f02 "./scripts/run_gen_ensemble_exp.sh 2 ./ensemble_configs/averaging/small_fixed_mask_configs/config3 ./averaging"
 
+# weak1 model
+tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config1 ./averaging"
+tmux new-session -d -s a01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config2 ./averaging"
+tmux new-session -d -s a02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config3 ./averaging"
+
 # medium model
 # xlabs53
 # tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fr_configs/config1 ./voting"
@@ -67,9 +72,9 @@
 # tmux new-session -d -s a07 "./scripts/run_gen_ensemble_exp.sh 2 ./ensemble_configs/adaboost/large_configs/config2 ./adaboost"
 # tmux new-session -d -s a08 "./scripts/run_gen_ensemble_exp.sh 2 ./ensemble_configs/adaboost/large_configs/config3 ./adaboost"
 
-tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/large_fixed_mask_configs/config2  ./adaboost"
-tmux new-session -d -s a01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/medium_fixed_mask_configs/config1 ./adaboost"
-tmux new-session -d -s a02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/small_fixed_mask_configs/config1  ./adaboost"
+# tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/large_fixed_mask_configs/config2  ./adaboost"
+# tmux new-session -d -s a01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/medium_fixed_mask_configs/config1 ./adaboost"
+# tmux new-session -d -s a02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/small_fixed_mask_configs/config1  ./adaboost"
 
 # tmux kill-session -t a00
 # tmux kill-session -t a01
@@ -94,15 +99,6 @@ tmux new-session -d -s a02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_confi
 # tmux new-session -d -s seq_ft04 "./scripts/run_gen_ensemble_exp.sh 2 ./ensemble_configs/adaboost/small_seq_configs/config2  ./adaboost_seq"
 # tmux new-session -d -s seq_ft05 "./scripts/run_gen_ensemble_exp.sh 2 ./ensemble_configs/adaboost/small_seq_configs/config3  ./adaboost_seq"
 
-# tmux kill-session -t seq_ft00
-# tmux kill-session -t seq_ft01
-# tmux kill-session -t seq_ft02
-# tmux kill-session -t seq_ft03
-# tmux kill-session -t seq_ft04
-# tmux kill-session -t seq_ft05
-# tmux kill-session -t seq_ft06
-# tmux kill-session -t seq_ft07
-# tmux kill-session -t seq_ft08
 
 # xlabs55
 

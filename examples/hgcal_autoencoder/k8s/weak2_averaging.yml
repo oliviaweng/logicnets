@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: weak2_avg
+spec:
+  template:
+    spec:
+      containers:
+      - name: gpu-container
+        image: gitlab-registry.nrp-nautilus.io/fpga-skip-connections/pytorch:latest
+        command: ["/bin/bash", "-c"]
+        # Train
+        args:
+          -
+            cd /imagenet-volume/pytorch;
+            git pull --recurse-submodules;
+            /imagenet-volume/pytorch/python/src/imagenet_resnet/scripts/remover_resnet_imagenet_k8s.sh 
+              50 
+              resume
+        volumeMounts:
+        - mountPath: /imagenet-volume
+          name: imagenet-volume
+        - mountPath: /dev/shm # Solves insufficient memory error for DataLoader
+          name: dshm
+        resources:
+          limits:
+            memory: 56Gi
+            cpu: "10"
+            nvidia.com/gpu: "1"
+          requests:
+            memory: 50Gi
+            cpu: "4"
+            nvidia.com/gpu: "1"                
+      volumes:
+        - name: imagenet-volume
+          persistentVolumeClaim:
+            claimName: imagenet-volume
+        - name: dshm  # Solves insufficient memory error for DataLoader
+          emptyDir:
+            medium: Memory
+
+      restartPolicy: Never
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: nvidia.com/gpu.product
+                operator: In
+                values:
+                - NVIDIA-GeForce-RTX-3090
+
+  backoffLimit: 2

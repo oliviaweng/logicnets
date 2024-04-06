@@ -207,11 +207,13 @@ def main(args):
             "lr1": lr1,
             "lr2": lr2,
         }
+        # Log experiment hyperparameters
         hparams_log = os.path.join(
             experiment_dir,"hparams.yml"
         )
         with open(hparams_log, "w") as f:
             yaml.dump(config, f)
+        # Start training
         if ensemble_method == "voting":
             train(model, dataset, train_params)
         elif ensemble_method == "snapshot":
@@ -233,8 +235,6 @@ def main(args):
             evaluate_model = True
             print(f"Evaluating model saved at: {args.checkpoint}")
             checkpoint = torch.load(args.checkpoint) 
-            # TODO: Implement proper checkpoint loading for various ensemble
-            # learning methods
             model.load_state_dict(checkpoint["model_dict"])
             if ensemble_method == "adaboost":
                 model.model_weights = checkpoint["model_weights"]
