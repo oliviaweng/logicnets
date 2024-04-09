@@ -24,7 +24,7 @@ from functools import reduce
 from pyverilator import PyVerilator
 
 from logicnets.quant import QuantBrevitasActivation
-from logicnets.nn import SparseLinearNeq, RandomFixedSparsityMask2D
+from logicnets.nn import SparseLinearNeq, PolyMask, FeatureMask, InputTerms
 
 class EncoderNeqModel(nn.Module):
     def __init__(
@@ -67,8 +67,20 @@ class EncoderNeqModel(nn.Module):
             bn = nn.BatchNorm1d(out_features)
             if i == 0: # First layer
                 in_features = self.input_length
-                lin_mask = RandomFixedSparsityMask2D(
-                    in_features, out_features, fan_in=config["input_fanin"],
+                terms = InputTerms(
+                    fan_in=config["input_fanin"], 
+                    degree=config["degree"],
+                )
+                new_in_features = len(terms)
+                mask = PolyMask(
+                    fan_in=config["input_fanin"], 
+                    terms=terms,
+                )
+                imask = FeatureMask(
+                    in_features,
+                    out_features,
+                    fan_in=config["input_fanin"],
+                    degree=config["degree"],
                 )
                 output_quant = QuantBrevitasActivation(
                     qnn.QuantReLU(
@@ -84,15 +96,28 @@ class EncoderNeqModel(nn.Module):
                     out_features, 
                     input_quant=self.input_quant, 
                     output_quant=output_quant,
-                    sparse_linear_kws={'mask': lin_mask},
+                    mask = mask,                                # mask for the polynomial degrees
+                    imask = imask,                              # mask for input fan-in
+                    new_in_features = new_in_features,          # number of input features after poly expansion
+                    fan_in = config["input_fanin"],
                 )
                 layers.append(sparse_lin_neq_layer)
             else:
                 in_features = config["hidden_layer"][i - 1]
-                lin_mask = RandomFixedSparsityMask2D(
-                    in_features, 
-                    out_features, 
+                terms = InputTerms(
+                    fan_in=config["neuron_fanin"][i - 1], 
+                    degree=config["degree"],
+                )
+                new_in_features = len(terms)
+                mask = PolyMask(
+                    fan_in=config["neuron_fanin"][i - 1], 
+                    terms=terms,
+                )
+                imask = FeatureMask(
+                    in_features,
+                    out_features,
                     fan_in=config["neuron_fanin"][i - 1],
+                    degree=config["degree"],
                 )
                 output_quant = QuantBrevitasActivation(
                     qnn.QuantReLU(
@@ -108,15 +133,28 @@ class EncoderNeqModel(nn.Module):
                     out_features, 
                     input_quant=layers[-1].output_quant, 
                     output_quant=output_quant,
-                    sparse_linear_kws={'mask': lin_mask},
+                    mask = mask,                                # mask for the polynomial degrees
+                    imask = imask,                              # mask for input fan-in
+                    new_in_features = new_in_features,          # number of input features after poly expansion
+                    fan_in = config["neuron_fanin"][i - 1],
                     apply_input_quant=False,
                 )
                 layers.append(sparse_lin_neq_layer)
         # Output layer
-        lin_mask = RandomFixedSparsityMask2D(
-            config["hidden_layer"][-1], 
-            self.encoded_dim, 
+        terms = InputTerms(
+            fan_in=config["neuron_fanin"][-1], 
+            degree=config["degree"],
+        )
+        new_in_features = len(terms)
+        mask = PolyMask(
+            fan_in=config["neuron_fanin"][-1], 
+            terms=terms,
+        )
+        imask = FeatureMask(
+            config["hidden_layer"][-1],
+            self.encoded_dim,
             fan_in=config["neuron_fanin"][-1],
+            degree=config["degree"],
         )
         bn = nn.BatchNorm1d(self.output_length)
         output_quant = QuantBrevitasActivation(
@@ -135,7 +173,10 @@ class EncoderNeqModel(nn.Module):
             # Make sure same quant object as prev layer's output quant
             input_quant=layers[-1].output_quant, 
             output_quant=output_quant,
-            sparse_linear_kws={'mask': lin_mask},
+            mask = mask,                                # mask for the polynomial degrees
+            imask = imask,                              # mask for input fan-in
+            new_in_features = new_in_features,          # number of input features after poly expansion
+            fan_in = config["neuron_fanin"][-1],
             apply_input_quant=False,
         )
         layers.append(sparse_lin_neq_layer)

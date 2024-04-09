@@ -20,7 +20,6 @@ import torch
 import random
 import datetime
 import numpy as np
-from tqdm import tqdm
 
 from argparse import ArgumentParser
 
@@ -300,6 +299,7 @@ def main(args):
 
 
 if __name__ == "__main__":
+    breakpoint()
     parser = ArgumentParser()
     # Dataset args
     parser.add_argument("--data_dir", type=str, default=None)

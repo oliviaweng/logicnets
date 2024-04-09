@@ -95,22 +95,28 @@ def module_list_to_verilog_module(module_list: nn.ModuleList, module_name: str, 
         f.write(module_list_verilog)
 
 class SparseLinear(nn.Linear):
-    def __init__(self, in_features: int, out_features: int, mask: nn.Module, bias: bool = True) -> None:
+    def __init__(self, in_features: int, out_features: int, new_in_features: int, bias: bool = True) -> None:
         super(SparseLinear, self).__init__(in_features=in_features, out_features=out_features, bias=bias)
-        self.mask = mask
+        y = 1.0 / np.sqrt(new_in_features)
+        self.weight = torch.nn.Parameter(torch.randn(out_features, new_in_features))
+        self.weight.data.uniform_(-y, y)
 
     def forward(self, input: Tensor) -> Tensor:
-        return F.linear(input, self.weight*self.mask(), self.bias)
+        return (input * self.weight).sum(dim=-1) + self.bias
 
 # TODO: Perhaps make this two classes, separating the LUT and NEQ code.
 class SparseLinearNeq(nn.Module):
-    def __init__(self, in_features: int, out_features: int, input_quant, output_quant, sparse_linear_kws={}, apply_input_quant=True, apply_output_quant=True) -> None:
+    def __init__(self, in_features: int, out_features: int, input_quant, output_quant, mask, imask, new_in_features, fan_in, apply_input_quant=True, apply_output_quant=True) -> None:
         super(SparseLinearNeq, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.input_quant = input_quant
-        self.fc = SparseLinear(in_features, out_features, **sparse_linear_kws)
+        self.fc = SparseLinear(in_features, out_features, new_in_features)
         self.output_quant = output_quant
+        self.mask = mask                                # mask for the polynomial degrees
+        self.imask = imask                              # mask for input fan-in
+        self.new_in_features = new_in_features          # number of input features after poly expansion
+        self.fan_in = fan_in
         self.is_lut_inference = False
         self.neuron_truth_tables = None
         self.apply_input_quant = apply_input_quant
@@ -251,6 +257,8 @@ class SparseLinearNeq(nn.Module):
         else:
             if self.apply_input_quant:
                 x = self.input_quant(x)
+            x = x[:, self.imask]
+            x = x.unsqueeze(dim=-2).pow(self.mask).prod(dim=-1)
             x = self.fc(x)
             if self.apply_output_quant:
                 x = self.output_quant(x)
@@ -299,6 +307,34 @@ class SparseLinearNeq(nn.Module):
                 # Append the connectivity, input permutations and output permutations to the neuron truth tables 
                 neuron_truth_tables.append((indices, bin_input_permutation_matrix, output_states, bin_output_states)) # Change this to be the binary output states
         self.neuron_truth_tables = neuron_truth_tables
+
+
+def InputTerms(fan_in, degree):
+    return list(
+        itertools.chain(
+            *[
+                list(itertools.combinations_with_replacement(range(fan_in), d + 1))
+                for d in range(degree)
+            ]
+        )
+    )
+
+
+def PolyMask(fan_in, terms):
+    T = len(terms)
+    mask = torch.zeros((T, fan_in))
+    for t, ks in enumerate(terms):
+        for k in ks:
+            mask[t, k] += 1
+    return mask
+
+
+def FeatureMask(in_features: int, out_features: int, fan_in: int, degree: int):
+    imask = torch.zeros((out_features, fan_in), dtype=torch.long)
+    for i in range(out_features):
+        imask[i, :] = torch.randperm(in_features)[:fan_in]
+        imask = torch.sort(imask, 1).values
+    return imask
 
 class DenseMask2D(nn.Module):
     def __init__(self, in_features: int, out_features: int) -> None:
@@ -368,4 +404,5 @@ class ScalarBiasScale(ScalarScaleBias):
         if self.weight is not None:
             x = x*self.weight
         return x
+
 
