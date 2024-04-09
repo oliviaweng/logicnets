@@ -218,7 +218,7 @@ for i in range(48):
     remap_8x8_matrix[remap_8x8[i], i] = 1
 
 
-def move_constants_to_gpu():
+def move_constants_to_gpu(dev):
     global remap_8x8_matrix, Remap_48_36, Remap_48_12, Remap_12_3, Weights_48_36
     # NOTE: unclear if this works for multi-gpu training, but that is overkill for this model
     # for dev in devices:
@@ -229,7 +229,7 @@ def move_constants_to_gpu():
     #     Remap_12_3 = Remap_12_3.to(torch.device(cuda_dev))
     #     Weights_48_36 = Weights_48_36.to(torch.device(cuda_dev))
 
-    cuda_dev = "cuda:0"
+    cuda_dev = "cuda:" + str(dev)
     remap_8x8_matrix = remap_8x8_matrix.to(torch.device(cuda_dev))
     Remap_48_36 = Remap_48_36.to(torch.device(cuda_dev))
     Remap_48_12 = Remap_48_12.to(torch.device(cuda_dev))

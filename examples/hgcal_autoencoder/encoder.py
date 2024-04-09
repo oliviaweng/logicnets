@@ -75,12 +75,14 @@ class EncoderNeqModel(nn.Module):
                 mask = PolyMask(
                     fan_in=config["input_fanin"], 
                     terms=terms,
+                    gpu = config["gpu"],
                 )
                 imask = FeatureMask(
                     in_features,
                     out_features,
                     fan_in=config["input_fanin"],
                     degree=config["degree"],
+                    gpu = config["gpu"],
                 )
                 output_quant = QuantBrevitasActivation(
                     qnn.QuantReLU(
@@ -112,12 +114,14 @@ class EncoderNeqModel(nn.Module):
                 mask = PolyMask(
                     fan_in=config["neuron_fanin"][i - 1], 
                     terms=terms,
+                    gpu = config["gpu"],
                 )
                 imask = FeatureMask(
                     in_features,
                     out_features,
                     fan_in=config["neuron_fanin"][i - 1],
                     degree=config["degree"],
+                    gpu = config["gpu"],
                 )
                 output_quant = QuantBrevitasActivation(
                     qnn.QuantReLU(
@@ -149,12 +153,14 @@ class EncoderNeqModel(nn.Module):
         mask = PolyMask(
             fan_in=config["neuron_fanin"][-1], 
             terms=terms,
+            gpu = config["gpu"],
         )
         imask = FeatureMask(
             config["hidden_layer"][-1],
             self.encoded_dim,
             fan_in=config["neuron_fanin"][-1],
             degree=config["degree"],
+            gpu = config["gpu"],
         )
         bn = nn.BatchNorm1d(self.output_length)
         output_quant = QuantBrevitasActivation(

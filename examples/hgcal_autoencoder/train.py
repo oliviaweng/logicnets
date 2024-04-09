@@ -83,8 +83,11 @@ def main(args):
     torch.manual_seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
     if args.gpu:
+        dev = 2
         torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.deterministic = True
+        torch.cuda.set_device(dev) #remove
+    config['gpu'] = args.gpu
     print(f"Global seed set to {seed}!")
 
     # Create experiment directory
@@ -179,7 +182,7 @@ def main(args):
      # Push model and constants to GPU if necessary
     if args.gpu:
         model.cuda()
-        move_constants_to_gpu()
+        move_constants_to_gpu(dev)
 
     # Train
     if args.train:
@@ -299,7 +302,6 @@ def main(args):
 
 
 if __name__ == "__main__":
-    breakpoint()
     parser = ArgumentParser()
     # Dataset args
     parser.add_argument("--data_dir", type=str, default=None)

@@ -20,6 +20,8 @@ import torch.nn as nn
 from torch.nn import init
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
+import itertools
+import numpy as np
 
 from .init import random_restrict_fanin
 from .util import fetch_mask_indices, generate_permutation_matrix
@@ -320,17 +322,24 @@ def InputTerms(fan_in, degree):
     )
 
 
-def PolyMask(fan_in, terms):
+def PolyMask(fan_in, terms, gpu):
     T = len(terms)
     mask = torch.zeros((T, fan_in))
+    if gpu:
+        mask = torch.zeros((T, fan_in)).cuda()
+    else:
+        mask = torch.zeros((T, fan_in))
     for t, ks in enumerate(terms):
         for k in ks:
             mask[t, k] += 1
     return mask
 
 
-def FeatureMask(in_features: int, out_features: int, fan_in: int, degree: int):
-    imask = torch.zeros((out_features, fan_in), dtype=torch.long)
+def FeatureMask(in_features: int, out_features: int, fan_in: int, degree: int, gpu: bool):
+    if gpu:
+        imask = torch.zeros((out_features, fan_in), dtype=torch.long).cuda()
+    else:
+        imask = torch.zeros((out_features, fan_in), dtype=torch.long)
     for i in range(out_features):
         imask[i, :] = torch.randperm(in_features)[:fan_in]
         imask = torch.sort(imask, 1).values
