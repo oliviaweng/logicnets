@@ -15,22 +15,21 @@
 
 
 CUDA_DEVICE=$1
-SEED=$2
 
 DATA_DIR=./data/hgcal22data_signal_driven_ttbar_v11/nElinks_5/
 DATA_FILE=./data/hgcal22data_signal_driven_ttbar_v11/hgcal22data_signal_driven_ttbar_v11_nELinks5.npy 
-SAVE_DIR=./pipecleaner
-EXP_NAME="hgcal_float${SEED}"
-CKPT="./pipecleaner/hgcal_float1/best_loss.pth"
-EPOCHS=1
+SAVE_DIR=./test
+EXP_NAME=small_lr0.01_warm_restart_freq50_wd0.01_batch_size512
+CONFIG=./grid_search_configs/avg_emd_small_configs/config1/small_lr0.01_warm_restart_freq50_wd0.01_batch_size512.yml
+CKPT=./sml_avg_emd_hp_grid_search/small_lr0.01_warm_restart_freq50_wd0.01_batch_size512/best_loss.pth
 
 
 CUDA_VISIBLE_DEVICES=$CUDA_DEVICE python3 train.py \
-   --data_dir $DATA_DIR \
-   --data_file $DATA_FILE \
-   --save_dir $SAVE_DIR \
-   --experiment_name $EXP_NAME \
-   --checkpoint $CKPT \
-   --seed $SEED \
-   --evaluate \
-   --gpu \
+    --data_dir $DATA_DIR \
+    --data_file $DATA_FILE \
+    --save_dir $SAVE_DIR \
+    --experiment_name $EXP_NAME \
+    --evaluate \
+    --checkpoint $CKPT \
+    --gpu \
+    --hparams_config $CONFIG
