@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: weak2_avg
+  name: weak1_gs
 spec:
   template:
     spec:

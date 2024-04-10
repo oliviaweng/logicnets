@@ -37,9 +37,9 @@
 # tmux new-session -d -s f02 "./scripts/run_gen_ensemble_exp.sh 2 ./ensemble_configs/averaging/small_fixed_mask_configs/config3 ./averaging"
 
 # weak1 model
-tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config1 ./averaging"
-tmux new-session -d -s a01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config2 ./averaging"
-tmux new-session -d -s a02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config3 ./averaging"
+# tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config1 ./averaging"
+# tmux new-session -d -s a01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config2 ./averaging"
+tmux new-session -d -s a02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config4 ./averaging"
 
 # medium model
 # xlabs53

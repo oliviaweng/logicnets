@@ -433,7 +433,7 @@ class AdaBoostAutoencoderNeqModel(nn.Module):
         # For now use weighted average using model weights because unclear
         # how to use weighted median for encoded vectors...
         outputs = [
-            encoder(x) * self.model_weights[i] 
+            encoder(x) * self.model_weights[i] # TODO: Push model_weight into previous layer, i.e., multiply previous layer's weights w/ this weight in pretransform of the output layer in logicnets. Marta can do this
             for i, encoder in enumerate(self.encoder_ensemble)
         ]
         avg_outputs = sum(outputs) / sum(self.model_weights)
