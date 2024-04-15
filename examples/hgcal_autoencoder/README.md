@@ -84,7 +84,7 @@ Your results will be stored in `./SAVE_DIR/EXP_NAME`.
 ## How to run an ensembling experiment
 
 ### Grid search method
-1. In `./ensemble_configs`, create a `CONFIG.yml` listing out the (hyper)parameters you would like to keep and change.
+1. In `./ensemble_configs`, create a `CONFIG.yml` listing out the hyperparameters you would like to keep and change.
 2. Update `./scripts/gen_grid_search_configs.sh` with the `CONFIG.yml` you created and then run it.
 3. To help parallelize the experiments, update `./scripts/create_run_subdirs.sh` with the number of subdirectories you would like and also the number of files you would like per subdirectory. Run script.
 4. Update `./scripts/launch_ensemble_learning.sh` with the config folders you would like to run. Run script.
