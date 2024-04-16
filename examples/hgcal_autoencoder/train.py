@@ -83,7 +83,7 @@ def main(args):
     torch.manual_seed(seed)
     os.environ['PYTHONHASHSEED'] = str(seed)
     if args.gpu:
-        dev = 2
+        dev = 0
         torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.deterministic = True
         torch.cuda.set_device(dev) #remove
@@ -174,10 +174,11 @@ def main(args):
         # Build model
         model = AutoencoderNeqModel(config)
         # Compute LUTCost of whole model
-        encoder_lut_cost = get_lut_cost(
-            model.encoder, experiment_dir, args.experiment_name
-        )
-        print(f"Encoder LUTCost = {encoder_lut_cost}")
+        # TODO: LUTCost doesn't work with polylut for now - ask Marta
+        # encoder_lut_cost = get_lut_cost(
+        #     model.encoder, experiment_dir, args.experiment_name
+        # )
+        # print(f"Encoder LUTCost = {encoder_lut_cost}")
 
      # Push model and constants to GPU if necessary
     if args.gpu:

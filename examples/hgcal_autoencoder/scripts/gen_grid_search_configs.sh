@@ -24,6 +24,10 @@
 # python3 grid_search.py -c search_configs/avg_emd_medium_model_grid_search.yml -d grid_search_configs/avg_emd_medium --experiment_prefix medium
 # python3 grid_search.py -c search_configs/avg_emd_medium_model_grid_search.yml -d grid_search_configs/avg_emd_medium --experiment_prefix medium
 
+# Weak model grid search (+polylut)
+python3 grid_search.py -c search_configs/weak1_model_grid_search.yml -d grid_search_configs/weak1_poly --experiment_prefix weak1_poly
+python3 grid_search.py -c search_configs/weak2_model_grid_search.yml -d grid_search_configs/weak2_poly --experiment_prefix weak2_poly
+
 # Ensemble grid search
 # Averaging
 # python3 grid_search.py -c search_configs/voting_small_model_grid_search.yml -d ensemble_configs/averaging/small --experiment_prefix averaging_small
@@ -33,7 +37,7 @@
 # python3 grid_search.py -c search_configs/voting_medium_model_grid_search.yml -d ensemble_configs/averaging/medium_fixed_mask --experiment_prefix averaging_medium_fixed_mask
 # python3 grid_search.py -c search_configs/voting_large_model_grid_search.yml -d ensemble_configs/averaging/large_fixed_mask --experiment_prefix averaging_large_fixed_mask
 
-python3 grid_search.py -c search_configs/voting_weak1_model_grid_search.yml -d ensemble_configs/averaging/weak1_200epochs --experiment_prefix averaging_weak1_two_hundred_epochs
+# python3 grid_search.py -c search_configs/voting_weak1_model_grid_search.yml -d ensemble_configs/averaging/weak1_200epochs --experiment_prefix averaging_weak1_two_hundred_epochs
 # python3 grid_search.py -c search_configs/voting_weak2_model_grid_search.yml -d ensemble_configs/averaging/weak2 --experiment_prefix averaging_weak2
 
 # python3 grid_search.py -c search_configs/voting_weak1_model_grid_search.yml -d ensemble_configs/averaging/weak1_fixed_mask --experiment_prefix averaging_weak1_fixed_mask

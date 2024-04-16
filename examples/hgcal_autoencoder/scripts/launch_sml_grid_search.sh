@@ -17,16 +17,16 @@
 # Pareto models determined by avg EMD
 
 # xlabs55
-tmux new-session -d -s g00 "./scripts/run_sml_grid_search_exp.sh 0 ./grid_search_configs/avg_emd_medium_configs/config1"
-tmux new-session -d -s g01 "./scripts/run_sml_grid_search_exp.sh 0 ./grid_search_configs/avg_emd_medium_configs/config2"
-tmux new-session -d -s g02 "./scripts/run_sml_grid_search_exp.sh 0 ./grid_search_configs/avg_emd_medium_configs/config3"
-tmux new-session -d -s g03 "./scripts/run_sml_grid_search_exp.sh 1 ./grid_search_configs/avg_emd_medium_configs/config4"
-tmux new-session -d -s g04 "./scripts/run_sml_grid_search_exp.sh 1 ./grid_search_configs/avg_emd_small_configs/config1"
-tmux new-session -d -s g05 "./scripts/run_sml_grid_search_exp.sh 1 ./grid_search_configs/avg_emd_small_configs/config2"
-tmux new-session -d -s g06 "./scripts/run_sml_grid_search_exp.sh 2 ./grid_search_configs/avg_emd_small_configs/config3"
-tmux new-session -d -s g07 "./scripts/run_sml_grid_search_exp.sh 2 ./grid_search_configs/avg_emd_small_configs/config4"
-tmux new-session -d -s g08 "./scripts/run_sml_grid_search_exp.sh 2 ./grid_search_configs/avg_emd_small_configs/config5"
-tmux new-session -d -s g09 "./scripts/run_sml_grid_search_exp.sh 2 ./grid_search_configs/avg_emd_small_configs/config6"
+# tmux new-session -d -s g00 "./scripts/run_sml_grid_search_exp.sh 0 ./grid_search_configs/avg_emd_medium_configs/config1"
+# tmux new-session -d -s g01 "./scripts/run_sml_grid_search_exp.sh 0 ./grid_search_configs/avg_emd_medium_configs/config2"
+# tmux new-session -d -s g02 "./scripts/run_sml_grid_search_exp.sh 0 ./grid_search_configs/avg_emd_medium_configs/config3"
+# tmux new-session -d -s g03 "./scripts/run_sml_grid_search_exp.sh 1 ./grid_search_configs/avg_emd_medium_configs/config4"
+# tmux new-session -d -s g04 "./scripts/run_sml_grid_search_exp.sh 1 ./grid_search_configs/avg_emd_small_configs/config1"
+# tmux new-session -d -s g05 "./scripts/run_sml_grid_search_exp.sh 1 ./grid_search_configs/avg_emd_small_configs/config2"
+# tmux new-session -d -s g06 "./scripts/run_sml_grid_search_exp.sh 2 ./grid_search_configs/avg_emd_small_configs/config3"
+# tmux new-session -d -s g07 "./scripts/run_sml_grid_search_exp.sh 2 ./grid_search_configs/avg_emd_small_configs/config4"
+# tmux new-session -d -s g08 "./scripts/run_sml_grid_search_exp.sh 2 ./grid_search_configs/avg_emd_small_configs/config5"
+# tmux new-session -d -s g09 "./scripts/run_sml_grid_search_exp.sh 2 ./grid_search_configs/avg_emd_small_configs/config6"
 
 # tmux kill-session -t g00
 # tmux kill-session -t g01
@@ -38,6 +38,10 @@ tmux new-session -d -s g09 "./scripts/run_sml_grid_search_exp.sh 2 ./grid_search
 # tmux kill-session -t g07
 # tmux kill-session -t g08
 # tmux kill-session -t g09
+
+# Weakest 2 Pareto models determined by avg EMD 
+tmux new-session -d -s g00 "./scripts/run_sml_grid_search_exp.sh 0 ./grid_search_configs/weak1_poly_configs"
+tmux new-session -d -s g01 "./scripts/run_sml_grid_search_exp.sh 0 ./grid_search_configs/weak2_poly_configs"
 
 # Old top 3 models
 
