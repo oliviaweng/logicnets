@@ -143,7 +143,7 @@ class SparseLinearNeq(nn.Module):
         _, input_bitwidth = self.input_quant.get_scale_factor_bits()
         _, output_bitwidth = self.output_quant.get_scale_factor_bits()
         input_bitwidth, output_bitwidth = int(input_bitwidth), int(output_bitwidth)
-        x = input_bitwidth * self.fc.mask.fan_in # neuron input fanin
+        x = input_bitwidth * self.fan_in
         y = output_bitwidth 
         neuron_lut_cost = (y / 3) * ((2 ** (x - 4)) - ((-1) ** x))
         # Compute total LUTCost
