@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tboard
+spec:
+  containers:
+  - name: tensorboard-container
+    image: gitlab-registry.nrp-nautilus.io/xdr/docker:logicnets
+    command: ["/bin/bash", "-c"]
+    args:
+      - 
+        tensorboard 
+          --bind_all 
+          --logdir /pvc/logicnets/examples/hgcal_autoencoder/averaging
+          --port 8008
+    volumeMounts:
+    - mountPath: /pvc
+      name: persist-vol-claim
+    resources:
+      limits:
+        cpu: 2
+        memory: 8Gi
+      requests:
+        cpu: 2
+        memory: 4Gi
+  volumes:
+    - name: persist-vol-claim
+      persistentVolumeClaim:
+        claimName: persist-vol-claim

@@ -1,44 +1,42 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: weak1_gs
+  name: averaging-small-fixed-6
 spec:
   template:
     spec:
       containers:
       - name: gpu-container
-        image: gitlab-registry.nrp-nautilus.io/fpga-skip-connections/pytorch:latest
+        image: gitlab-registry.nrp-nautilus.io/xdr/docker:logicnets
         command: ["/bin/bash", "-c"]
         # Train
         args:
           -
-            cd /imagenet-volume/pytorch;
-            git pull --recurse-submodules;
-            /imagenet-volume/pytorch/python/src/imagenet_resnet/scripts/remover_resnet_imagenet_k8s.sh 
-              50 
-              resume
+            cd /pvc/logicnets/examples/hgcal_autoencoder;
+            git pull;
+            python3 -m pip install /pvc/logicnets; 
+            ./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config6 ./averaging
         volumeMounts:
-        - mountPath: /imagenet-volume
-          name: imagenet-volume
+        - mountPath: /pvc
+          name: persist-vol-claim
         - mountPath: /dev/shm # Solves insufficient memory error for DataLoader
           name: dshm
         resources:
           limits:
-            memory: 56Gi
-            cpu: "10"
+            cpu: 16
+            memory: 16Gi
             nvidia.com/gpu: "1"
           requests:
-            memory: 50Gi
-            cpu: "4"
-            nvidia.com/gpu: "1"                
+            cpu: 12
+            memory: 12Gi
+            nvidia.com/gpu: "1"
       volumes:
-        - name: imagenet-volume
+        - name: persist-vol-claim
           persistentVolumeClaim:
-            claimName: imagenet-volume
+            claimName: persist-vol-claim
         - name: dshm  # Solves insufficient memory error for DataLoader
           emptyDir:
             medium: Memory
-
       restartPolicy: Never
       affinity:
         nodeAffinity:
@@ -48,6 +46,5 @@ spec:
               - key: nvidia.com/gpu.product
                 operator: In
                 values:
-                - NVIDIA-GeForce-RTX-3090
-
+                - NVIDIA-GeForce-GTX-1080-Ti
   backoffLimit: 2

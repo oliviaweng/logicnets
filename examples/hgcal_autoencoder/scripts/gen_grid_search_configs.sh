@@ -18,8 +18,8 @@
 # python3 grid_search.py -c search_configs/small_model_grid_search.yml -d grid_search_configs/small --experiment_prefix small
 # python3 grid_search.py -c search_configs/medium_model_grid_search.yml -d grid_search_configs/medium --experiment_prefix medium
 # python3 grid_search.py -c search_configs/large_model_grid_search.yml -d grid_search_configs/large --experiment_prefix large
-python3 grid_search.py -c search_configs/weak1_model_grid_search.yml -d grid_search_configs/weak1 --experiment_prefix weak1
-python3 grid_search.py -c search_configs/weak2_model_grid_search.yml -d grid_search_configs/weak2 --experiment_prefix weak2
+# python3 grid_search.py -c search_configs/weak1_model_grid_search.yml -d grid_search_configs/weak1 --experiment_prefix weak1
+# python3 grid_search.py -c search_configs/weak2_model_grid_search.yml -d grid_search_configs/weak2 --experiment_prefix weak2
 
 # Avg EMD Pareto models grid search
 # python3 grid_search.py -c search_configs/avg_emd_small_model_grid_search.yml -d grid_search_configs/avg_emd_small --experiment_prefix small
@@ -59,6 +59,10 @@ python3 grid_search.py -c search_configs/weak2_model_grid_search.yml -d grid_sea
 # python3 grid_search.py -c search_configs/adaboost_small_model_grid_search.yml  -d ensemble_configs/adaboost/fixed_mask_10epochs --experiment_prefix  adaboost_small_fixed_mask_10epochs
 # python3 grid_search.py -c search_configs/adaboost_medium_model_grid_search.yml -d ensemble_configs/adaboost/fixed_mask_10epochs --experiment_prefix adaboost_medium_fixed_mask_10epochs
 # python3 grid_search.py -c search_configs/adaboost_large_model_grid_search.yml  -d ensemble_configs/adaboost/large_fixed_mask --experiment_prefix  adaboost_large_fixed_mask_10epochs
+
+python3 grid_search.py -c search_configs/adaboost_weak1_model_grid_search.yml -d ensemble_configs/adaboost/weak1_seq --experiment_prefix adaboost_weak1_seq
+python3 grid_search.py -c search_configs/adaboost_weak2_model_grid_search.yml -d ensemble_configs/adaboost/weak2_seq --experiment_prefix adaboost_weak2_seq
+
 
 # Bagging
 # python3 grid_search.py -c search_configs/bagging_small_model_grid_search.yml  -d ensemble_configs/bagging/small_seq  --experiment_prefix bagging_small_seq

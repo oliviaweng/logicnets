@@ -1,0 +1,50 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: averaging-large-fixed-2
+spec:
+  template:
+    spec:
+      containers:
+      - name: gpu-container
+        image: gitlab-registry.nrp-nautilus.io/xdr/docker:logicnets
+        command: ["/bin/bash", "-c"]
+        # Train
+        args:
+          -
+            cd /pvc/logicnets/examples/hgcal_autoencoder;
+            git pull;
+            pip install /pvc/logicnets[example-all]; 
+            ./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config2 ./averaging
+        volumeMounts:
+        - mountPath: /pvc
+          name: persist-vol-claim
+        - mountPath: /dev/shm # Solves insufficient memory error for DataLoader
+          name: dshm
+        resources:
+          limits:
+            cpu: 16
+            memory: 16Gi
+            nvidia.com/gpu: "1"
+          requests:
+            cpu: 12
+            memory: 12Gi
+            nvidia.com/gpu: "1"
+      volumes:
+        - name: persist-vol-claim
+          persistentVolumeClaim:
+            claimName: persist-vol-claim
+        - name: dshm  # Solves insufficient memory error for DataLoader
+          emptyDir:
+            medium: Memory
+      restartPolicy: Never
+      affinity:
+            nodeAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                nodeSelectorTerms:
+                - matchExpressions:
+                  - key: nvidia.com/gpu.product
+                    operator: In
+                    values:
+                    - NVIDIA-GeForce-GTX-1080-Ti
+  backoffLimit: 2

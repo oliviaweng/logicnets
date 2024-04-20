@@ -13,23 +13,37 @@
 #  limitations under the License.
 
 
+# Fixed params
 activation_bitwidth:
-- 2
-- 6
+- 3
+- 4
 batch_size: 512
-ensemble_method: voting
-ensemble_size: 4
+ensemble_method: adaboost
+ensemble_hp:
+  independent: false
+  fixed_sparsity_mask: false
+  # fixed_decoder: ./fixed_decoder/fixed_decoder1/best_loss.pth
+finetune_epochs: 10
 epochs: 200
 hidden_layer:
-- 256
-- 256
+- 64
+- 128
 input_bitwidth: 5
-input_fanin: 3
-lr: 0.0033764005846442036
+input_fanin: 2
+lr: 0.001
 neuron_fanin:
-- 5
-- 2
-output_bitwidth: 6
-seed: 2036987025
+- 3
+- 3
+output_bitwidth: 4
+seed: 1583736550
 warm_restart_freq: 100
-wd: 0.013596132573332096
+wd: 0.0001
+
+
+# Params to grid search
+grid_search_params:
+  seed:
+  - 1583736550
+  - 1
+  - 2
+
