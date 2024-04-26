@@ -3,7 +3,7 @@ We build a LogicNets version of the HGCal autoencoder, which requires 50ns infer
 
 ## Download the dataset
 Download the dataset. Right now we're only using the `nElinks_5` dataset:
-* [HGCal dataset](https://cseweb.ucsd.edu/~oweng/hgcal_datset/)
+* [HGCal dataset](https://cseweb.ucsd.edu/~oweng/hgcal_dataset/)
 <!-- * [Elegun dataset](https://emdhgcalae.nrp-nautilus.io/EleGun/low_pt_high_eta/data/nElinks_5/) -->
 
 ## How to train a model:
