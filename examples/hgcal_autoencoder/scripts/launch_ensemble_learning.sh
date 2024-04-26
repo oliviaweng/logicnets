@@ -45,6 +45,7 @@ tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_confi
 tmux new-session -d -s f01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config2 ./averaging"
 tmux new-session -d -s f02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config6 ./averaging"
 
+# TODO: Small
 
 # weak1 model
 # tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config1 ./averaging"
