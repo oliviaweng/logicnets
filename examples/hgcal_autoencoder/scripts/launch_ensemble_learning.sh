@@ -41,9 +41,10 @@
 # tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fixed_mask_configs/config1 ./averaging"
 # tmux new-session -d -s f01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fixed_mask_configs/config2 ./averaging"
 
-tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config1 ./averaging"
-tmux new-session -d -s f01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config2 ./averaging"
-tmux new-session -d -s f02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config6 ./averaging"
+# config3 and 4 done
+tmux new-session -d -s lf00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config1 ./averaging"
+tmux new-session -d -s lf01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config2 ./averaging"
+tmux new-session -d -s lf02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config6 ./averaging"
 
 # TODO: Small
 
@@ -110,8 +111,9 @@ tmux new-session -d -s f02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_confi
 # tmux new-session -d -s seq_ft04 "./scripts/run_gen_ensemble_exp.sh 2 ./ensemble_configs/adaboost/small_seq_configs/config2  ./adaboost_seq"
 # tmux new-session -d -s seq_ft05 "./scripts/run_gen_ensemble_exp.sh 2 ./ensemble_configs/adaboost/small_seq_configs/config3  ./adaboost_seq"
 
-tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/weak1_seq_configs/config1 ./adaboost"
-tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/weak2_seq_configs/config1 ./adaboost"
+# TODO
+# tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/weak1_seq_configs/config1 ./adaboost"
+# tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/weak2_seq_configs/config1 ./adaboost"
 
 
 # xlabs55
