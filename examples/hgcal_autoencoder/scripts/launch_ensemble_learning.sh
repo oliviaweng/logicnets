@@ -40,7 +40,8 @@
 
 # tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fixed_mask_configs/config1 ./averaging"
 # tmux new-session -d -s f01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fixed_mask_configs/config2 ./averaging"
-tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fixed_mask_configs/config4 ./averaging"
+# CURR
+# tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fixed_mask_configs/config4 ./averaging"
 
 # config3 and 4 done
 # tmux new-session -d -s lf00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config1 ./averaging"
@@ -49,11 +50,11 @@ tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_confi
 
 # CURR
 # tmux new-session -d -s lf03 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_fixed_mask_configs/config5 ./averaging"
-
 # Small
 tmux new-session -d -s sf00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config1 ./averaging"
 tmux new-session -d -s sf01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config2 ./averaging"
-tmux new-session -d -s sf02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config6 ./averaging"
+tmux new-session -d -s sf02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config5 ./averaging"
+# TODO: config4 do 32models in parallel
 
 # weak1 model
 # tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config1 ./averaging"
