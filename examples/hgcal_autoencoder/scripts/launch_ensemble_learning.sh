@@ -40,11 +40,12 @@
 
 # tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fixed_mask_configs/config1 ./averaging"
 # tmux new-session -d -s f01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fixed_mask_configs/config2 ./averaging"
+tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_fixed_mask_configs/config4 ./averaging"
 
 # config3 and 4 done
-tmux new-session -d -s lf00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config1 ./averaging"
-tmux new-session -d -s lf01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config2 ./averaging"
-tmux new-session -d -s lf02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config6 ./averaging"
+# tmux new-session -d -s lf00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config1 ./averaging"
+# tmux new-session -d -s lf01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config2 ./averaging"
+# tmux new-session -d -s lf02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config6 ./averaging"
 
 # TODO: Small
 
