@@ -1,0 +1,24 @@
+activation_bitwidth:
+- 3
+- 4
+batch_size: 512
+ensemble_hp:
+  fixed_sparsity_mask: false
+  independent: false
+ensemble_method: adaboost
+ensemble_size: 32
+epochs: 200
+finetune_epochs: 10
+hidden_layer:
+- 64
+- 128
+input_bitwidth: 5
+input_fanin: 2
+lr: 0.001
+neuron_fanin:
+- 3
+- 3
+output_bitwidth: 4
+seed: 1583736550
+warm_restart_freq: 100
+wd: 0.0001
