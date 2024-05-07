@@ -7,7 +7,7 @@ batch_size: 512
 ensemble_hp:
   fixed_sparsity_mask: true
 ensemble_method: voting
-ensemble_size: 4
+ensemble_size: 16
 epochs: 200
 hidden_layer:
 - 128

@@ -1,0 +1,10 @@
+Single model 1 val loss: 0.03859218582510948	Avg EMD = 1.965007957442509
+Ensemble size 1 val loss: 0.03859218582510948	Avg EMD = -1
+Single model 2 val loss: 0.03669149801135063	Avg EMD = -1
+Ensemble size 2 val loss: 0.03683906048536301	Avg EMD = -1
+Ensemble size 2 val loss: 0.032704196870326996	Avg EMD = 1.8286886142427106
+Single model 3 val loss: 0.037086427211761475	Avg EMD = -1
+Ensemble size 3 val loss: 0.03856977820396423	Avg EMD = -1
+Single model 4 val loss: 0.040004096925258636	Avg EMD = -1
+Ensemble size 4 val loss: 0.056777287274599075	Avg EMD = -1
+Ensemble size 4 val loss: 0.029380569234490395	Avg EMD = 1.769567342352817
