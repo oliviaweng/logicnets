@@ -13,6 +13,7 @@
 #  limitations under the License.
 
 data/
+model_ckpts/
 **/.vscode/
 # Large ensemble checkpoints
 **/averaging/**/*.pth
