@@ -36,7 +36,11 @@ adaboost_medium_seq_seed2,1.559,0.027,2,medium
 adaboost_medium_seq_seed1,1.591,0.022,2,medium
 adaboost_small_seq_seed2,1.594,0.025,2,small
 adaboost_small_seq_seed1,1.595,0.021,4,small
+adaboost_weak2_seq_seed1583736550,1.637,0.033,32,weak2
 adaboost_small_seq_seed1,1.648,0.024,2,small
+adaboost_weak2_seq_seed1583736550,1.658,0.033,16,weak2
+adaboost_weak1_seq_seed1665510883,1.67,0.026,16,weak1
+adaboost_weak1_seq_seed1665510883,1.682,0.025,8,weak1
 adaboost_weak2_seq_seed1583736550,1.686,0.035,8,weak2
 adaboost_weak2_seq_seed1,1.702,0.036,32,weak2
 adaboost_weak2_seq_seed1,1.707,0.037,16,weak2
@@ -52,3 +56,6 @@ adaboost_weak2_seq_seed1,1.775,0.039,2,weak2
 adaboost_weak1_seq_seed1,1.82,0.033,32,weak1
 adaboost_weak1_seq_seed1665510883,1.829,0.033,2,weak1
 adaboost_weak1_seq_seed1,1.851,0.034,2,weak1
+adaboost_weak2_seq_seed2,2.038,0.066,8,weak2
+adaboost_weak2_seq_seed2,2.051,0.067,4,weak2
+adaboost_weak2_seq_seed2,2.064,0.067,2,weak2
