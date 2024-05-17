@@ -27,6 +27,7 @@
 # python3 grid_search.py -c search_configs/avg_emd_medium_model_grid_search.yml -d grid_search_configs/avg_emd_medium --experiment_prefix medium
 
 # Ensemble grid search
+
 # Averaging
 # python3 grid_search.py -c search_configs/voting_small_model_grid_search.yml -d ensemble_configs/averaging/small --experiment_prefix averaging_small
 # python3 grid_search.py -c search_configs/voting_medium_model_grid_search.yml -d ensemble_configs/averaging/medium_fr --experiment_prefix averaging_medium_fr
@@ -40,6 +41,10 @@
 
 # python3 grid_search.py -c search_configs/voting_weak1_model_grid_search.yml -d ensemble_configs/averaging/weak1_fixed_mask --experiment_prefix averaging_weak1_fixed_mask
 # python3 grid_search.py -c search_configs/voting_weak2_model_grid_search.yml -d ensemble_configs/averaging/weak2_fixed_mask --experiment_prefix averaging_weak2_fixed_mask
+
+# Averaging w/o weight decay
+python3 grid_search.py -c search_configs/voting_small_model_grid_search.yml -d ensemble_configs/averaging/small_fixed_mask_no_wd --experiment_prefix averaging_small_fixed_mask_no_wd
+python3 grid_search.py -c search_configs/voting_large_model_grid_search.yml -d ensemble_configs/averaging/large_fixed_mask_no_wd --experiment_prefix averaging_large_fixed_mask_no_wd
 
 # Snapshot Ensemble
 # python3 grid_search.py -c search_configs/sse_large_model_grid_search.yml -d ensemble_configs/sse/large_more_epochs --experiment_prefix sse_large
@@ -60,8 +65,8 @@
 # python3 grid_search.py -c search_configs/adaboost_medium_model_grid_search.yml -d ensemble_configs/adaboost/fixed_mask_10epochs --experiment_prefix adaboost_medium_fixed_mask_10epochs
 # python3 grid_search.py -c search_configs/adaboost_large_model_grid_search.yml  -d ensemble_configs/adaboost/large_fixed_mask --experiment_prefix  adaboost_large_fixed_mask_10epochs
 
-python3 grid_search.py -c search_configs/adaboost_weak1_model_grid_search.yml -d ensemble_configs/adaboost/weak1_seq --experiment_prefix adaboost_weak1_seq
-python3 grid_search.py -c search_configs/adaboost_weak2_model_grid_search.yml -d ensemble_configs/adaboost/weak2_seq --experiment_prefix adaboost_weak2_seq
+# python3 grid_search.py -c search_configs/adaboost_weak1_model_grid_search.yml -d ensemble_configs/adaboost/weak1_seq --experiment_prefix adaboost_weak1_seq
+# python3 grid_search.py -c search_configs/adaboost_weak2_model_grid_search.yml -d ensemble_configs/adaboost/weak2_seq --experiment_prefix adaboost_weak2_seq
 
 
 # Bagging

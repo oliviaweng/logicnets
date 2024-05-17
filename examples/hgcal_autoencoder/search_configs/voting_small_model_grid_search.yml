@@ -39,7 +39,8 @@ neuron_fanin:
 - 2
 output_bitwidth: 6
 warm_restart_freq: 100
-wd: 1.0e-05
+seed: 963241121
+wd: 0.0
 
 # Params to grid search
 grid_search_params:
@@ -49,8 +50,4 @@ grid_search_params:
   - 8
   - 16
   - 32
-  seed:
-  - 963241121
-  - 1
-  - 2
 

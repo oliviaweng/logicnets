@@ -14,12 +14,12 @@
 #  limitations under the License.
 
 
-CONFIG_DIR=./ensemble_configs/adaboost/weak2_seq
+CONFIG_DIR=./ensemble_configs/averaging/small_fixed_mask_no_wd
 
-for i in {1..1}; do 
+for i in {1..3}; do 
 new_dir=${CONFIG_DIR}_configs/config${i}
 mkdir -p $new_dir
-find -wholename "${CONFIG_DIR}/*.yml" -print | head -n3 | xargs mv -t $new_dir
+find -wholename "${CONFIG_DIR}/*.yml" -print | head -n2 | xargs mv -t $new_dir
 done
 
 # manually move first 6 files to ./subfolder1

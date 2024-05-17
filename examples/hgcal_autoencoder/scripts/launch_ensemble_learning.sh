@@ -52,10 +52,17 @@
 # tmux new-session -d -s sf00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config1 ./averaging"
 # tmux new-session -d -s sf01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config2 ./averaging"
 # tmux new-session -d -s sf02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config5 ./averaging"
-# CURR
+
 # tmux new-session -d -s sf00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config4 ./averaging"
-tmux new-session -d -s sf01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config6 ./averaging"
+# tmux new-session -d -s sf01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config6 ./averaging"
 # tmux new-session -d -s sf02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_configs/config7 ./averaging"
+
+# No weight decay
+# CURR
+tmux new-session -d -s swd00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_no_wd_configs/config1 ./averaging"
+tmux new-session -d -s swd01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_no_wd_configs/config2 ./averaging"
+tmux new-session -d -s lwd00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_no_wd_configs/config1 ./averaging"
+tmux new-session -d -s lwd01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_fixed_mask_no_wd_configs/config2 ./averaging"
 
 # weak1 model
 # tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config1 ./averaging"
