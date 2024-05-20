@@ -25,10 +25,13 @@
 # python3 grid_search.py -c search_configs/avg_emd_medium_model_grid_search.yml -d grid_search_configs/avg_emd_medium --experiment_prefix medium
 
 # Weak model grid search (+polylut)
-python3 grid_search.py -c search_configs/weak1_model_grid_search.yml -d grid_search_configs/weak1_poly --experiment_prefix weak1_poly
-python3 grid_search.py -c search_configs/weak2_model_grid_search.yml -d grid_search_configs/weak2_poly --experiment_prefix weak2_poly
+# python3 grid_search.py -c search_configs/weak1_model_grid_search.yml -d grid_search_configs/weak1_poly --experiment_prefix weak1_poly
+# python3 grid_search.py -c search_configs/weak2_model_grid_search.yml -d grid_search_configs/weak2_poly --experiment_prefix weak2_poly
 
 # Ensemble grid search
+# Averaging polylut
+python3 grid_search.py -c search_configs/voting_small_polylut_grid_search.yml -d ensemble_configs/averaging/small_polylut --experiment_prefix averaging_small_poly2
+
 # Averaging
 # python3 grid_search.py -c search_configs/voting_small_model_grid_search.yml -d ensemble_configs/averaging/small --experiment_prefix averaging_small
 # python3 grid_search.py -c search_configs/voting_medium_model_grid_search.yml -d ensemble_configs/averaging/medium_fr --experiment_prefix averaging_medium_fr

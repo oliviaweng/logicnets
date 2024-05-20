@@ -14,6 +14,7 @@
 
 data/
 .vscode/
+model_ckpts/
 # Large ensemble checkpoints
 **/averaging/**/*.pth
 **/voting/**/*.pth
