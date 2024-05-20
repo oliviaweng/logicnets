@@ -18,6 +18,7 @@ averaging_small_ensemble_size16_seed1,1.271,0.008,16,small
 averaging_medium_fixed_mask_ensemble_size8_seed524926359,1.281,0.011,8,medium_fixed
 averaging_small_ensemble_size32_seed963241121,1.285,0.014,32,small
 averaging_small_ensemble_size16_seed2,1.285,0.008,16,small
+averaging_small_poly2_ensemble_size2_degree2,1.303,0.017,2,small_poly2
 averaging_large_ensemble_size2_seed1,1.308,0.009,2,large
 averaging_medium_ensemble_size32_seed2,1.311,0.011,32,medium
 averaging_medium_ensemble_size4_seed1,1.313,0.012,4,medium
