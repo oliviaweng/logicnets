@@ -33,8 +33,8 @@
 # tmux new-session -d -s s05 "./scripts/run_ensemble_exp.sh 2 ./ensemble_configs/averaging/small_configs/config6"
 
 # small polylut modell
-tmux new-session -d -s s00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_polylut_configs/config1 ./averaging"
-tmux new-session -d -s s01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_polylut_configs/config2 ./averaging"
+tmux new-session -d -s s00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_polylut_seed3_configs/config1 ./averaging"
+tmux new-session -d -s s01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_polylut_seed3_configs/config2 ./averaging"
 
 # tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config3 ./averaging"
 # tmux new-session -d -s f01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/medium_fixed_mask_configs/config3 ./averaging"
