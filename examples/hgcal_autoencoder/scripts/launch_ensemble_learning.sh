@@ -32,7 +32,7 @@
 # tmux new-session -d -s s04 "./scripts/run_ensemble_exp.sh 2 ./ensemble_configs/averaging/small_configs/config5"
 # tmux new-session -d -s s05 "./scripts/run_ensemble_exp.sh 2 ./ensemble_configs/averaging/small_configs/config6"
 
-# small polylut modell
+# small polylut model
 # tmux new-session -d -s s00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_polylut_seed3_configs/config1 ./averaging"
 # tmux new-session -d -s s01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/small_polylut_seed3_configs/config2 ./averaging"
 tmux new-session -d -s s02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_polylut_seed3_configs/config3 ./averaging"
