@@ -1,4 +1,3 @@
-# Fixed params
 activation_bitwidth:
 - 2
 - 2
@@ -7,8 +6,7 @@ activation_bitwidth:
 batch_size: 512
 degree: 2
 ensemble_method: voting
-# ensemble_hp:
-#   fixed_sparsity_mask: true
+ensemble_size: 4
 epochs: 200
 hidden_layer:
 - 128
@@ -24,16 +22,6 @@ neuron_fanin:
 - 4
 - 2
 output_bitwidth: 6
+seed: 3
 warm_restart_freq: 100
 wd: 0
-
-# Params to grid search
-grid_search_params:
-  ensemble_size:
-  - 2
-  - 4
-  - 8
-  - 16
-  - 32
-  seed:
-  - 3

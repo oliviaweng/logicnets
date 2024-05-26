@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 
-CONFIG_DIR=./ensemble_configs/averaging/small_polylut
+CONFIG_DIR=./ensemble_configs/averaging/small_polylut_seed3
 
 for i in {1..3}; do 
 new_dir=${CONFIG_DIR}_configs/config${i}
