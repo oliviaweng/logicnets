@@ -15,9 +15,10 @@ averaging_medium_ensemble_size8_seed2,1.248,0.008,8,medium
 averaging_medium_ensemble_size8_seed1,1.26,0.009,8,medium
 averaging_medium_ensemble_size8_seed524926359,1.269,0.009,8,medium
 averaging_small_ensemble_size16_seed1,1.271,0.008,16,small
+averaging_small_poly2_ensemble_size4_seed3,1.272,0.011,2,small_poly2
 averaging_medium_fixed_mask_ensemble_size8_seed524926359,1.281,0.011,8,medium_fixed
-averaging_small_ensemble_size32_seed963241121,1.285,0.014,32,small
 averaging_small_ensemble_size16_seed2,1.285,0.008,16,small
+averaging_small_ensemble_size32_seed963241121,1.285,0.014,32,small
 averaging_small_poly2_ensemble_size2_degree2,1.303,0.017,2,small_poly2
 averaging_large_ensemble_size2_seed1,1.308,0.009,2,large
 averaging_medium_ensemble_size32_seed2,1.311,0.011,32,medium
@@ -28,11 +29,13 @@ averaging_small_ensemble_size32_seed2,1.322,0.013,32,small
 averaging_medium_ensemble_size4_seed2,1.327,0.012,4,medium
 averaging_small_ensemble_size8_seed1,1.329,0.01,8,small
 averaging_large_ensemble_size16_seed2,1.33,0.01,16,large
+averaging_small_poly2_ensemble_size2_seed3,1.338,0.018,2,small_poly2
 averaging_large_ensemble_size2_seed432384445,1.34,0.01,2,large
 averaging_small_ensemble_size16_seed963241121,1.344,0.011,16,small
 averaging_small_ensemble_size8_seed2,1.353,0.011,8,small
 averaging_large_ensemble_size2_seed2,1.372,0.011,2,large
 averaging_large_ensemble_size32_seed1,1.374,0.01,32,large
+averaging_small_poly2_ensemble_size4_degree2,1.405,0.015,2,small_poly2
 averaging_small_ensemble_size4_seed1,1.409,0.012,4,small
 averaging_large_ensemble_size4_seed432384445,1.42,0.013,4,large
 averaging_large_ensemble_size8_seed1,1.438,0.012,8,large
@@ -67,3 +70,4 @@ averaging_weak1_ensemble_size8_seed2,1.919,0.026,8,weak1
 averaging_medium_ensemble_size16_seed2,1.93,0.031,16,medium
 averaging_weak1_ensemble_size4_seed1665510883,1.981,0.031,4,weak1
 averaging_large_ensemble_size4_seed2,2.034,0.033,4,large
+averaging_small_poly2_ensemble_size8_degree2,2.26,0.043,2,small_poly2
