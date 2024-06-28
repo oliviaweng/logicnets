@@ -1,0 +1,3 @@
+trial,accuracy,loss,ensemble_size,model_size
+averaging_small_ensemble_size2,71.05,0.838,2,small
+averaging_small_ensemble_size4,72.05,0.793,4,small
