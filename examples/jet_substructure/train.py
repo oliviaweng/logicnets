@@ -176,7 +176,7 @@ def train(model, datasets, config, cuda=False, log_dir="./jsc"):
             loss.backward()
             optimizer.step()
             scheduler.step()
-
+        accLoss /= len(train_loader.dataset)
         accuracy = 100.0*correct / len(train_loader.dataset)
         print(f"Epoch: {epoch}/{num_epochs}\tTrain Acc (%): {accuracy.detach().cpu().numpy():.2f}\tTrain Loss: {accLoss.detach().cpu().numpy():.3e}")
         writer.add_scalar('avg_train_loss', accLoss.detach().cpu().numpy(), (epoch+1)*steps)
