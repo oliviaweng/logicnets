@@ -16,5 +16,10 @@
 # Jet tagger model
 
 # python3 grid_search.py -c search_configs/jsc_s_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_small
-python3 grid_search.py -c search_configs/jsc_m_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_medium
-python3 grid_search.py -c search_configs/jsc_l_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_large
+# python3 grid_search.py -c search_configs/jsc_m_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_medium
+# python3 grid_search.py -c search_configs/jsc_l_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_large
+
+# python3 grid_search.py -c search_configs/jsc_s_averaging_grid_search.yml -d ./ensemble_configs/averaging/small_qavg --experiment_prefix small_qavg
+python3 grid_search.py -c search_configs/jsc_m_averaging_grid_search.yml -d ./ensemble_configs/averaging/medium_qavg --experiment_prefix medium_qavg
+python3 grid_search.py -c search_configs/jsc_l_averaging_grid_search.yml -d ./ensemble_configs/averaging/large_qavg --experiment_prefix large_qavg
+

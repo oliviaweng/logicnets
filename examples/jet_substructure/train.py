@@ -265,12 +265,15 @@ def main(args):
     config['input_length'] = len(x)
     config['output_length'] = len(y)
 
-    print(f"config:\n{config}")
+    # Ensemble settings
+    quantize_avg = False
+    if "quantize_avg" in config:
+        quantize_avg = config["quantize_avg"]
 
     if "ensemble_method" in config:
         if config["ensemble_method"] == "averaging":
             print("Averaging ensemble method")
-            model = AveragingJetNeqModel(config, config["ensemble_size"])
+            model = AveragingJetNeqModel(config, config["ensemble_size"], quantize_avg=quantize_avg)
         else:
             raise ValueError(f"Unknown ensemble method: {config['ensemble_method']}")
     else: # Single model learning
@@ -281,7 +284,6 @@ def main(args):
         model.load_state_dict(checkpoint['model_dict'])
 
     print(f"Model: {model.__class__.__name__}")
-    # print(model)
 
     # Train
     if args.train:

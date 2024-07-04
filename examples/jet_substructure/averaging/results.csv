@@ -1,3 +1,11 @@
 trial,accuracy,loss,ensemble_size,model_size
-averaging_small_ensemble_size2,71.05,0.838,2,small
+averaging_medium_ensemble_size32,75.02,0.693,32,medium
+averaging_medium_ensemble_size16,74.82,0.698,16,medium
+averaging_medium_ensemble_size8,74.43,0.709,8,medium
+averaging_small_ensemble_size32,73.92,0.728,32,small
+averaging_medium_ensemble_size4,73.91,0.728,4,medium
+averaging_small_ensemble_size16,73.54,0.744,16,small
+averaging_medium_ensemble_size2,73.29,0.748,2,medium
+averaging_small_ensemble_size8,72.76,0.764,8,small
 averaging_small_ensemble_size4,72.05,0.793,4,small
+averaging_small_ensemble_size2,71.05,0.838,2,small
