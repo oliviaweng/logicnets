@@ -14,7 +14,6 @@ tmux new-session -d -s jscs_avg00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensembl
 # tmux new-session -d -s jscm01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_configs/config2 ./averaging"
 # tmux new-session -d -s jscm02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_configs/config3 ./averaging"
 
-# TODO
 # tmux new-session -d -s jscl00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_configs/config1 ./averaging"
 # tmux new-session -d -s jscl01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_configs/config2 ./averaging"
 # tmux new-session -d -s jscl02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_configs/config3 ./averaging"

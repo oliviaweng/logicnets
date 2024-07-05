@@ -8,4 +8,6 @@ averaging_small_ensemble_size16,73.54,0.744,16,small
 averaging_medium_ensemble_size2,73.29,0.748,2,medium
 averaging_small_ensemble_size8,72.76,0.764,8,small
 averaging_small_ensemble_size4,72.05,0.793,4,small
+small_qavg_ensemble_size4,71.25,0.849,4,small_qavg
 averaging_small_ensemble_size2,71.05,0.838,2,small
+small_qavg_ensemble_size2,70.75,0.865,2,small_qavg
