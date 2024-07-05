@@ -20,4 +20,6 @@
 # tmux new-session -d -s jscl02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_configs/config3 ./averaging"
 
 # Bagging
-tmux new-session -d -s jscs_bag00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/small_configs./bagging"
+tmux new-session -d -s jscs_bag "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/small_configs ./bagging"
+tmux new-session -d -s jscm_bag "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/medium_configs ./bagging"
+tmux new-session -d -s jscl_bag "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/bagging/large_configs ./bagging"
