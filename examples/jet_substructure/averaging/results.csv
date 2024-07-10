@@ -1,13 +1,16 @@
 trial,accuracy,loss,ensemble_size,model_size
+averaging_large_ensemble_size16,75.08,0.689,16,large
 averaging_medium_ensemble_size32,75.02,0.693,32,medium
+averaging_large_ensemble_size8,74.99,0.693,8,large
 large_qavg_ensemble_size6,74.95,0.695,6,large_qavg
 averaging_medium_ensemble_size16,74.82,0.698,16,medium
 averaging_large_ensemble_size4,74.67,0.703,4,large
+averaging_small_ensemble_size128,74.58,0.707,128,small
 large_qavg_ensemble_size4,74.54,0.704,4,large_qavg
 averaging_medium_ensemble_size8,74.43,0.709,8,medium
 averaging_small_ensemble_size64,74.34,0.715,64,small
-averaging_large_ensemble_size2,74.17,0.718,2,large
 large_qavg_ensemble_size2,74.17,0.718,2,large_qavg
+averaging_large_ensemble_size2,74.17,0.718,2,large
 medium_qavg_ensemble_size6,74.1,0.725,6,medium_qavg
 averaging_small_ensemble_size32,73.92,0.728,32,small
 averaging_medium_ensemble_size4,73.91,0.728,4,medium

@@ -132,3 +132,54 @@ class BaggingJetNeqModel(BaseEnsembleClassifier):
         super(BaggingJetNeqModel, self).__init__(
             self.model_class, model_config, num_models, quantize_avg, single_model_mode,
         )
+
+
+class AdaBoostJetNeqModel(BaseEnsembleClassifier):
+    """
+    AdaBoost ensemble of JetSubstructureNeqModel models.
+    """
+    def __init__(
+        self, 
+        model_config, 
+        num_models, 
+        num_train_samples, 
+        num_classes=5,
+        quantize_avg=False, 
+        single_model_mode=False
+    ):
+        self.model_class = JetSubstructureNeqModel
+        super(AdaBoostJetNeqModel, self).__init__(
+            self.model_class, model_config, num_models, quantize_avg, single_model_mode,
+        )
+        self.num_train_samples = num_train_samples
+        self.num_classes = num_classes
+        # Training sample weights
+        self.weights = torch.ones(num_train_samples) / num_train_samples
+        self.alphas = [] # Accuracy measures for each model
+
+    def update_alphas(self, epsilon):
+        # Calculate alpha (accuracy measure) for current model and append to alphas
+        alpha = torch.log((1.0 - epsilon) / epsilon) + torch.log(torch.Tensor([self.num_classes - 1.0]))
+        self.alphas.append(alpha)
+        return alpha
+    
+    def update_sample_weights(self, alpha, incorrect_train_indices):
+        # Reweight sample weights (only the positive weights are updated) 
+        # Based on sklearn AdaBoost SAAME implementation:
+        # https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.AdaBoostClassifier.html
+        self.weights = torch.exp(
+            torch.log(self.weights) + alpha * incorrect_train_indices * (self.weights > 0)
+        )
+        # Normalize weights
+        self.weights = self.weights / self.weights.sum()
+
+    def pytorch_forward(self, x):
+        if self.single_model_mode:
+            outputs = self.model(x)
+            return outputs
+        # Compute weighted average using self.model_weights
+        outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
+        outputs = outputs @ self.alphas / self.alphas.sum()
+        if self.quantize_avg:
+            outputs = self.avg_quant(outputs)
+        return outputs

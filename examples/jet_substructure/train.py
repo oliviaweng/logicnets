@@ -22,13 +22,13 @@ import numpy as np
 import torch
 from torch.utils.data import DataLoader
 
-from training_methods import train, test, train_bagging
+from training_methods import train, test, train_bagging, train_adaboost
 
 from dataset import JetSubstructureDataset
 from models import JetSubstructureNeqModel
-from ensemble import AveragingJetNeqModel, BaggingJetNeqModel
+from ensemble import AveragingJetNeqModel, BaggingJetNeqModel, AdaBoostJetNeqModel
 
-ENSEMBLING_METHODS = ["averaging", "bagging"]
+ENSEMBLING_METHODS = ["adaboost", "averaging", "bagging"]
 
 
 configs = {
@@ -127,6 +127,15 @@ def main(args):
                 quantize_avg=quantize_avg,
                 single_model_mode=args.train,
             )
+        elif config["ensemble_method"] == "adaboost":
+            print("AdaBoost ensemble method")
+            model = AdaBoostJetNeqModel(
+                config, 
+                config["ensemble_size"], 
+                len(dataset["train"]), 
+                quantize_avg=quantize_avg,
+                single_model_mode=args.train,
+            )
         else:
             raise ValueError(f"Unknown ensemble method: {config['ensemble_method']}")
     else: # Single model learning
@@ -146,6 +155,8 @@ def main(args):
             yaml.dump(config, f)
         if config["ensemble_method"] == "bagging":
             train_bagging(model, dataset, config, cuda=args.cuda, log_dir=experiment_dir)
+        elif config["ensemble_method"] == "adaboost":
+            train_adaboost(model, dataset, config, cuda=args.cuda, log_dir=experiment_dir)
         else:
             train(model, dataset, config, cuda=args.cuda, log_dir=experiment_dir)
     # Evaluate model

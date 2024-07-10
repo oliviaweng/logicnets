@@ -237,3 +237,86 @@ def evaluate_ensemble(model, datasets, config, cuda=False, log_dir="./jsc"):
         f.write(f"Ensemble size {len(model.ensemble)} test loss: {test_loss}\tAccuracy = {test_accuracy}\n")
     model.single_model_mode = True
     return test_loss, test_accuracy
+
+def train_adaboost(model, datasets, config, cuda=False, log_dir="./jsc"):
+    """
+    Train an ensemble of models using AdaBoost, where each model is trained
+    sequentially with the training data weighted by the performance of the
+    previous model. The weights are updated based on the performance of the
+    current model. 
+    """
+    test_loader = DataLoader(
+        datasets["test"], batch_size=config['batch_size'], shuffle=False
+    )
+    for i in range(model.num_models):
+        model.single_model_mode = True
+        # Draw training samples based on sample weights
+        sampler = torch.utils.data.sampler.WeightedRandomSampler(
+            model.weights, model.num_train_samples, replacement=True,
+        )
+        # Train model
+        train(model, datasets, config, cuda=cuda, log_dir=log_dir, sampler=sampler)
+        # Evaluate best single model on validation data 
+        best_checkpoint = torch.load(
+            os.path.join(log_dir, "best_accuracy.pth")
+        )
+        model.load_state_dict(best_checkpoint["model_dict"])
+        print("Evaluate best single model performance")
+        test_accuracy, _, test_loss = test(model, test_loader, cuda=cuda)
+        # Log single model performance
+        os.makedirs(log_dir, exist_ok=True)
+        ensemble_perf_log = os.path.join(log_dir, f"ensemble_perf.txt")
+        with open(ensemble_perf_log, "a") as f:
+            f.write(f"Single model {i + 1} test loss: {test_loss}\tAccuracy = {test_accuracy}\n")
+        # Compute model error epsilon
+        model_error, incorrect_train_idx = compute_adaboost_model_error(
+            model, datasets, config, cuda
+        )
+        alpha = model.update_alphas(model_error)
+        model.update_sample_weights(alpha, incorrect_train_idx)
+    
+        # Save model to ensemble
+        snapshot = JetSubstructureNeqModel(config)
+        if cuda:
+            snapshot.cuda()
+        snapshot.load_state_dict(model.model.state_dict())
+        model.ensemble.append(snapshot)
+        # Evaluate ensemble on validation data and save ensemble checkpoint
+        ensemble_test_loss, ensemble_test_acc = evaluate_ensemble(
+            model, datasets, config, cuda=cuda, log_dir=log_dir
+        )
+        ensemble_ckpt = {
+            "model_dict": model.state_dict(),
+            "test_loss": ensemble_test_loss,
+            "test_acc": ensemble_test_acc,
+        }
+        torch.save(
+            ensemble_ckpt, 
+            os.path.join(log_dir, "last_ensemble_ckpt.pth")
+        )
+        print(f"Saved AdaBoost model # {len(model.ensemble)}")
+
+def compute_adaboost_model_error(model, datasets, config, cuda=False):
+    """"
+    Evaluate the model on the training data and compute the weighted error 
+    epsilon by first getting the indices of the incorrectly classified samples
+    and then computing a weighted average using the model's weights.
+    """
+    model.eval()
+    train_loader = DataLoader(
+        datasets["train"], batch_size=config['batch_size'], shuffle=False
+    )
+    with torch.no_grad():
+        model.eval()
+        incorrect_train_indices = []
+        for batch_idx, (data, target) in enumerate(train_loader):
+            if cuda:
+                data, target = data.cuda(), target.cuda()
+            output = model(data)
+            pred = output.detach().max(1, keepdim=True)[1]
+            target_label = torch.max(target.detach(), 1, keepdim=True)[1]
+            curr_incorrect_idx = pred.ne(target_label).long()
+            incorrect_train_indices += curr_incorrect_idx
+    incorrect_train_indices = torch.Tensor(incorrect_train_indices)
+    epsilon = model.weights @ incorrect_train_indices / torch.sum(model.weights)
+    return epsilon, incorrect_train_indices
