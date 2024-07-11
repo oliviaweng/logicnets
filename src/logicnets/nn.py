@@ -60,7 +60,14 @@ def neq_inference(model: nn.Module) -> None:
 
 # TODO: Should this go in with the other verilog functions?
 # TODO: Support non-linear topologies
-def module_list_to_verilog_module(module_list: nn.ModuleList, module_name: str, output_directory: str, add_registers: bool = True, generate_bench: bool = True):
+def module_list_to_verilog_module(
+    module_list: nn.ModuleList, 
+    module_name: str, 
+    output_directory: str, 
+    ensemble_member_idx: int = 0,
+    add_registers: bool = True, 
+    generate_bench: bool = True
+):
     input_bitwidth = None
     output_bitwidth = None
     module_contents = ""
@@ -81,17 +88,19 @@ def module_list_to_verilog_module(module_list: nn.ModuleList, module_name: str, 
                                                         output_wire=i!=len(module_list)-1,
                                                         register=add_registers)
         else:
-            raise Exception(f"Expect type(module) == SparseLinearNeq, {type(module)} found")
-    module_list_verilog = generate_logicnets_verilog(   module_name=module_name,
-                                                        input_name="M0",
-                                                        input_bits=input_bitwidth,
-                                                        output_name=f"M{len(module_list)}",
-                                                        output_bits=output_bitwidth,
-                                                        module_contents=module_contents)
+            raise Exception(f"Expect type(module) == SparseLinearNeq, {type(m)} found")
+    module_list_verilog = generate_logicnets_verilog(
+        module_name=f"{module_name}_{ensemble_member_idx}",
+        input_name="M0",
+        input_bits=input_bitwidth,
+        output_name=f"M{len(module_list)}",
+        output_bits=output_bitwidth,
+        module_contents=module_contents
+    )
     reg_verilog = generate_register_verilog()
     with open(f"{output_directory}/myreg.v", "w") as f:
         f.write(reg_verilog)
-    with open(f"{output_directory}/{module_name}.v", "w") as f:
+    with open(f"{output_directory}/{module_name}_{ensemble_member_idx}.v", "w") as f:
         f.write(module_list_verilog)
 
 class SparseLinear(nn.Linear):

@@ -320,3 +320,18 @@ def compute_adaboost_model_error(model, datasets, config, cuda=False):
     incorrect_train_indices = torch.Tensor(incorrect_train_indices)
     epsilon = model.weights @ incorrect_train_indices / torch.sum(model.weights)
     return epsilon, incorrect_train_indices
+
+
+def test_adaboost(model, dataset_loader, cuda=False):
+    """
+    Evaluate the AdaBoost ensemble model on the test dataset.
+    """
+    model.single_model_mode = False
+    # Configure criterion to be multi-class exponential loss function
+    with torch.no_grad():
+        model.eval()
+        for batch_idx, (data, target) in enumerate(dataset_loader):
+            if cuda:
+                data, target = data.cuda(), target.cuda()
+            output = model(data)
+            

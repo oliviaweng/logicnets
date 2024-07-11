@@ -20,13 +20,14 @@ class AveragingJetNeqModel(nn.Module):
         self.quantize_avg = quantize_avg
         self.ensemble = nn.ModuleList([JetSubstructureNeqModel(model_config) for _ in range(num_models)])
         self.is_verilog_inference = False
-        self.avg_quant = QuantBrevitasActivation(
-            QuantIdentity(
-                # TODO: Might need to adjust output bitwidth (+/- 1) after mean operation
-                bit_width=model_config["output_bitwidth"], 
-                quant_type=QuantType.INT, 
+        if quantize_avg:
+            self.avg_quant = QuantBrevitasActivation(
+                QuantIdentity(
+                    # TODO: Might need to adjust output bitwidth (+/- 1) after mean operation
+                    bit_width=model_config["output_bitwidth"], 
+                    quant_type=QuantType.INT, 
+                )
             )
-        )
 
     def forward(self, x):
         if self.is_verilog_inference:
@@ -43,13 +44,17 @@ class AveragingJetNeqModel(nn.Module):
     # TODO: Implement verilog_forward() and verilog_inference()
     def verilog_forward(self, x):
         outputs = [model.verilog_forward(x) for model in self.ensemble]
-        return sum(outputs) / self.num_models
+        return sum(outputs) # / self.num_models # Do division in pretransform
     
     def verilog_inference(self, verilog_dir, top_module_filename, logfile=None, add_registers: bool = False):
         pass
     
     def pytorch_inference(self):
         self.is_verilog_inference = False
+
+class AveragingJetLUTModel(AveragingJetNeqModel):
+    pass
+
 
 class BaseEnsembleClassifier(nn.Module):
     """
@@ -177,9 +182,6 @@ class AdaBoostJetNeqModel(BaseEnsembleClassifier):
         if self.single_model_mode:
             outputs = self.model(x)
             return outputs
-        # Compute weighted average using self.model_weights
+        # Compute forward pass for all models in the ensemble
         outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
-        outputs = outputs @ self.alphas / self.alphas.sum()
-        if self.quantize_avg:
-            outputs = self.avg_quant(outputs)
         return outputs
