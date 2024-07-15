@@ -35,29 +35,78 @@ class JetSubstructureNeqModel(nn.Module):
         super(JetSubstructureNeqModel, self).__init__()
         self.model_config = model_config
         self.num_neurons = [model_config["input_length"]] + model_config["hidden_layers"] + [model_config["output_length"]]
+        self.post_transform_output = model_config["post_transform_output"]
         layer_list = []
         for i in range(1, len(self.num_neurons)):
             in_features = self.num_neurons[i-1]
             out_features = self.num_neurons[i]
             bn = nn.BatchNorm1d(out_features)
-            if i == 1:
+            if i == 1: # First layer
                 bn_in = nn.BatchNorm1d(in_features)
                 input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
-                input_quant = QuantBrevitasActivation(QuantHardTanh(model_config["input_bitwidth"], max_val=1., narrow_range=False, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn_in, input_bias])
+                input_quant = QuantBrevitasActivation(
+                    QuantHardTanh(
+                        model_config["input_bitwidth"], 
+                        max_val=1., 
+                        narrow_range=False, 
+                        quant_type=QuantType.INT, 
+                        scaling_impl_type=ScalingImplType.PARAMETER
+                    ), 
+                    pre_transforms=[bn_in, input_bias]
+                )
                 output_quant = QuantBrevitasActivation(QuantReLU(bit_width=model_config["hidden_bitwidth"], max_val=1.61, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn])
                 mask = RandomFixedSparsityMask2D(in_features, out_features, fan_in=model_config["input_fanin"])
                 layer = SparseLinearNeq(in_features, out_features, input_quant=input_quant, output_quant=output_quant, sparse_linear_kws={'mask': mask})
                 layer_list.append(layer)
-            elif i == len(self.num_neurons)-1:
-                output_bias_scale = ScalarBiasScale(bias_init=0.33)
-                output_quant = QuantBrevitasActivation(QuantHardTanh(bit_width=model_config["output_bitwidth"], max_val=1.33, narrow_range=False, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn], post_transforms=[output_bias_scale])
-                mask = RandomFixedSparsityMask2D(in_features, out_features, fan_in=model_config["output_fanin"])
-                layer = SparseLinearNeq(in_features, out_features, input_quant=layer_list[-1].output_quant, output_quant=output_quant, sparse_linear_kws={'mask': mask}, apply_input_quant=False)
+            elif i == len(self.num_neurons) - 1: # Output layer
+                post_transforms = []
+                if self.post_transform_output:
+                    output_bias_scale = ScalarBiasScale(bias_init=0.33)
+                    post_transforms.append(output_bias_scale)
+                output_quant = QuantBrevitasActivation(
+                    QuantHardTanh(
+                        bit_width=model_config["output_bitwidth"], 
+                        max_val=1.33, 
+                        narrow_range=False, 
+                        quant_type=QuantType.INT, 
+                        scaling_impl_type=ScalingImplType.PARAMETER
+                        ), 
+                    pre_transforms=[bn], 
+                    post_transforms=post_transforms,
+                )
+                mask = RandomFixedSparsityMask2D(
+                    in_features, out_features, fan_in=model_config["output_fanin"]
+                )
+                layer = SparseLinearNeq(
+                    in_features, 
+                    out_features, 
+                    input_quant=layer_list[-1].output_quant, 
+                    output_quant=output_quant, 
+                    sparse_linear_kws={'mask': mask}, 
+                    apply_input_quant=False
+                )
                 layer_list.append(layer)
             else:
-                output_quant = QuantBrevitasActivation(QuantReLU(bit_width=model_config["hidden_bitwidth"], max_val=1.61, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn])
-                mask = RandomFixedSparsityMask2D(in_features, out_features, fan_in=model_config["hidden_fanin"])
-                layer = SparseLinearNeq(in_features, out_features, input_quant=layer_list[-1].output_quant, output_quant=output_quant, sparse_linear_kws={'mask': mask}, apply_input_quant=False)
+                output_quant = QuantBrevitasActivation(
+                    QuantReLU(
+                        bit_width=model_config["hidden_bitwidth"], 
+                        max_val=1.61, 
+                        quant_type=QuantType.INT, 
+                        scaling_impl_type=ScalingImplType.PARAMETER
+                    ), 
+                    pre_transforms=[bn]
+                )
+                mask = RandomFixedSparsityMask2D(
+                    in_features, out_features, fan_in=model_config["hidden_fanin"]
+                )
+                layer = SparseLinearNeq(
+                    in_features, 
+                    out_features, 
+                    input_quant=layer_list[-1].output_quant, 
+                    output_quant=output_quant, 
+                    sparse_linear_kws={'mask': mask}, 
+                    apply_input_quant=False
+                )
                 layer_list.append(layer)
         self.module_list = nn.ModuleList(layer_list)
         self.is_verilog_inference = False
