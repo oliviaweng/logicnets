@@ -1,0 +1,22 @@
+ensemble_method: adaboost
+ensemble_size: 32
+hidden_layers:
+- 32
+- 64
+- 192
+- 192
+- 16
+input_bitwidth: 4
+hidden_bitwidth: 3
+output_bitwidth: 7
+input_fanin: 3
+hidden_fanin: 4
+output_fanin: 5
+weight_decay: 0.001
+batch_size: 1024
+epochs: 1000
+learning_rate: 0.001
+seed: 16
+checkpoint: null
+quantize_avg: false
+post_transform_output: True
