@@ -18,11 +18,14 @@ epochs: 1000
 learning_rate: 0.001
 seed: 16
 checkpoint: null
-quantize_avg: true
+quantize_avg: false
+post_transform_output: false
 
 # Params to grid search
 grid_search_params:
   ensemble_size:
   - 2
   - 4
-  - 6
+  - 8
+  - 16
+  - 32

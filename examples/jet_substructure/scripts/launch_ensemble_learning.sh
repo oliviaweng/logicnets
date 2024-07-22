@@ -15,9 +15,18 @@
 # tmux new-session -d -s jscm01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_configs/config2 ./averaging"
 # tmux new-session -d -s jscm02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_configs/config3 ./averaging"
 
-tmux new-session -d -s jscl00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_configs/config1 ./averaging"
-tmux new-session -d -s jscl01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_configs/config2 ./averaging"
-tmux new-session -d -s jscl02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_configs/config3 ./averaging"
+# tmux new-session -d -s jscl00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_configs/config1 ./averaging"
+# tmux new-session -d -s jscl01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_configs/config2 ./averaging"
+# tmux new-session -d -s jscl02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_configs/config3 ./averaging"
+
+tmux new-session -d -s jsc_00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_no_post_trans_configs/config1 ./averaging"
+tmux new-session -d -s jsc_01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_no_post_trans_configs/config2 ./averaging"
+
+tmux new-session -d -s jsc_02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_no_post_trans_configs/config1 ./averaging"
+tmux new-session -d -s jsc_03 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/medium_no_post_trans_configs/config2 ./averaging"
+
+tmux new-session -d -s jsc_04 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_no_post_trans_configs/config1 ./averaging"
+tmux new-session -d -s jsc_05 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_no_post_trans_configs/config2 ./averaging"
 
 # Bagging
 # tmux new-session -d -s jscs_bag "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/small_configs ./bagging"
@@ -25,6 +34,6 @@ tmux new-session -d -s jscl02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_co
 # tmux new-session -d -s jscl_bag "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/bagging/large_configs ./bagging"
 
 # Adaboost
-tmux new-session -d -s jscs_ada "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/small_configs ./adaboost"
+# tmux new-session -d -s jscs_ada "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/small_configs ./adaboost"
 # tmux new-session -d -s jscm_ada "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/medium_configs ./adaboost"
 # tmux new-session -d -s jscl_ada "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/large_configs ./adaboost"

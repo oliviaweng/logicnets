@@ -30,56 +30,6 @@ from ensemble import AveragingJetNeqModel, BaggingJetNeqModel, AdaBoostJetNeqMod
 
 ENSEMBLING_METHODS = ["adaboost", "averaging", "bagging"]
 
-
-configs = {
-    "jsc-s": {
-        "hidden_layers": [64, 32, 32, 32],
-        "input_bitwidth": 2,
-        "hidden_bitwidth": 2,
-        "output_bitwidth": 2,
-        "input_fanin": 3,
-        "hidden_fanin": 3,
-        "output_fanin": 3,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 2,
-        "checkpoint": None,
-    },
-    "jsc-m": {
-        "hidden_layers": [64, 32, 32, 32],
-        "input_bitwidth": 3,
-        "hidden_bitwidth": 3,
-        "output_bitwidth": 3,
-        "input_fanin": 4,
-        "hidden_fanin": 4,
-        "output_fanin": 4,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 3,
-        "checkpoint": None,
-    },
-    "jsc-l": {
-        "hidden_layers": [32, 64, 192, 192, 16],
-        "input_bitwidth": 4,
-        "hidden_bitwidth": 3,
-        "output_bitwidth": 7,
-        "input_fanin": 3,
-        "hidden_fanin": 4,
-        "output_fanin": 5,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 16,
-        "checkpoint": None,
-    },
-}
-
-
 def main(args):
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)

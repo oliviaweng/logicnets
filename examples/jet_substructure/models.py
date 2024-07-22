@@ -70,7 +70,7 @@ class JetSubstructureNeqModel(nn.Module):
                         narrow_range=False, 
                         quant_type=QuantType.INT, 
                         scaling_impl_type=ScalingImplType.PARAMETER
-                        ), 
+                    ), 
                     pre_transforms=[bn], 
                     post_transforms=post_transforms,
                 )
