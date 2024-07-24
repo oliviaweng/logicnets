@@ -58,6 +58,25 @@ def neq_inference(model: nn.Module) -> None:
         if type(module) == SparseLinearNeq:
             module.neq_inference()
 
+def ensemble_to_verilog_module(
+    ensemble: nn.ModuleList, 
+    module_name: str, # "logicnet"
+    output_dir: str, 
+    add_registers: bool = True, 
+    generate_bench: bool = True
+):
+    for i, lnet in enumerate(ensemble):
+        module_list_to_verilog_module(
+            lnet.module_list, 
+            module_name, 
+            output_dir, 
+            ensemble_member_idx=i,
+            generate_bench=generate_bench,
+            add_registers=add_registers,
+        )
+        print(f"Top level entity stored at: {output_dir}/logicnet.v ...")
+
+
 # TODO: Should this go in with the other verilog functions?
 # TODO: Support non-linear topologies
 def module_list_to_verilog_module(
@@ -74,7 +93,7 @@ def module_list_to_verilog_module(
     for i in range(len(module_list)):
         m = module_list[i]
         if type(m) == SparseLinearNeq:
-            module_prefix = f"layer{i}"
+            module_prefix = f"ens{ensemble_member_idx}_layer{i}"
             module_input_bits, module_output_bits = m.gen_layer_verilog(module_prefix, output_directory, generate_bench=generate_bench)
             if i == 0:
                 input_bitwidth = module_input_bits
