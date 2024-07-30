@@ -209,7 +209,7 @@ if __name__ == "__main__":
         "--checkpoint",
         type=str,
         default=None,
-        help="Retrain the model from a previous checkpoint (default: %(default)s)",
+        help="Load the model from a previous checkpoint (default: %(default)s)",
     )
     parser.add_argument(
         "--config",
