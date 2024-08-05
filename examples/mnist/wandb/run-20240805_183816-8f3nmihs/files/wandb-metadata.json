@@ -1,0 +1,102 @@
+{
+    "os": "Linux-5.10.0-30-cloud-amd64-x86_64-with-glibc2.17",
+    "python": "3.8.19",
+    "heartbeatAt": "2024-08-05T18:38:17.036607",
+    "startedAt": "2024-08-05T18:38:16.582053",
+    "docker": null,
+    "cuda": null,
+    "args": [
+        "--config",
+        "./mnist_configs/mnist_polylut_deg1.yml",
+        "--save_dir",
+        "./mnist_polylut",
+        "--experiment_name",
+        "./mnist_configs/mnist_polylut_deg1",
+        "--cuda",
+        "--device",
+        "0"
+    ],
+    "state": "running",
+    "program": "train.py",
+    "codePathLocal": "train.py",
+    "codePath": "examples/mnist/train.py",
+    "git": {
+        "remote": "git@github.com:oliviaweng/logicnets.git",
+        "commit": "76e3e370267f9c563c44624007eac2a492049668"
+    },
+    "email": null,
+    "root": "/workspace/logicnets",
+    "host": "5e6edc9a508a",
+    "username": "oweng",
+    "executable": "/home/oweng/.local/miniconda3/bin/python3",
+    "cpu_count": 4,
+    "cpu_count_logical": 8,
+    "cpu_freq": {
+        "current": 2199.998,
+        "min": 0.0,
+        "max": 0.0
+    },
+    "cpu_freq_per_core": [
+        {
+            "current": 2199.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2199.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2199.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2199.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2199.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2199.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2199.998,
+            "min": 0.0,
+            "max": 0.0
+        },
+        {
+            "current": 2199.998,
+            "min": 0.0,
+            "max": 0.0
+        }
+    ],
+    "disk": {
+        "/": {
+            "total": 125.74690628051758,
+            "used": 59.507041931152344
+        }
+    },
+    "gpu": "Tesla P100-PCIE-16GB",
+    "gpu_count": 2,
+    "gpu_devices": [
+        {
+            "name": "Tesla P100-PCIE-16GB",
+            "memory_total": 17179869184
+        },
+        {
+            "name": "Tesla P100-PCIE-16GB",
+            "memory_total": 17179869184
+        }
+    ],
+    "memory": {
+        "total": 50.99925231933594
+    }
+}
