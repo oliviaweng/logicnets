@@ -19,14 +19,20 @@
 # tmux new-session -d -s jscl01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_configs/config2 ./averaging"
 # tmux new-session -d -s jscl02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_configs/config3 ./averaging"
 
-tmux new-session -d -s jsc_00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_no_post_trans_configs/config1 ./averaging"
-tmux new-session -d -s jsc_01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_no_post_trans_configs/config2 ./averaging"
+# tmux new-session -d -s jsc_00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_no_post_trans_configs/config1 ./averaging"
+# tmux new-session -d -s jsc_01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_no_post_trans_configs/config2 ./averaging"
 
-tmux new-session -d -s jsc_02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_no_post_trans_configs/config1 ./averaging"
-tmux new-session -d -s jsc_03 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/medium_no_post_trans_configs/config2 ./averaging"
+# tmux new-session -d -s jsc_02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_no_post_trans_configs/config1 ./averaging"
+# tmux new-session -d -s jsc_03 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/medium_no_post_trans_configs/config2 ./averaging"
 
-tmux new-session -d -s jsc_04 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_no_post_trans_configs/config1 ./averaging"
-tmux new-session -d -s jsc_05 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_no_post_trans_configs/config2 ./averaging"
+# tmux new-session -d -s jsc_04 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_no_post_trans_configs/config1 ./averaging"
+# tmux new-session -d -s jsc_05 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_no_post_trans_configs/config2 ./averaging"
+
+
+tmux new-session -d -s jsc00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_configs/config1 ./averaging"
+tmux new-session -d -s jsc00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_configs/config2 ./averaging"
+tmux new-session -d -s jsc00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_configs/config3 ./averaging"
+
 
 # Bagging
 # tmux new-session -d -s jscs_bag "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/small_configs ./bagging"

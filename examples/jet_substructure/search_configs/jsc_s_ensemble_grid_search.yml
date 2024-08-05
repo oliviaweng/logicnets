@@ -19,6 +19,7 @@ seed: 2
 checkpoint: null
 quantize_avg: false
 post_transform_output: false
+same_output_scale: true
 
 # Params to grid search
 grid_search_params:

@@ -70,6 +70,9 @@ def main(args):
         quantize_avg = config["quantize_avg"]
     if "post_transform_output" not in config:
         config["post_transform_output"] = True # Default
+    if "same_output_scale" not in config:
+        config["same_output_scale"] = False # Default
+    
 
     if "ensemble_method" in config:
         if config["ensemble_method"] == "averaging":

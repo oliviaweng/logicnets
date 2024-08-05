@@ -20,6 +20,7 @@ class AveragingJetNeqModel(nn.Module):
         self.model_config = model_config
         self.num_models = num_models
         self.quantize_avg = quantize_avg
+        self.same_output_scale = model_config["same_output_scale"]
         self.ensemble = nn.ModuleList(
             [JetSubstructureNeqModel(model_config) for _ in range(num_models)]
         )
@@ -31,6 +32,21 @@ class AveragingJetNeqModel(nn.Module):
                     quant_type=QuantType.INT,
                 )
             )
+        if self.same_output_scale:
+            # FOR DEBUGGING: Print output quantizer for each ensemble member
+            # print("BEFORE: Output quantizer for each ensemble member:")
+            # for model in self.ensemble:
+            #     print(f"\t{hex(id(model.module_list[-1].output_quant))}")
+            # Set all ensemble member's output quantizer to be the same as the
+            # first model's output quantizer
+            for model in self.ensemble[1:]:
+                model.module_list[-1].output_quant = self.ensemble[0].module_list[-1].output_quant
+            # FOR DEBUGGING: Print output quantizer for each ensemble member
+            # print("AFTER: Output quantizer for each ensemble member:")
+            # for model in self.ensemble:
+            #     print(f"\t{hex(id(model.module_list[-1].output_quant))}")
+
+
 
     def forward(self, x):
         if self.is_verilog_inference:
