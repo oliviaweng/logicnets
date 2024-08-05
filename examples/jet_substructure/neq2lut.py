@@ -14,6 +14,7 @@
 
 import os
 import yaml
+import time
 from argparse import ArgumentParser
 
 import torch
@@ -21,9 +22,9 @@ from torch.utils.data import DataLoader
 
 from logicnets.nn import    generate_truth_tables, \
                             lut_inference, \
-                            module_list_to_verilog_module
+                            module_list_to_verilog_module , \
+                            ensemble_to_verilog_module
 
-from train import configs
 from training_methods import test
 from dataset import JetSubstructureDataset
 from models import JetSubstructureNeqModel, JetSubstructureLutModel
@@ -91,8 +92,8 @@ model_config = {
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Synthesize convert a PyTorch trained model into verilog")
-    parser.add_argument('--arch', type=str, choices=configs.keys(), default="jsc-s",
-        help="Specific the neural network model to use (default: %(default)s)")
+    # parser.add_argument('--arch', type=str, choices=configs.keys(), default="jsc-s",
+    #     help="Specific the neural network model to use (default: %(default)s)")
     parser.add_argument('--batch-size', type=int, default=None, metavar='N',
         help="Batch size for evaluation (default: %(default)s)")
     parser.add_argument('--input-bitwidth', type=int, default=None,
@@ -153,6 +154,13 @@ if __name__ == "__main__":
     x, y = dataset[args.dataset_split][0]
     config['input_length'] = len(x)
     config['output_length'] = len(y)
+    # Ensemble settings
+    quantize_avg = False
+    if "quantize_avg" in config:
+        quantize_avg = config["quantize_avg"]
+    if "post_transform_output" not in config:
+        config["post_transform_output"] = True # Default
+
     model = AveragingJetNeqModel(config, config["ensemble_size"])
 
     # Load the model weights
@@ -179,11 +187,13 @@ if __name__ == "__main__":
 
     # Test the LUT-based model
     print("Running inference on LUT-based model...")
+    lut_inf_start_time = time.time()
     lut_inference(lut_model)
     lut_model.eval()
     lut_accuracy, lut_avg_roc_auc, _ = test(lut_model, test_loader, cuda=False)
     print("LUT-Based Model accuracy: %f" % (lut_accuracy))
     print("LUT-Based AVG ROC AUC: %f" % (lut_avg_roc_auc))
+    print(f"LUT inference took: {time.time() - lut_inf_start_time} s")
     modelSave = {   'model_dict': lut_model.state_dict(),
                     'test_accuracy': lut_accuracy,
                     'test_avg_roc_auc': lut_avg_roc_auc}
@@ -191,18 +201,25 @@ if __name__ == "__main__":
     torch.save(modelSave, args.log_dir + "/lut_based_model.pth")
 
     print("Generating verilog in %s..." % (args.log_dir))
-    for i, lm in enumerate(lut_model.ensemble):
-        module_list_to_verilog_module(
-            lm.module_list, 
-            "logicnet", 
-            args.log_dir, 
-            ensemble_member_idx=i,
-            generate_bench=args.generate_bench,
-            add_registers=args.add_registers,
-        )
-        print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
+    ensemble_to_verilog_module(
+        lut_model.ensemble,
+        "logicnet", 
+        args.log_dir, 
+        add_registers=args.add_registers,
+        generate_bench=args.generate_bench,
+    )
+    # for i, lm in enumerate(lut_model.ensemble):
+    #     module_list_to_verilog_module(
+    #         lm.module_list, 
+    #         "logicnet", 
+    #         args.log_dir, 
+    #         ensemble_member_idx=i,
+    #         add_registers=args.add_registers,
+    #         generate_bench=args.generate_bench,
+    #     )
+    #     print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
 
-    # END - pyverilator doesn't really work...
+    # END - pyverilator doesn't really work well...
 
 
     # if args.dump_io:

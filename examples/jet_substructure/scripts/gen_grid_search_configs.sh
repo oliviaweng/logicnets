@@ -19,7 +19,7 @@
 # python3 grid_search.py -c search_configs/jsc_m_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_medium
 # python3 grid_search.py -c search_configs/jsc_l_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_large
 
-# python3 grid_search.py -c search_configs/jsc_s_averaging_grid_search.yml -d ./ensemble_configs/averaging/small_qavg --experiment_prefix small_qavg
-python3 grid_search.py -c search_configs/jsc_m_averaging_grid_search.yml -d ./ensemble_configs/averaging/medium_qavg --experiment_prefix medium_qavg
-python3 grid_search.py -c search_configs/jsc_l_averaging_grid_search.yml -d ./ensemble_configs/averaging/large_qavg --experiment_prefix large_qavg
+python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_no_post_trans --experiment_prefix small_no_post_trans
+python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_no_post_trans --experiment_prefix medium_no_post_trans
+python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_no_post_trans --experiment_prefix large_no_post_trans
 
