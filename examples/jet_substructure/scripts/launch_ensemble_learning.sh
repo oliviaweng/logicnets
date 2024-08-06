@@ -33,11 +33,19 @@
 # tmux new-session -d -s jsc01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_configs/config2 ./averaging"
 # tmux new-session -d -s jsc02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_configs/config3 ./averaging"
 
+tmux new-session -d -s jscm00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_output_scale_post_trans_configs/config1 ./averaging"
+tmux new-session -d -s jscm01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_output_scale_post_trans_configs/config2 ./averaging"
+tmux new-session -d -s jscm02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_output_scale_post_trans_configs/config3 ./averaging"
+
+tmux new-session -d -s jscl00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_same_output_scale_post_trans_configs/config1 ./averaging"
+tmux new-session -d -s jscl01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_same_output_scale_post_trans_configs/config2 ./averaging"
+tmux new-session -d -s jscl02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_same_output_scale_post_trans_configs/config3 ./averaging"
+
 # tmux new-session -d -s jsc01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_post_trans ./averaging"
 
-tmux new-session -d -s jsc_sopt00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_post_trans_configs/config1 ./averaging"
-tmux new-session -d -s jsc_sopt01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_post_trans_configs/config2 ./averaging"
-tmux new-session -d -s jsc_sopt02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_post_trans_configs/config3 ./averaging"
+# tmux new-session -d -s jsc_sopt00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_post_trans_configs/config1 ./averaging"
+# tmux new-session -d -s jsc_sopt01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_post_trans_configs/config2 ./averaging"
+# tmux new-session -d -s jsc_sopt02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_post_trans_configs/config3 ./averaging"
 
 
 

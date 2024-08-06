@@ -23,4 +23,6 @@
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_same_output_scale --experiment_prefix medium_same_output_scale
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_same_output_scale --experiment_prefix large_same_output_scale
 
-python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_same_output_scale_post_trans --experiment_prefix small_same_output_scale_post_trans
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_same_output_scale_post_trans --experiment_prefix small_same_output_scale_post_trans
+python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_same_output_scale_post_trans --experiment_prefix medium_same_output_scale_post_trans
+python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_same_output_scale_post_trans --experiment_prefix large_same_output_scale_post_trans
