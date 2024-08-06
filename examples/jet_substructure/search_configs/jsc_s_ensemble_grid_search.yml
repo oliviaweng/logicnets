@@ -15,10 +15,10 @@ weight_decay: 0.001
 batch_size: 1024
 epochs: 1000
 learning_rate: 0.001
-seed: 2
+# seed: 2
 checkpoint: null
 quantize_avg: false
-post_transform_output: false
+post_transform_output: true
 same_output_scale: true
 
 # Params to grid search
@@ -29,3 +29,6 @@ grid_search_params:
   - 8
   - 16
   - 32
+  seed:
+  - 1
+  - 6

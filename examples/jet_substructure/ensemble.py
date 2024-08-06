@@ -25,7 +25,7 @@ class AveragingJetNeqModel(nn.Module):
             [JetSubstructureNeqModel(model_config) for _ in range(num_models)]
         )
         self.is_verilog_inference = False
-        if quantize_avg:
+        if quantize_avg: # For packing averaging into a LUT
             self.avg_quant = QuantBrevitasActivation(
                 QuantIdentity(
                     bit_width=model_config["output_bitwidth"],
@@ -56,7 +56,7 @@ class AveragingJetNeqModel(nn.Module):
     def pytorch_forward(self, x):
         outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
         outputs = outputs.mean(dim=0)
-        if self.quantize_avg:
+        if self.quantize_avg: # For packing averaging into a LUT
             outputs = self.avg_quant(outputs)
         return outputs
 
