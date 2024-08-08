@@ -1,0 +1,110 @@
+wandb_version: 1
+
+hidden_layers:
+  desc: null
+  value:
+  - 256
+  - 100
+  - 100
+  - 100
+  - 100
+input_bitwidth:
+  desc: null
+  value: 2
+hidden_bitwidth:
+  desc: null
+  value: 2
+output_bitwidth:
+  desc: null
+  value: 2
+input_fanin:
+  desc: null
+  value: 6
+degree:
+  desc: null
+  value: 1
+hidden_fanin:
+  desc: null
+  value: 6
+output_fanin:
+  desc: null
+  value: 6
+weight_decay:
+  desc: null
+  value: 0
+batch_size:
+  desc: null
+  value: 128
+epochs:
+  desc: null
+  value: 500
+learning_rate:
+  desc: null
+  value: 0.004
+seed:
+  desc: null
+  value: 984237
+dataset:
+  desc: null
+  value: mnist
+_wandb:
+  desc: null
+  value:
+    python_version: 3.8.19
+    cli_version: 0.17.6
+    framework: torch
+    is_jupyter_run: false
+    is_kaggle_kernel: false
+    start_time: 1723094909
+    t:
+      1:
+      - 1
+      - 41
+      - 55
+      2:
+      - 1
+      - 41
+      - 55
+      3:
+      - 1
+      - 7
+      - 13
+      - 16
+      - 23
+      - 63
+      4: 3.8.19
+      5: 0.17.6
+      8:
+      - 5
+      13: linux-x86_64
+    m:
+    - 1: Train Acc (%)
+      6:
+      - 3
+      7:
+      - 2
+    - 1: Test Acc (%)
+      6:
+      - 3
+      7:
+      - 2
+    - 1: Valid Acc(%)
+      6:
+      - 3
+      7:
+      - 2
+    - 1: Train Loss(%)
+      6:
+      - 3
+      7:
+      - 1
+    - 1: Test Loss
+      6:
+      - 3
+      7:
+      - 1
+    - 1: Val Loss
+      6:
+      - 3
+      7:
+      - 1

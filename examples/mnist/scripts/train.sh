@@ -10,6 +10,7 @@ CUDA_VISIBLE_DEVICES=$CUDA_DEVICE python3 train.py \
     --config $CONFIG \
     --save_dir $SAVE_DIR \
     --experiment_name $exp_name \
+    --train \
     --cuda \
     --device $CUDA_DEVICE
 

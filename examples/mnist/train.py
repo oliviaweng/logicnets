@@ -34,52 +34,9 @@ from torch.utils.data import DataLoader
 
 from torchvision import datasets, transforms
 from models import MnistNeqModel
+from ensemble import AveragingMnistNeqModel
 
-# configs = {
-#     "hdr": {
-#         "hidden_layers": [256, 100, 100, 100, 100],
-#         "input_bitwidth": 2,
-#         "hidden_bitwidth": 2,
-#         "output_bitwidth": 2,
-#         "input_fanin": 6,
-#         "degree": 4,
-#         "hidden_fanin": 6,
-#         "output_fanin": 6,
-#         "weight_decay": 0,
-#         "batch_size": 128,
-#         "epochs": 500,
-#         "learning_rate": 0.004,
-#         "seed": 984237,
-#         "checkpoint": None,
-#     },
-# }
-
-# A dictionary, so we can set some defaults if necessary
-# model_config = {
-#     "hidden_layers": None,
-#     "input_bitwidth": None,
-#     "hidden_bitwidth": None,
-#     "output_bitwidth": None,
-#     "input_fanin": None,
-#     "degree": None,
-#     "hidden_fanin": None,
-#     "output_fanin": None,
-# }
-
-# training_config = {
-#     "weight_decay": None,
-#     "batch_size": None,
-#     "epochs": None,
-#     "learning_rate": None,
-#     "seed": None,
-# }
-
-# other_options = {
-#     "cuda": None,
-#     "log_dir": None,
-#     "checkpoint": None,
-#     "device": 1,
-# }
+ENSEMBLING_METHODS = ["adaboost", "averaging", "bagging"]
 
 
 def train(model, config, cuda=False, log_dir="./mnist"):
@@ -172,8 +129,6 @@ def train(model, config, cuda=False, log_dir="./mnist"):
     # Push the model to the GPU, if necessary
     if cuda:
         model.cuda()
-
-
     # Main training loop
     maxAcc = 0.0
     num_epochs = config["epochs"]
@@ -202,8 +157,8 @@ def train(model, config, cuda=False, log_dir="./mnist"):
 
         accLoss /= len(train_loader.dataset)
         accuracy = 100.0 * correct / len(train_loader.dataset)
-        val_accuracy = test(model, val_loader, cuda)
-        test_accuracy = test(model, test_loader, cuda)
+        val_accuracy, val_loss = test(model, val_loader, cuda)
+        test_accuracy, test_loss = test(model, test_loader, cuda)
         modelSave = {
             "model_dict": model.state_dict(),
             "optim_dict": optimizer.state_dict(),
@@ -222,27 +177,34 @@ def train(model, config, cuda=False, log_dir="./mnist"):
                 "Train Loss(%)": accLoss.detach().cpu().numpy(),
                 "Test Acc (%)": test_accuracy,
                 "Valid Acc(%)": val_accuracy,
+                "Test Loss": test_loss,
+                "Val Loss": val_loss,
             }
         )
 
 
 def test(model, dataset_loader, cuda):
     model.eval()
-    correct = 0
     accLoss = 0.0
-    for batch_idx, (data, target) in enumerate(dataset_loader):
+    correct = 0
+    # Configure criterion
+    criterion = nn.CrossEntropyLoss()
+    for _, (data, target) in enumerate(dataset_loader):
         if cuda:
             data, target = data.cuda(), target.cuda()
         data = data.reshape(-1, 784)
         target = torch.nn.functional.one_hot(target, num_classes=10)
         output = model(data)
+        loss = criterion(output, torch.max(target, 1)[1])
         pred = output.detach().max(1, keepdim=True)[1]
         target_label = torch.max(target.detach(), 1, keepdim=True)[1]
         curCorrect = pred.eq(target_label).long().sum()
         curAcc = 100.0 * curCorrect / len(data)
+        accLoss += loss.detach() * len(data)
         correct += curCorrect
     accuracy = 100 * float(correct) / len(dataset_loader.dataset)
-    return accuracy
+    accLoss /= len(dataset_loader.dataset)
+    return accuracy, accLoss
 
 
 def main(args):
@@ -251,28 +213,6 @@ def main(args):
     # Create experiment directory
     experiment_dir = os.path.join(args.save_dir, args.experiment_name)
     os.makedirs(experiment_dir, exist_ok=True)
-    # defaults = configs[args.arch]
-    # options = vars(args)
-    # del options["arch"]
-    # config = {}
-    # for k in options.keys():
-    #     config[k] = (
-    #         options[k] if options[k] is not None else defaults[k]
-    #     )  # Override defaults, if specified.
-
-    # if not os.path.exists("test_" + config["log_dir"]):
-    #     os.makedirs("test_" + config["log_dir"])
-
-    # # Split up configuration options to be more understandable
-    # model_cfg = {}
-    # for k in model_config.keys():
-    #     model_cfg[k] = config[k]
-    # train_cfg = {}
-    # for k in training_config.keys():
-    #     train_cfg[k] = config[k]
-    # options_cfg = {}
-    # for k in other_options.keys():
-    #     options_cfg[k] = config[k]
 
     # Set random seeds
     random.seed(config["seed"])
@@ -282,50 +222,165 @@ def main(args):
     if args.cuda:
         torch.cuda.manual_seed_all(config["seed"])
         torch.backends.cudnn.deterministic = True
-        torch.cuda.set_device(args.device)
+        # torch.cuda.set_device(args.device)
     config["gpu"] = args.cuda
 
     # Instantiate model
     config["input_length"] = 784
     config["output_length"] = 10
-    model = MnistNeqModel(config)
+
+    # Ensemble settings
+    quantize_avg = False
+    if "quantize_avg" in config:
+        quantize_avg = config["quantize_avg"]
+    if "post_transform_output" not in config:
+        config["post_transform_output"] = True # Default
+    if "same_output_scale" not in config:
+        config["same_output_scale"] = False # Default
+
+    if "ensemble_method" in config:
+        if config["ensemble_method"] == "averaging":
+            print("Averaging ensemble method")
+            model = AveragingMnistNeqModel(
+                config, config["ensemble_size"], quantize_avg=quantize_avg
+            )
+        # elif config["ensemble_method"] == "bagging":
+        #     print("Bagging ensemble method")
+        #     model = BaggingJetNeqModel(
+        #         config,
+        #         config["ensemble_size"],
+        #         quantize_avg=quantize_avg,
+        #         single_model_mode=args.train,
+        #     )
+        # elif config["ensemble_method"] == "adaboost":
+        #     print("AdaBoost ensemble method")
+        #     model = AdaBoostJetNeqModel(
+        #         config,
+        #         config["ensemble_size"],
+        #         len(dataset["train"]),
+        #         quantize_avg=quantize_avg,
+        #         single_model_mode=args.train,
+        #     )
+        else:
+            raise ValueError(f"Unknown ensemble method: {config['ensemble_method']}")
+    else:  # Single model learning
+        model = MnistNeqModel(config)
 
     if args.checkpoint is not None:
         print(f"Loading pre-trained checkpoint {args.checkpoint}")
         checkpoint = torch.load(args.checkpoint, map_location="cpu")
         model.load_state_dict(checkpoint["model_dict"])
 
-    # start a new wandb run to track this script
-    wandb.init(
-        # set the wandb project where this run will be logged
-        project="PolyLUT",
-        # track hyperparameters and run metadata
-        config={
-            "hidden_layers": config["hidden_layers"],
-            "input_bitwidth": config["input_bitwidth"],
-            "hidden_bitwidth": config["hidden_bitwidth"],
-            "output_bitwidth": config["output_bitwidth"],
-            "input_fanin": config["input_fanin"],
-            "degree": config["degree"],
-            "hidden_fanin": config["hidden_fanin"],
-            "output_fanin": config["output_fanin"],
-            "weight_decay": config["weight_decay"],
-            "batch_size": config["batch_size"],
-            "epochs": config["epochs"],
-            "learning_rate": config["learning_rate"],
-            "seed": config["seed"],
-            "dataset": "mnist",
-        },
-    )
+    print(f"Model: {model.__class__.__name__}")
+    # Train
+    if args.train:
+        # Save hyperparameter config
+        hparams_log = os.path.join(experiment_dir, "hparams.yml")
+        with open(hparams_log, "w") as f:
+            yaml.dump(config, f)
 
-    wandb.define_metric("Train Acc (%)", summary="max")
-    wandb.define_metric("Test Acc (%)", summary="max")
-    wandb.define_metric("Valid Acc(%)", summary="max")
-    wandb.define_metric("Train Loss(%)", summary="min")
-    wandb.watch(model, log_freq=10)
-    train(model, config, cuda=args.cuda, log_dir=experiment_dir)
+        # start a new wandb run to track this script
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project="PolyLUT",
+            name=args.experiment_name,
+            # track hyperparameters and run metadata
+            config={
+                "hidden_layers": config["hidden_layers"],
+                "input_bitwidth": config["input_bitwidth"],
+                "hidden_bitwidth": config["hidden_bitwidth"],
+                "output_bitwidth": config["output_bitwidth"],
+                "input_fanin": config["input_fanin"],
+                "degree": config["degree"],
+                "hidden_fanin": config["hidden_fanin"],
+                "output_fanin": config["output_fanin"],
+                "weight_decay": config["weight_decay"],
+                "batch_size": config["batch_size"],
+                "epochs": config["epochs"],
+                "learning_rate": config["learning_rate"],
+                "seed": config["seed"],
+                "dataset": "mnist",
+            },
+        )
+
+        wandb.define_metric("Train Acc (%)", summary="max")
+        wandb.define_metric("Test Acc (%)", summary="max")
+        wandb.define_metric("Valid Acc(%)", summary="max")
+        wandb.define_metric("Train Loss(%)", summary="min")
+        wandb.define_metric("Test Loss", summary="min")
+        wandb.define_metric("Val Loss", summary="min")
+        wandb.watch(model, log_freq=10)
+        train(model, config, cuda=args.cuda, log_dir=experiment_dir)
+        
+    # Evaluate model
+    evaluate_model = False
+    if args.evaluate:
+        if args.checkpoint:
+            # Evaluate given checkpoint
+            evaluate_model = True
+            print(f"Evaluating model saved at: {args.checkpoint}")
+            checkpoint = torch.load(args.checkpoint)
+            model.load_state_dict(checkpoint["model_dict"])
+            if (
+                config["ensemble_method"] in ENSEMBLING_METHODS
+                and config["ensemble_method"] != "averaging"
+            ):
+                model.single_model_mode = False
+        else:
+            raise ValueError(
+                "No checkpoint provided for evaluation. "
+                "Provide a path to checkpoint argument, "
+                "i.e., --checkpoint CHECKPOINT_PATH"
+            )
+    elif args.train:
+        evaluate_model = True  # Evaluate the model after training
+        if (
+            config["ensemble_method"] in ENSEMBLING_METHODS
+            and config["ensemble_method"] != "averaging"
+        ):
+            ensemble_ckpt_path = os.path.join(experiment_dir, "last_ensemble_ckpt.pth")
+            print(f"Evaluating last ensemble saved at: {ensemble_ckpt_path}")
+            best_checkpoint = torch.load(ensemble_ckpt_path)
+            model.single_model_mode = False
+        else:
+            ckpt_path = os.path.join(experiment_dir, "best_accuracy.pth")
+            print(f"Evaluating best model saved at: {ckpt_path}")
+            best_checkpoint = torch.load(ckpt_path)
+        model.load_state_dict(best_checkpoint["model_dict"])
+
+    if evaluate_model:
+        print("Evaluating model")
+        test_loader = DataLoader(
+            datasets.MNIST(
+                "mnist_data",
+                download=False,
+                train=False,
+                transform=transforms.Compose(
+                    [
+                        transforms.ToTensor(),  # first, convert image to PyTorch tensor
+                        transforms.Normalize((0.1307,), (0.3081,)),  # normalize inputs
+                    ]
+                ),
+            ),
+            batch_size=config["batch_size"],
+            shuffle=False,
+        )
+        test_accuracy, test_loss = test(model, test_loader, args.cuda)
+        eval_tag = "_eval" if args.evaluate else ""
+        os.makedirs(experiment_dir, exist_ok=True)
+        test_results_log = os.path.join(
+            experiment_dir,
+            args.experiment_name
+            + f"_loss={test_loss:.3f}"
+            + eval_tag
+            + "_accuracy.txt",
+        )
+        print(f"Test Accuracy: {test_accuracy:.2f}%")
+        print(f"Test loss: {test_loss:.3f}")
+        with open(test_results_log, "w") as f:
+            f.write(str(test_accuracy))
+            f.close()
     wandb.finish()
-
 
 
 if __name__ == "__main__":
