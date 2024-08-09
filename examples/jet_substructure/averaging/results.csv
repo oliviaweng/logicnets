@@ -20,6 +20,7 @@ averaging_small_ensemble_size64,74.34,0.715,64,small
 averaging_large_ensemble_size2,74.17,0.718,2,large
 large_qavg_ensemble_size2,74.17,0.718,2,large_qavg
 medium_qavg_ensemble_size6,74.1,0.725,6,medium_qavg
+large_same_output_scale_post_trans_ensemble_size2,73.99,0.723,2,large_same_output_scale_post_trans
 small_no_post_trans_ensemble_size32,73.94,0.73,32,small_no_post
 averaging_small_ensemble_size32,73.92,0.728,32,small
 medium_no_post_trans_ensemble_size4,73.91,0.725,4,medium_no_post
@@ -29,14 +30,19 @@ large_no_post_trans_ensemble_size2,73.79,0.726,2,large_no_post
 averaging_small_ensemble_size16,73.54,0.744,16,small
 small_no_post_trans_ensemble_size16,73.44,0.743,16,small_no_post
 averaging_medium_ensemble_size2,73.29,0.748,2,medium
+medium_same_output_scale_post_trans_ensemble_size2,73.23,0.751,2,medium_same_output_scale_post_trans
 medium_qavg_ensemble_size2,73.12,0.755,2,medium_qavg
+small_same_output_scale_post_trans_ensemble_size32_seed1,73.05,0.803,32,small_same_output_scale_post_trans
 medium_no_post_trans_ensemble_size2,72.97,0.755,2,medium_no_post
 small_no_post_trans_ensemble_size8,72.89,0.761,8,small_no_post
 averaging_small_ensemble_size8,72.76,0.764,8,small
 small_same_output_scale_ensemble_size16,72.5,0.843,16,small_same_output_scale
 small_same_output_scale_post_trans_ensemble_size16_seed1,72.15,0.832,16,small_same_output_scale_post_trans
+small_same_output_scale_post_trans_ensemble_size8_seed1,72.12,0.844,8,small_same_output_scale_post_trans
 small_no_post_trans_ensemble_size4,72.09,0.79,4,small_no_post
 averaging_small_ensemble_size4,72.05,0.793,4,small
+small_same_output_scale_post_trans_ensemble_size16_seed6,71.96,0.851,16,small_same_output_scale_post_trans
+small_same_output_scale_post_trans_ensemble_size8_seed6,71.95,0.83,8,small_same_output_scale_post_trans
 small_qavg_ensemble_size6,71.88,0.824,6,small_qavg
 small_same_output_scale_ensemble_size8,71.68,0.869,8,small_same_output_scale
 small_same_output_scale_post_trans_ensemble_size4_seed1,71.61,0.834,4,small_same_output_scale_post_trans
