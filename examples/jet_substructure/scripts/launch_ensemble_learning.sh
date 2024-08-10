@@ -58,10 +58,10 @@
 
 # tmux new-session -d -s jscs_bag_ind "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/small_independent_configs ./bagging"
 # tmux new-session -d -s jscm_bag_ind "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/medium_independent_configs ./bagging"
-# tmux new-session -d -s jscl_bag_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/bagging/large_independent_configs ./bagging"
+# tmux new-session -d -s jscl_bag_ind "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/large_independent_configs ./bagging"
 
 
 # Adaboost
-# tmux new-session -d -s jscs_ada "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/small_configs ./adaboost"
-# tmux new-session -d -s jscm_ada "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/medium_configs ./adaboost"
-# tmux new-session -d -s jscl_ada "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/adaboost/large_configs ./adaboost"
+tmux new-session -d -s jscs_ada_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/small_independent_configs ./adaboost"
+tmux new-session -d -s jscm_ada_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/medium_independent_configs ./adaboost"
+tmux new-session -d -s jscl_ada_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/large_independent_configs ./adaboost"
