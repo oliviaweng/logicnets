@@ -12,6 +12,7 @@ medium_no_post_trans_ensemble_size16,74.83,0.697,16,medium_no_post
 averaging_medium_ensemble_size16,74.82,0.698,16,medium
 averaging_large_ensemble_size4,74.67,0.703,4,large
 averaging_small_ensemble_size128,74.58,0.707,128,small
+large_same_output_scale_post_trans_ensemble_size4,74.58,0.71,4,large_same_output_scale_post_trans
 large_qavg_ensemble_size4,74.54,0.704,4,large_qavg
 medium_no_post_trans_ensemble_size8,74.53,0.707,8,medium_no_post
 large_no_post_trans_ensemble_size4,74.48,0.706,4,large_no_post
@@ -23,9 +24,10 @@ medium_qavg_ensemble_size6,74.1,0.725,6,medium_qavg
 large_same_output_scale_post_trans_ensemble_size2,73.99,0.723,2,large_same_output_scale_post_trans
 small_no_post_trans_ensemble_size32,73.94,0.73,32,small_no_post
 averaging_small_ensemble_size32,73.92,0.728,32,small
-medium_no_post_trans_ensemble_size4,73.91,0.725,4,medium_no_post
 averaging_medium_ensemble_size4,73.91,0.728,4,medium
+medium_no_post_trans_ensemble_size4,73.91,0.725,4,medium_no_post
 medium_qavg_ensemble_size4,73.82,0.733,4,medium_qavg
+medium_same_output_scale_post_trans_ensemble_size4,73.82,0.736,4,medium_same_output_scale_post_trans
 large_no_post_trans_ensemble_size2,73.79,0.726,2,large_no_post
 averaging_small_ensemble_size16,73.54,0.744,16,small
 small_no_post_trans_ensemble_size16,73.44,0.743,16,small_no_post

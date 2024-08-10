@@ -82,6 +82,8 @@ def main(args):
             )
         elif config["ensemble_method"] == "bagging":
             print("Bagging ensemble method")
+            if "independent" not in config:
+                config["independent"] = False # Default
             model = BaggingJetNeqModel(
                 config,
                 config["ensemble_size"],
@@ -90,6 +92,8 @@ def main(args):
             )
         elif config["ensemble_method"] == "adaboost":
             print("AdaBoost ensemble method")
+            if "independent" not in config:
+                config["independent"] = False # Default
             model = AdaBoostJetNeqModel(
                 config,
                 config["ensemble_size"],

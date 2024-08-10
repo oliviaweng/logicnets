@@ -201,6 +201,12 @@ def train_bagging(model, datasets, config, cuda=False, log_dir="./jsc"):
     num_train_samples = len(datasets["train"])
     for i in range(model.num_models):
         model.single_model_mode = True
+        if config["independent"] and i > 0: 
+            # Start w/fresh model each time
+            print("Independent training mode")
+            model.model = JetSubstructureNeqModel(config)
+            if cuda:
+                model.cuda()
         # Create bagging sampler
         subset_indices = np.random.choice(num_train_samples, size=num_train_samples)
         sampler = torch.utils.data.sampler.SubsetRandomSampler(subset_indices)
@@ -270,6 +276,12 @@ def train_adaboost(model, datasets, config, cuda=False, log_dir="./jsc"):
     )
     for i in range(model.num_models):
         model.single_model_mode = True
+        if config["independent"] and i > 0: 
+            # Start w/fresh model each time
+            print("Independent training mode")
+            model.model = JetSubstructureNeqModel(config)
+            if cuda:
+                model.cuda()
         # Draw training samples based on sample weights
         sampler = torch.utils.data.sampler.WeightedRandomSampler(
             model.weights,

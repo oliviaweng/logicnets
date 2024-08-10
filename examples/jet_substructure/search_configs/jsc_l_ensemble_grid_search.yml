@@ -1,5 +1,6 @@
 # Fixed params
-ensemble_method: averaging
+ensemble_method: adaboost
+independent: true
 hidden_layers:
 - 32
 - 64
@@ -20,13 +21,13 @@ seed: 16
 checkpoint: null
 quantize_avg: false
 post_transform_output: true
-same_output_scale: true
+same_output_scale: false
 
 # Params to grid search
 grid_search_params:
   ensemble_size:
-  - 2
-  - 4
-  - 8
-  - 16
+  # - 2
+  # - 4
+  # - 8
+  # - 16
   - 32
