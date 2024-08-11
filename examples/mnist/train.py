@@ -222,7 +222,6 @@ def main(args):
     if args.cuda:
         torch.cuda.manual_seed_all(config["seed"])
         torch.backends.cudnn.deterministic = True
-        # torch.cuda.set_device(args.device)
     config["gpu"] = args.cuda
 
     # Instantiate model
