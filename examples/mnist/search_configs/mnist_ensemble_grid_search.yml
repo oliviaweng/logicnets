@@ -1,5 +1,5 @@
 # Fixed params
-ensemble_method: averaging
+ensemble_method: bagging
 hidden_layers: 
 - 256
 - 100
@@ -18,13 +18,13 @@ batch_size: 128
 epochs: 500
 learning_rate: 0.004
 seed: 984237
-same_output_scale: true
+same_output_scale: false
 
 # Params to grid search
 grid_search_params:
   ensemble_size:
-  - 2
-  - 4
-  - 8
-  - 16
+  # - 2
+  # - 4
+  # - 8
+  # - 16
   - 32

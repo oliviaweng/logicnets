@@ -28,183 +28,14 @@ import wandb
 import random
 
 import torch
-import torch.nn as nn
-import torch.optim as optim
 from torch.utils.data import DataLoader
-
 from torchvision import datasets, transforms
+
 from models import MnistNeqModel
-from ensemble import AveragingMnistNeqModel
+from training_methods import train, test, train_bagging
+from ensemble import AveragingMnistNeqModel, BaggingMnistNeqModel, AdaBoostMnistNeqModel
 
 ENSEMBLING_METHODS = ["adaboost", "averaging", "bagging"]
-
-
-def train(model, config, cuda=False, log_dir="./mnist"):
-    # Create data loaders for training and inference:
-    train_loader = DataLoader(
-        datasets.MNIST(
-            "mnist_data",
-            download=False,
-            train=True,
-            transform=transforms.Compose(
-                [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
-            ),
-        ),
-        batch_size=config["batch_size"],
-        shuffle=True,
-    )
-    val_loader = DataLoader(
-        datasets.MNIST(
-            "mnist_data",
-            download=False,
-            train=True,
-            transform=transforms.Compose(
-                [
-                    transforms.ToTensor(),  # first, convert image to PyTorch tensor
-                    transforms.Normalize((0.1307,), (0.3081,)),  # normalize inputs
-                ]
-            ),
-        ),
-        batch_size=config["batch_size"],
-        shuffle=False,
-    )
-    test_loader = DataLoader(
-        datasets.MNIST(
-            "mnist_data",
-            download=False,
-            train=False,
-            transform=transforms.Compose(
-                [
-                    transforms.ToTensor(),  # first, convert image to PyTorch tensor
-                    transforms.Normalize((0.1307,), (0.3081,)),  # normalize inputs
-                ]
-            ),
-        ),
-        batch_size=config["batch_size"],
-        shuffle=False,
-    )
-
-    # Configure optimizer
-    weight_decay = config["weight_decay"]
-    decay_exclusions = [
-        "bn",
-        "bias",
-        "learned_value",
-    ]  # Make a list of parameters name fragments which will ignore weight decay TODO: make this list part of the train_cfg
-    decay_params = []
-    no_decay_params = []
-    for pname, params in model.named_parameters():
-        if params.requires_grad:
-            if reduce(
-                lambda a, b: a or b, map(lambda x: x in pname, decay_exclusions)
-            ):  # check if the current label should be excluded from weight decay
-                # print("Disabling weight decay for %s" % (pname))
-                no_decay_params.append(params)
-            else:
-                # print("Enabling weight decay for %s" % (pname))
-                decay_params.append(params)
-        # else:
-        # print("Ignoring %s" % (pname))
-    params = [
-        {"params": decay_params, "weight_decay": weight_decay},
-        {"params": no_decay_params, "weight_decay": 0.0},
-    ]
-
-    optimizer = optim.AdamW(
-        params,
-        lr=config["learning_rate"],
-        betas=(0.5, 0.999),
-        weight_decay=weight_decay,
-    )
-
-    # Configure scheduler
-    steps = len(train_loader)
-    scheduler = optim.lr_scheduler.CosineAnnealingWarmRestarts(
-        optimizer, T_0=steps * 100, T_mult=1
-    )
-
-    # Configure criterion
-    criterion = nn.CrossEntropyLoss()
-
-    # Push the model to the GPU, if necessary
-    if cuda:
-        model.cuda()
-    # Main training loop
-    maxAcc = 0.0
-    num_epochs = config["epochs"]
-    for epoch in range(0, num_epochs):
-        # Train for this epoch
-        model.train()
-        accLoss = 0.0
-        correct = 0
-        for batch_idx, (data, target) in enumerate(train_loader):
-            if cuda:
-                data, target = data.cuda(), target.cuda()
-            optimizer.zero_grad()
-            data = data.reshape(-1, 784)
-            target = torch.nn.functional.one_hot(target, num_classes=10)
-            output = model(data)
-            loss = criterion(output, torch.max(target, 1)[1])
-            pred = output.detach().max(1, keepdim=True)[1]
-            target_label = torch.max(target.detach(), 1, keepdim=True)[1]
-            curCorrect = pred.eq(target_label).long().sum()
-            curAcc = 100.0 * curCorrect / len(data)
-            correct += curCorrect
-            accLoss += loss.detach() * len(data)
-            loss.backward()
-            optimizer.step()
-            scheduler.step()
-
-        accLoss /= len(train_loader.dataset)
-        accuracy = 100.0 * correct / len(train_loader.dataset)
-        val_accuracy, val_loss = test(model, val_loader, cuda)
-        test_accuracy, test_loss = test(model, test_loader, cuda)
-        modelSave = {
-            "model_dict": model.state_dict(),
-            "optim_dict": optimizer.state_dict(),
-            "val_accuracy": val_accuracy,
-            "test_accuracy": test_accuracy,
-            "epoch": epoch,
-        }
-        torch.save(modelSave, os.path.join(log_dir, "checkpoint.pth"))
-        if maxAcc < test_accuracy:
-            torch.save(modelSave, os.path.join(log_dir, "best_accuracy.pth"))
-            maxAcc = test_accuracy
-
-        wandb.log(
-            {
-                "Train Acc (%)": accuracy.detach().cpu().numpy(),
-                "Train Loss(%)": accLoss.detach().cpu().numpy(),
-                "Test Acc (%)": test_accuracy,
-                "Valid Acc(%)": val_accuracy,
-                "Test Loss": test_loss,
-                "Val Loss": val_loss,
-            }
-        )
-
-
-def test(model, dataset_loader, cuda):
-    model.eval()
-    accLoss = 0.0
-    correct = 0
-    # Configure criterion
-    criterion = nn.CrossEntropyLoss()
-    for _, (data, target) in enumerate(dataset_loader):
-        if cuda:
-            data, target = data.cuda(), target.cuda()
-        data = data.reshape(-1, 784)
-        target = torch.nn.functional.one_hot(target, num_classes=10)
-        output = model(data)
-        loss = criterion(output, torch.max(target, 1)[1])
-        pred = output.detach().max(1, keepdim=True)[1]
-        target_label = torch.max(target.detach(), 1, keepdim=True)[1]
-        curCorrect = pred.eq(target_label).long().sum()
-        curAcc = 100.0 * curCorrect / len(data)
-        accLoss += loss.detach() * len(data)
-        correct += curCorrect
-    accuracy = 100 * float(correct) / len(dataset_loader.dataset)
-    accLoss /= len(dataset_loader.dataset)
-    return accuracy, accLoss
 
 
 def main(args):
@@ -223,6 +54,51 @@ def main(args):
         torch.cuda.manual_seed_all(config["seed"])
         torch.backends.cudnn.deterministic = True
     config["gpu"] = args.cuda
+
+    # Create data loaders for training and inference:
+    dataloaders = {}
+    dataloaders["train"] = DataLoader(
+        datasets.MNIST(
+            "mnist_data",
+            download=False,
+            train=True,
+            transform=transforms.Compose(
+                [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+            ),
+        ),
+        batch_size=config["batch_size"],
+        shuffle=True,
+    )
+    dataloaders["valid"] = DataLoader(
+        datasets.MNIST(
+            "mnist_data",
+            download=False,
+            train=True,
+            transform=transforms.Compose(
+                [
+                    transforms.ToTensor(),  # first, convert image to PyTorch tensor
+                    transforms.Normalize((0.1307,), (0.3081,)),  # normalize inputs
+                ]
+            ),
+        ),
+        batch_size=config["batch_size"],
+        shuffle=False,
+    )
+    dataloaders["test"] = DataLoader(
+        datasets.MNIST(
+            "mnist_data",
+            download=False,
+            train=False,
+            transform=transforms.Compose(
+                [
+                    transforms.ToTensor(),  # first, convert image to PyTorch tensor
+                    transforms.Normalize((0.1307,), (0.3081,)),  # normalize inputs
+                ]
+            ),
+        ),
+        batch_size=config["batch_size"],
+        shuffle=False,
+    )
 
     # Instantiate model
     config["input_length"] = 784
@@ -243,20 +119,24 @@ def main(args):
             model = AveragingMnistNeqModel(
                 config, config["ensemble_size"], quantize_avg=quantize_avg
             )
-        # elif config["ensemble_method"] == "bagging":
-        #     print("Bagging ensemble method")
-        #     model = BaggingJetNeqModel(
-        #         config,
-        #         config["ensemble_size"],
-        #         quantize_avg=quantize_avg,
-        #         single_model_mode=args.train,
-        #     )
+        elif config["ensemble_method"] == "bagging":
+            print("Bagging ensemble method")
+            if "independent" not in config:
+                config["independent"] = False # Default
+            model = BaggingMnistNeqModel(
+                config,
+                config["ensemble_size"],
+                quantize_avg=quantize_avg,
+                single_model_mode=args.train,
+            )
         # elif config["ensemble_method"] == "adaboost":
         #     print("AdaBoost ensemble method")
-        #     model = AdaBoostJetNeqModel(
+            # if "independent" not in config:
+            #         config["independent"] = False # Default
+        #     model = AdaBoostMnistNeqModel(
         #         config,
         #         config["ensemble_size"],
-        #         len(dataset["train"]),
+        #         len(dataloaders["train"].dataset),
         #         quantize_avg=quantize_avg,
         #         single_model_mode=args.train,
         #     )
@@ -277,7 +157,6 @@ def main(args):
         hparams_log = os.path.join(experiment_dir, "hparams.yml")
         with open(hparams_log, "w") as f:
             yaml.dump(config, f)
-
         # start a new wandb run to track this script
         wandb.init(
             # set the wandb project where this run will be logged
@@ -309,7 +188,10 @@ def main(args):
         wandb.define_metric("Test Loss", summary="min")
         wandb.define_metric("Val Loss", summary="min")
         wandb.watch(model, log_freq=10)
-        train(model, config, cuda=args.cuda, log_dir=experiment_dir)
+        if config["ensemble_method"] == "bagging":
+            train_bagging(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
+        else:
+            train(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
         
     # Evaluate model
     evaluate_model = False
@@ -349,22 +231,7 @@ def main(args):
 
     if evaluate_model:
         print("Evaluating model")
-        test_loader = DataLoader(
-            datasets.MNIST(
-                "mnist_data",
-                download=False,
-                train=False,
-                transform=transforms.Compose(
-                    [
-                        transforms.ToTensor(),  # first, convert image to PyTorch tensor
-                        transforms.Normalize((0.1307,), (0.3081,)),  # normalize inputs
-                    ]
-                ),
-            ),
-            batch_size=config["batch_size"],
-            shuffle=False,
-        )
-        test_accuracy, test_loss = test(model, test_loader, args.cuda)
+        test_accuracy, test_loss = test(model, dataloaders["test"], args.cuda)
         eval_tag = "_eval" if args.evaluate else ""
         os.makedirs(experiment_dir, exist_ok=True)
         test_results_log = os.path.join(
