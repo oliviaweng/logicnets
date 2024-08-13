@@ -229,3 +229,102 @@ def evaluate_ensemble(model, dataloaders, cuda=False, log_dir="./jsc"):
         )
     model.single_model_mode = True
     return test_loss, test_accuracy
+
+
+def train_adaboost(model, dataloaders, config, cuda=False, log_dir="./mnist"):
+    """
+    Train an ensemble of models using AdaBoost, where each model is trained
+    sequentially with the training data weighted by the performance of the
+    previous model. The weights are updated based on the performance of the
+    current model.
+    """
+    test_loader = dataloaders["test"]
+    for i in range(model.num_models):
+        model.single_model_mode = True
+        if config["independent"] and i > 0: 
+            # Start w/fresh model each time
+            print("Independent training mode")
+            model.model = MnistNeqModel(config)
+            if cuda:
+                model.cuda()
+        # Draw training samples based on sample weights
+        sampler = torch.utils.data.sampler.WeightedRandomSampler(
+            model.weights,
+            model.num_train_samples,
+            replacement=True,
+        )
+        # Train model
+        train(model, dataloaders, config, cuda=cuda, log_dir=log_dir, sampler=sampler)
+        # Evaluate best single model on validation data
+        best_checkpoint = torch.load(os.path.join(log_dir, "best_accuracy.pth"))
+        model.load_state_dict(best_checkpoint["model_dict"])
+        print("Evaluate best single model performance")
+        test_accuracy, test_loss = test(model, test_loader, cuda=cuda)
+        # Log single model performance
+        os.makedirs(log_dir, exist_ok=True)
+        ensemble_perf_log = os.path.join(log_dir, f"ensemble_perf.txt")
+        # Compute model error epsilon
+        model_error, incorrect_train_idx = compute_adaboost_model_error(
+            model, dataloaders, config, cuda,
+        )
+        with open(ensemble_perf_log, "a") as f:
+            f.write(
+                f"Single model {i + 1} test loss: {test_loss}\tModel error: {model_error}\tAccuracy = {test_accuracy}\n"
+            )
+        if model_error >= 1 - (1 / model.num_classes):
+            model.num_models = len(model.ensemble)
+            print(
+                f"Exiting AdaBoost training early bc model error is worse than random guessing. model_error = {model_error}"
+            )
+            break
+        alpha = model.update_alphas(model_error, cuda=cuda)
+        model.update_sample_weights(alpha, incorrect_train_idx)
+        # Save model to ensemble
+        snapshot = MnistNeqModel(config)
+        if cuda:
+            snapshot.cuda()
+        snapshot.load_state_dict(model.model.state_dict())
+        model.ensemble.append(snapshot)
+        # Evaluate ensemble on validation data and save ensemble checkpoint
+        ensemble_test_loss, ensemble_test_acc = evaluate_ensemble(
+            model, dataloaders, cuda=cuda, log_dir=log_dir,
+        )
+        ensemble_ckpt = {
+            "model_dict": model.state_dict(),
+            "test_loss": ensemble_test_loss,
+            "test_acc": ensemble_test_acc,
+            "alphas": model.alphas,
+            "weights": model.weights,
+        }
+        torch.save(ensemble_ckpt, os.path.join(log_dir, "last_ensemble_ckpt.pth"))
+        print(f"Saved AdaBoost model # {len(model.ensemble)}")
+
+
+def compute_adaboost_model_error(model, dataloaders, config, cuda=False):
+    """ "
+    Evaluate the model on the training data and compute the weighted error
+    epsilon by first getting the indices of the incorrectly classified samples
+    and then computing a weighted average using the model's weights.
+    """
+    model.eval()
+    train_loader = DataLoader(
+        dataloaders["train"].dataset,
+        batch_size=config["batch_size"],
+        shuffle=False,
+    )
+    with torch.no_grad():
+        model.eval()
+        incorrect_train_indices = []
+        for batch_idx, (data, target) in enumerate(train_loader):
+            if cuda:
+                data, target = data.cuda(), target.cuda()
+            data = data.reshape(-1, 784)
+            target = torch.nn.functional.one_hot(target, num_classes=10)
+            output = model(data)
+            pred = output.detach().max(1, keepdim=True)[1]
+            target_label = torch.max(target.detach(), 1, keepdim=True)[1]
+            curr_incorrect_idx = pred.ne(target_label).long()
+            incorrect_train_indices += curr_incorrect_idx
+    incorrect_train_indices = torch.Tensor(incorrect_train_indices)
+    epsilon = model.weights @ incorrect_train_indices / torch.sum(model.weights)
+    return epsilon, incorrect_train_indices

@@ -32,7 +32,7 @@ from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
 from models import MnistNeqModel
-from training_methods import train, test, train_bagging
+from training_methods import train, test, train_bagging, train_adaboost
 from ensemble import AveragingMnistNeqModel, BaggingMnistNeqModel, AdaBoostMnistNeqModel
 
 ENSEMBLING_METHODS = ["adaboost", "averaging", "bagging"]
@@ -129,17 +129,18 @@ def main(args):
                 quantize_avg=quantize_avg,
                 single_model_mode=args.train,
             )
-        # elif config["ensemble_method"] == "adaboost":
-        #     print("AdaBoost ensemble method")
-            # if "independent" not in config:
-            #         config["independent"] = False # Default
-        #     model = AdaBoostMnistNeqModel(
-        #         config,
-        #         config["ensemble_size"],
-        #         len(dataloaders["train"].dataset),
-        #         quantize_avg=quantize_avg,
-        #         single_model_mode=args.train,
-        #     )
+        elif config["ensemble_method"] == "adaboost":
+            print("AdaBoost ensemble method")
+            if "independent" not in config:
+                    config["independent"] = False # Default
+            model = AdaBoostMnistNeqModel(
+                config,
+                config["ensemble_size"],
+                len(dataloaders["train"].dataset),
+                num_classes=config["output_length"],
+                quantize_avg=quantize_avg,
+                single_model_mode=args.train,
+            )
         else:
             raise ValueError(f"Unknown ensemble method: {config['ensemble_method']}")
     else:  # Single model learning
@@ -190,6 +191,8 @@ def main(args):
         wandb.watch(model, log_freq=10)
         if config["ensemble_method"] == "bagging":
             train_bagging(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
+        elif config["ensemble_method"] == "adaboost":
+            train_adaboost(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
         else:
             train(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
         
@@ -230,6 +233,8 @@ def main(args):
         model.load_state_dict(best_checkpoint["model_dict"])
 
     if evaluate_model:
+        if args.cuda:
+            model.cuda()
         print("Evaluating model")
         test_accuracy, test_loss = test(model, dataloaders["test"], args.cuda)
         eval_tag = "_eval" if args.evaluate else ""
