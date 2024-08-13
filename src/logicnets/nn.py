@@ -115,9 +115,9 @@ class SparseLinearNeq(nn.Module):
         self.input_quant = input_quant
         self.fc = SparseLinear(in_features, out_features, new_in_features)
         self.output_quant = output_quant
-        self.mask = mask                                # mask for the polynomial degrees
-        self.imask = imask                              # mask for input fan-in
-        self.new_in_features = new_in_features          # number of input features after poly expansion
+        self.mask = Parameter(mask, requires_grad=False)   # mask for the polynomial degrees
+        self.imask = Parameter(imask, requires_grad=False) # mask for input fan-in
+        self.new_in_features = new_in_features             # number of input features after poly expansion
         self.fan_in = fan_in
         self.is_lut_inference = False
         self.neuron_truth_tables = None
