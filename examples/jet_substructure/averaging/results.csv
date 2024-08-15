@@ -13,8 +13,8 @@ medium_no_post_trans_ensemble_size16,74.83,0.697,16,medium_no_post
 averaging_medium_ensemble_size16,74.82,0.698,16,medium
 large_same_output_scale_post_trans_ensemble_size8,74.76,0.707,8,large_same_output_scale_post_trans
 averaging_large_ensemble_size4,74.67,0.703,4,large
-large_same_output_scale_post_trans_ensemble_size4,74.58,0.71,4,large_same_output_scale_post_trans
 averaging_small_ensemble_size128,74.58,0.707,128,small
+large_same_output_scale_post_trans_ensemble_size4,74.58,0.71,4,large_same_output_scale_post_trans
 large_qavg_ensemble_size4,74.54,0.704,4,large_qavg
 medium_no_post_trans_ensemble_size8,74.53,0.707,8,medium_no_post
 large_no_post_trans_ensemble_size4,74.48,0.706,4,large_no_post
@@ -34,7 +34,9 @@ medium_same_output_scale_post_trans_ensemble_size4,73.82,0.736,4,medium_same_out
 medium_qavg_ensemble_size4,73.82,0.733,4,medium_qavg
 large_no_post_trans_ensemble_size2,73.79,0.726,2,large_no_post
 averaging_small_ensemble_size16,73.54,0.744,16,small
+small_same_output_scale_post_trans_ensemble_size128_seed1,73.54,0.781,128,small_same_output_scale_post_trans
 small_no_post_trans_ensemble_size16,73.44,0.743,16,small_no_post
+large_same_output_scale_post_trans_ensemble_size32,73.39,0.734,32,large_same_output_scale_post_trans
 averaging_medium_ensemble_size2,73.29,0.748,2,medium
 medium_same_output_scale_post_trans_ensemble_size2,73.23,0.751,2,medium_same_output_scale_post_trans
 medium_qavg_ensemble_size2,73.12,0.755,2,medium_qavg
@@ -52,6 +54,7 @@ averaging_small_ensemble_size4,72.05,0.793,4,small
 small_same_output_scale_post_trans_ensemble_size16_seed6,71.96,0.851,16,small_same_output_scale_post_trans
 small_same_output_scale_post_trans_ensemble_size8_seed6,71.95,0.83,8,small_same_output_scale_post_trans
 small_qavg_ensemble_size6,71.88,0.824,6,small_qavg
+medium_same_output_scale_post_trans_ensemble_size32,71.87,0.926,32,medium_same_output_scale_post_trans
 small_same_output_scale_ensemble_size8,71.68,0.869,8,small_same_output_scale
 small_same_output_scale_post_trans_ensemble_size4_seed1,71.61,0.834,4,small_same_output_scale_post_trans
 small_same_output_scale_post_trans_ensemble_size2_seed6,71.29,0.851,2,small_same_output_scale_post_trans
