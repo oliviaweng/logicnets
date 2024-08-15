@@ -85,6 +85,10 @@ RUN conda install -y wget h5py pyyaml=5 numpy pandas scikit-learn tensorboard pr
 RUN conda install -y cupy pot -c conda-forge && \
     conda clean -ya
 
+# Install prerequisites for MNIST example
+RUN conda install -y wandb && \
+    conda clean -ya
+
 # Install pip-based prerequisites
 ## Install LogicNets prerequisites
 #RUN pip install --no-cache-dir torch==1.5.1+cpu torchvision==0.6.1+cpu -f https://download.pytorch.org/whl/torch_stable.html
