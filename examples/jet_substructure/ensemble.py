@@ -199,8 +199,11 @@ class AdaBoostJetNeqModel(BaseEnsembleClassifier):
         self.num_classes = num_classes
         # Training sample weights
         self.weights = torch.ones(num_train_samples) / num_train_samples
-        # self.alphas = torch.tensor([])  # Accuracy measures for each model
-        self.register_buffer("alphas", torch.tensor([]))
+        if single_model_mode:
+            self.register_buffer("alphas", torch.tensor([])) # Accuracy measures for each model
+        else:
+            self.register_buffer("alphas", torch.zeros(num_models))
+            
         # AdaBoost multi-class "one-hot" encoding
         adaboost_labels = (
             torch.ones(num_classes, num_classes) * -1 / (num_classes - 1)

@@ -165,6 +165,8 @@ def main(args):
         model.load_state_dict(best_checkpoint["model_dict"])
 
     if evaluate_model:
+        if args.cuda:
+            model.cuda()
         print("Evaluating model")
         test_loader = DataLoader(
             dataset["test"], batch_size=config["batch_size"], shuffle=False

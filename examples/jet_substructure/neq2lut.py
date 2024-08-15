@@ -160,6 +160,8 @@ if __name__ == "__main__":
         quantize_avg = config["quantize_avg"]
     if "post_transform_output" not in config:
         config["post_transform_output"] = True # Default
+    if "same_output_scale" not in config:
+        config["same_output_scale"] = False # Default
 
     model = AveragingJetNeqModel(config, config["ensemble_size"])
 
