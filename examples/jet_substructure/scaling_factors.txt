@@ -1,0 +1,44 @@
+small_same_output_scale_post_trans_ensemble_size2_seed1
+    output scaling factor: 0.7855398654937744
+    output post transform weight: tensor([1.7341])
+    output post transform bias: tensor([-7.4054])
+
+averaging_small_ensemble_size2
+Model 0
+    output scaling factor: 0.9172595739364624
+    output post transform weight: tensor([1.8512])
+    output post transform bias: tensor([-36.5664])
+------
+Model 1
+    output scaling factor: 0.8226234912872314
+    output post transform weight: tensor([1.5613])
+    output post transform bias: tensor([-34.3731])
+------
+
+small_same_output_scale_post_trans_ensemble_size4_seed1
+    output scaling factor: 0.9900168180465698
+    output post transform weight: tensor([1.8220])
+    output post transform bias: tensor([-20.7113])
+------
+
+averaging_small_ensemble_size4
+Model 0
+    output scaling factor: 0.9991763830184937
+    output post transform weight: tensor([1.9055])
+    output post transform bias: tensor([-5.5704])
+------
+Model 1
+    output scaling factor: 0.9823369979858398
+    output post transform weight: tensor([1.7395])
+    output post transform bias: tensor([-5.5471])
+------
+Model 2
+    output scaling factor: 1.0671069622039795
+    output post transform weight: tensor([1.7988])
+    output post transform bias: tensor([-5.6575])
+------
+Model 3
+    output scaling factor: 0.9641386270523071
+    output post transform weight: tensor([2.0151])
+    output post transform bias: tensor([-6.0564])
+------
