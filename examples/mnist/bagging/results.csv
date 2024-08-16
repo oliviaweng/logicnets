@@ -1,1 +1,8 @@
-trial,accuracy,loss,ensemble_size,model_size
+trial,accuracy,loss,ensemble_size,tag
+bagging_ensemble_size32,96.27,0.131,7,deg1
+bagging_ensemble_size32,96.2,0.135,6,deg1
+bagging_ensemble_size32,96.07,0.142,5,deg1
+bagging_ensemble_size32,96.04,0.148,4,deg1
+bagging_ensemble_size32,95.55,0.164,3,deg1
+bagging_ensemble_size32,94.84,0.192,2,deg1
+bagging_ensemble_size32,93.57,0.247,1,deg1
