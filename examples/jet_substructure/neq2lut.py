@@ -208,16 +208,16 @@ if __name__ == "__main__":
         add_registers=args.add_registers,
         generate_bench=args.generate_bench,
     )
-    # for i, lm in enumerate(lut_model.ensemble):
-    #     module_list_to_verilog_module(
-    #         lm.module_list, 
-    #         "logicnet", 
-    #         args.log_dir, 
-    #         ensemble_member_idx=i,
-    #         add_registers=args.add_registers,
-    #         generate_bench=args.generate_bench,
-    #     )
-    #     print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
+    #for i, lm in enumerate(lut_model.ensemble):
+    #    module_list_to_verilog_module(
+    #        lm.module_list, 
+    #        "logicnet", 
+    #        args.log_dir, 
+    #        ensemble_member_idx=i,
+    #        add_registers=args.add_registers,
+    #        generate_bench=args.generate_bench,
+    #    )
+    #    print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
 
     # END - pyverilator doesn't really work well...
 
@@ -230,21 +230,22 @@ if __name__ == "__main__":
     # else:
     #     io_filename = None
 
-    # if args.simulate_pre_synthesis_verilog:
-    #     print("Running inference simulation of Verilog-based model...")
-    #     lut_model.verilog_inference(options_cfg["log_dir"], "logicnet.v", logfile=io_filename, add_registers=options_cfg["add_registers"])
-    #     verilog_accuracy, verilog_avg_roc_auc = test(lut_model, test_loader, cuda=False)
-    #     print("Verilog-Based Model accuracy: %f" % (verilog_accuracy))
-    #     print("Verilog-Based AVG ROC AUC: %f" % (verilog_avg_roc_auc))
+    if args.simulate_pre_synthesis_verilog:
+        print("Running inference simulation of Verilog-based model...")
+        lut_model.verilog_inference(args.log_dir, "logicnet.v", logfile=args.log_dir+f"io_{args.dataset_split}.txt", add_registers=args.add_registers)
+        verilog_accuracy, verilog_avg_roc_auc, _ = test(lut_model, test_loader, cuda=False)
+        print("Verilog-Based Model accuracy: %f" % (verilog_accuracy))
+        print("Verilog-Based AVG ROC AUC: %f" % (verilog_avg_roc_auc))
 
-    # print("Running out-of-context synthesis")
-    # ret = synthesize_and_get_resource_counts(options_cfg["log_dir"], "logicnet", fpga_part="xcu280-fsvh2892-2L-e", clk_period_ns=args.clock_period, post_synthesis = 1)
+    print("Running out-of-context synthesis")
+    ret = synthesize_and_get_resource_counts(args.log_dir, "logicnet", fpga_part="xc7k70tfbg676-2", clk_period_ns=args.clock_period, post_synthesis = 1)
 
-    # if args.simulate_post_synthesis_verilog:
-    #     print("Running post-synthesis inference simulation of Verilog-based model...")
-    #     proc_postsynth_file(options_cfg["log_dir"])
-    #     lut_model.verilog_inference(options_cfg["log_dir"]+"/post_synth", "logicnet_post_synth.v", io_filename, add_registers=options_cfg["add_registers"])
-    #     post_synth_accuracy, post_synth_avg_roc_auc = test(lut_model, test_loader, cuda=False)
-    #     print("Post-synthesis Verilog-Based Model accuracy: %f" % (post_synth_accuracy))
-    #     print("Post-synthesis Verilog-Based AVG ROC AUC: %f" % (post_synth_avg_roc_auc))
+    io_filename = args.log_dir + f"io_{args.dataset_split}.txt"
+    #if args.simulate_post_synthesis_verilog:
+    #    print("Running post-synthesis inference simulation of Verilog-based model...")
+    #    proc_postsynth_file(args.log_dir)
+    #    lut_model.verilog_inference(args.log_dir+"/post_synth", "logicnet_post_synth.v", io_filename, add_registers=args.add_registers)
+    #    post_synth_accuracy, post_synth_avg_roc_auc, _ = test(lut_model, test_loader, cuda=False)
+    #    print("Post-synthesis Verilog-Based Model accuracy: %f" % (post_synth_accuracy))
+    #    print("Post-synthesis Verilog-Based AVG ROC AUC: %f" % (post_synth_avg_roc_auc))
     

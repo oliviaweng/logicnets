@@ -5,6 +5,10 @@ from brevitas.core.quant import QuantType
 from brevitas.nn import QuantIdentity
 from logicnets.quant import QuantBrevitasActivation
 
+from pyverilator import PyVerilator
+from os.path import realpath
+from functools import reduce
+
 
 from models import JetSubstructureNeqModel
 
@@ -62,8 +66,61 @@ class AveragingJetNeqModel(nn.Module):
 
     # TODO: Implement verilog_forward() and verilog_inference()
     def verilog_forward(self, x):
-        outputs = [model.verilog_forward(x) for model in self.ensemble]
-        return sum(outputs)  # / self.num_models # Do division in pretransform
+        # Get integer output from the first layer
+        input_quants = [model.module_list[0].input_quant for model in self.ensemble]
+        output_quants = [model.module_list[-1].output_quant for model in self.ensemble]
+        input_bitwidths = [int(model.module_list[0].input_quant.get_scale_factor_bits()[1]) for model in self.ensemble]
+        output_bitwidths = [int(model.module_list[-1].output_quant.get_scale_factor_bits()[1]) for model in self.ensemble]
+        total_input_bits = [model.module_list[0].in_features*input_bitwidth for input_bitwidth,model in zip(input_bitwidths,self.ensemble)]
+        total_output_bits = [model.module_list[-1].out_features*output_bitwidth for output_bitwidth,model in zip(output_bitwidths,self.ensemble)]
+        # assumes all models have same # of layers
+        num_layers = len(self.ensemble[0].module_list)
+        for input_quant in input_quants:
+            input_quant.bin_output()
+        self.ensemble[0].module_list[0].apply_input_quant = False
+        y = torch.zeros(x.shape[0], self.ensemble[0].module_list[-1].out_features)
+        xs = [input_quant(x) for input_quant in input_quants]
+        # for x in xs:
+        #     print("asdf")
+        #     print(x.shape)
+        # print(x, x.shape)
+        self.dut.io.rst = 0
+        self.dut.io.clk = 0
+        for i in range(x.shape[0]):
+            x_is = [x[i,:] for x in xs]
+            # y_is = [model.pytorch_forward(x[i:i+1,:])[0] for x,model in zip(xs, self.ensemble)]
+            xv_is = [list(map(lambda z: input_quant.get_bin_str(z), x_i)) for x_i,input_quant in zip(x_is,input_quants)]
+            # ys_i = list(map(lambda z: output_quants[0].get_bin_str(z), y_i))
+            # print("xv_i:", xv_i, "ys_i:",ys_i)
+            #print("xv_is:", xv_is)
+            xvc_i = reduce(lambda a,b: b+a, [reduce(lambda a,b: a+b, xv_i[::-1]) for xv_i in xv_is])
+            #print("xvc_i:", xvc_i)
+            #print(len(xvc_i))
+            # ysc_i = reduce(lambda a,b: a+b, ys_i[::-1])
+            self.dut["M0"] = int(xvc_i, 2)
+            for j in range(len(self.ensemble[0].module_list) +  2):
+                #print(self.dut.io.M5)
+                res = self.dut[f"out"]
+                result = f"{res:0{int(total_output_bits[0])}b}"
+                self.dut.io.clk = 1
+                self.dut.io.clk = 0
+                #print("res, result: ", res, result)
+            # expected = f"{int(ysc_i,2):0{int(total_output_bits)}b}"
+            result = f"{res:0{int(total_output_bits[0])}b}"
+            # print("expected:", expected, "result:", result)
+            # assert(expected == result)
+            res_split = [result[i:i+output_bitwidths[0]] for i in range(0, len(result), output_bitwidths[0])][::-1]
+            yv_i = torch.Tensor(list(map(lambda z: int(z, 2), res_split)))
+            y[i,:] = yv_i
+            # Dump the I/O pairs
+            if self.logfile is not None:
+                with open(self.logfile, "a") as f:
+                    f.write(f"{int(xvc_i,2):0{int(sum(total_input_bits))}b}, {result}\n")
+        return y
+    
+    # def verilog_forward(self, x):
+    #     outputs = [model.verilog_forward(x) for model in self.ensemble]
+    #     return sum(outputs)  # / self.num_models # Do division in pretransform
 
     def verilog_inference(
         self,
@@ -72,7 +129,13 @@ class AveragingJetNeqModel(nn.Module):
         logfile=None,
         add_registers: bool = False,
     ):
-        pass
+        self.verilog_dir = realpath(verilog_dir)
+        self.top_module_filename = top_module_filename
+        self.dut = PyVerilator.build(f"{self.verilog_dir}/{self.top_module_filename}", verilog_path=[self.verilog_dir], build_dir=f"{self.verilog_dir}/verilator")
+        self.is_verilog_inference = True
+        self.logfile = logfile
+        # if add_registers:
+        #     self.latency = len(self.num_neurons)
 
     def pytorch_inference(self):
         self.is_verilog_inference = False

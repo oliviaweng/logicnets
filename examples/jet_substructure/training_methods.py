@@ -15,6 +15,9 @@ from torch.utils.tensorboard import SummaryWriter
 
 from models import JetSubstructureNeqModel
 
+# added tqdm because verilog inference can be slow
+from tqdm import tqdm
+
 
 def test(model, dataset_loader, cuda):
     # Configure criterion
@@ -25,7 +28,7 @@ def test(model, dataset_loader, cuda):
         golden_ref = None
         correct = 0
         accLoss = 0.0
-        for batch_idx, (data, target) in enumerate(dataset_loader):
+        for batch_idx, (data, target) in enumerate(tqdm(dataset_loader)):
             if cuda:
                 data, target = data.cuda(), target.cuda()
             output = model(data)
