@@ -1,4 +1,8 @@
 trial,accuracy,loss,ensemble_size,tag
+bagging_ensemble_size32,96.47,0.126,11,deg1
+bagging_ensemble_size32,96.35,0.13,9,deg1
+bagging_ensemble_size32,96.35,0.128,10,deg1
+bagging_ensemble_size32,96.33,0.13,8,deg1
 bagging_ensemble_size32,96.27,0.131,7,deg1
 bagging_ensemble_size32,96.2,0.135,6,deg1
 bagging_ensemble_size32,96.07,0.142,5,deg1
