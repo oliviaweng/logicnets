@@ -61,7 +61,8 @@ def main(args):
 
     # Load model weights
     print(f"Preloading model weights from: {args.checkpoint}")
-    checkpoint = torch.load(args.checkpoint, map_location=torch.device("cpu"))
+    # checkpoint = torch.load(args.checkpoint, map_location=torch.device("cpu"))
+    checkpoint = torch.load(args.checkpoint)
     model.load_state_dict(checkpoint["model_dict"])
 
     # Test the PyTorch model
@@ -78,17 +79,18 @@ def main(args):
         pin_memory=True,
         shuffle=False,
     )
-    print("Running inference on baseline model...")
     model.eval()
-    loss, avg_emd = test(
-        model, 
-        test_loader, 
-        val_sum=val_sum, 
-        gpu=args.gpu, 
-        compute_emd=args.compute_emd
-    )
-    print(f"Baseline loss: {loss:.3f}")
-    print(f"Baseline average EMD: {avg_emd:.3f}")
+    if args.test_model:
+        print("Running inference on baseline model...")
+        loss, avg_emd = test(
+            model, 
+            test_loader, 
+            val_sum=val_sum, 
+            gpu=args.gpu, 
+            compute_emd=args.compute_emd
+        )
+        print(f"Baseline loss: {loss:.3f}")
+        print(f"Baseline average EMD: {avg_emd:.3f}")
 
     # Build LUT model
     lut_model = AutoencoderLutModel(config)
@@ -98,24 +100,29 @@ def main(args):
     print("Converting NEQs to LUTs...")
     generate_truth_tables(lut_model, verbose=True)
 
-    # Test the LUT-based model
-    print("Running inference on LUT-based model...")
+    # Test the LUT-based model 
     if args.gpu:
         lut_model.cuda()
     lut_inference(lut_model)
     lut_model.eval()
-    lut_loss, lut_avg_emd = test(
-        lut_model, 
-        test_loader, 
-        val_sum=val_sum, 
-        gpu=args.gpu, 
-        compute_emd=args.compute_emd
-    )
-    print(f"LUT model loss: {lut_loss:.3f}")
-    print(f"LUT model average EMD: {lut_avg_emd:.3f}")
+    lut_loss = -1
+    lut_avg_emd = -1
+
+    if args.test_model:
+        print("Running inference on LUT-based model...")
+        lut_loss, lut_avg_emd = test(
+            lut_model, 
+            test_loader, 
+            val_sum=val_sum, 
+            # gpu=args.gpu, 
+            compute_emd=args.compute_emd
+        )
+        print(f"LUT model loss: {lut_loss:.3f}")
+        print(f"LUT model average EMD: {lut_avg_emd:.3f}")
 
     print(f"Total execution time = {time.time() - start_time}")
 
+    print(f"Saving model to {experiment_dir}")
     checkpoint = {
         "model_dict": model.state_dict(),
         "val_loss": lut_loss,
@@ -124,7 +131,7 @@ def main(args):
     torch.save(
         checkpoint, 
         os.path.join(
-            experiment_dir, f"lut_model_loss={lut_loss:.3f}_emd={avg_emd}.pth"
+            experiment_dir, f"lut_model_loss={lut_loss:.3f}_emd={lut_avg_emd}.pth"
     ))
 
     # Generate verilog
@@ -144,7 +151,7 @@ def main(args):
         print("Running inference simulation of Verilog-based model...")
         lut_model.verilog_inference(
             verilog_dir, 
-            "logicnet.v", 
+            "logicnet_0.v", 
             add_registers=args.add_registers,
         )
         verilog_loss, verilog_avg_emd = test(
@@ -160,29 +167,31 @@ def main(args):
     print("Running out-of-context synthesis")
     _ = synthesize_and_get_resource_counts(
         verilog_dir, 
-        "logicnet", 
-        fpga_part="xcu280-fsvh2892-2L-e", 
+        "logicnet_0", 
+        # fpga_part="xcu280-fsvh2892-2L-e", # xcvu9p-flgb2104-2-i
+        fpga_part="xcvu9p-flgb2104-2-i", # 
         clk_period_ns=args.clock_period, 
         post_synthesis=1,
     )
 
-    if args.simulate_post_synthesis_verilog:
-        print("Running post-synthesis inference simulation of Verilog-based model...")
-        proc_postsynth_file(verilog_dir)
-        lut_model.verilog_inference(
-            os.path.join(verilog_dir, "post_synth"), 
-            "logicnet_post_synth.v", 
-            add_registers=args.add_registers,
-        )
-        post_synth_loss, post_synth_avg_emd = test(
-            lut_model, 
-            test_loader,
-            val_sum=val_sum, 
-            gpu=args.gpu, 
-            compute_emd=args.compute_emd,
-        )
-        print(f"Post-synthesis Verilog model loss: {post_synth_loss:.3f}")
-        print(f"Post-synthesis Verilog model average EMD: {post_synth_avg_emd:.3f}")
+    # NOTE: Post synthesis doesn't work
+    # if args.simulate_post_synthesis_verilog:
+    #     print("Running post-synthesis inference simulation of Verilog-based model...")
+    #     proc_postsynth_file(verilog_dir)
+    #     lut_model.verilog_inference(
+    #         os.path.join(verilog_dir, "post_synth"), 
+    #         "logicnet_post_synth.v", 
+    #         add_registers=args.add_registers,
+    #     )
+    #     post_synth_loss, post_synth_avg_emd = test(
+    #         lut_model, 
+    #         test_loader,
+    #         val_sum=val_sum, 
+    #         gpu=args.gpu, 
+    #         compute_emd=args.compute_emd,
+    #     )
+    #     print(f"Post-synthesis Verilog model loss: {post_synth_loss:.3f}")
+    #     print(f"Post-synthesis Verilog model average EMD: {post_synth_avg_emd:.3f}")
 
 
 if __name__ == "__main__":
@@ -196,6 +205,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=512)
     parser.add_argument("--gpu", action="store_true", default=False)
     parser.add_argument("--compute_emd", action="store_true", default=False)
+    parser.add_argument("--test_model", action="store_true", default=False)
     parser.add_argument(
         "--hparams_config", 
         type=str, 

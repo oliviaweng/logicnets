@@ -31,22 +31,7 @@ def main(args):
     yaml_dir = os.path.join(args.config_dir)
     os.makedirs(yaml_dir, exist_ok=True)
 
-    # Default hparams
-    default_hparams = {
-        "seed": None, 
-        "hidden_layer": [],
-        "neuron_fanin": [],
-        "input_bitwidth": None,
-        "input_fanin": None,
-        "output_bitwidth": None,
-        "activation_bitwidth": [],
-        "warm_restart_freq": 50,
-        "batch_size": 512,
-        "epochs": 100,
-        "lr": 0.001,
-        "wd": 0.01,
-    }
-
+    default_hparams = {}
     # Populate fixed hyperparameters
     for k in config.keys():
         if k != "grid_search_params":

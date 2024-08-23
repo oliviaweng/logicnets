@@ -1,0 +1,680 @@
+#-----------------------------------------------------------
+# Vivado v2020.1 (64-bit)
+# SW Build 2902540 on Wed May 27 19:54:35 MDT 2020
+# IP Build 2902112 on Wed May 27 22:43:36 MDT 2020
+# Start of session at: Thu Aug 15 22:36:38 2024
+# Process ID: 602
+# Current directory: /workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/vivadocompile/vivadocompile.runs/synth_1
+# Command line: vivado -log logicnet_0.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source logicnet_0.tcl
+# Log file: /workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/vivadocompile/vivadocompile.runs/synth_1/logicnet_0.vds
+# Journal file: /workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/vivadocompile/vivadocompile.runs/synth_1/vivado.jou
+#-----------------------------------------------------------
+source logicnet_0.tcl -notrace
+Command: synth_design -top logicnet_0 -part xcvu9p-flgb2104-2-i -directive PerformanceOptimized -retiming -fsm_extraction one_hot -keep_equivalent_registers -resource_sharing off -no_lc -shreg_min_size 5 -mode out_of_context
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xcvu9p'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xcvu9p'
+INFO: [Common 17-1540] The version limit for your license is '2022.07' and has expired for new software. A version limit expiration means that, although you may be able to continue to use the current version of tools or IP with this license, you will not be eligible for any updates or new releases.
+INFO: [Device 21-403] Loading part xcvu9p-flgb2104-2-i
+INFO: [Synth 8-7079] Multithreading enabled for synth_design using a maximum of 4 processes.
+INFO: [Synth 8-7078] Launching helper process for spawning children vivado processes
+INFO: [Synth 8-7075] Helper process launched with PID 608
+---------------------------------------------------------------------------------
+Starting RTL Elaboration : Time (s): cpu = 00:00:01 ; elapsed = 00:00:02 . Memory (MB): peak = 2752.293 ; gain = 186.715 ; free physical = 721 ; free virtual = 17937
+---------------------------------------------------------------------------------
+INFO: [Synth 8-6157] synthesizing module 'logicnet_0' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/logicnet_0.v:1]
+INFO: [Synth 8-6157] synthesizing module 'myreg' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/myreg.v:1]
+	Parameter DataWidth bound to: 32 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'myreg' (1#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/myreg.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N0' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N0.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N0' (2#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N0.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N1' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N1.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N1' (3#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N1.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N2' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N2.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N2' (4#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N2.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N3' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N3.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N3' (5#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N3.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N4' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N4.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N4' (6#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N4.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N5' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N5.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N5' (7#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N5.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N6' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N6.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N6' (8#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N6.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N7' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N7.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N7' (9#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N7.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N8' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N8.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N8' (10#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N8.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N9' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N9.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N9' (11#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N9.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N10' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N10.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N10' (12#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N10.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N11' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N11.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N11' (13#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N11.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N12' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N12.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N12' (14#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N12.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N13' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N13.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N13' (15#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N13.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N14' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N14.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N14' (16#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N14.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N15' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N15.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N15' (17#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N15.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N16' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N16.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N16' (18#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N16.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N17' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N17.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N17' (19#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N17.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N18' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N18.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N18' (20#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N18.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N19' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N19.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N19' (21#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N19.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N20' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N20.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N20' (22#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N20.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N21' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N21.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N21' (23#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N21.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N22' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N22.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N22' (24#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N22.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N23' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N23.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N23' (25#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N23.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N24' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N24.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N24' (26#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N24.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N25' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N25.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N25' (27#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N25.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N26' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N26.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N26' (28#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N26.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N27' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N27.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N27' (29#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N27.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N28' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N28.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N28' (30#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N28.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N29' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N29.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N29' (31#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N29.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N30' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N30.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N30' (32#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N30.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N31' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N31.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N31' (33#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N31.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N32' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N32.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N32' (34#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N32.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N33' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N33.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N33' (35#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N33.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N34' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N34.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N34' (36#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N34.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N35' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N35.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N35' (37#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N35.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N36' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N36.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N36' (38#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N36.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N37' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N37.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N37' (39#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N37.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N38' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N38.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N38' (40#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N38.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N39' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N39.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N39' (41#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N39.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N40' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N40.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N40' (42#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N40.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N41' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N41.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N41' (43#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N41.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N42' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N42.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N42' (44#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N42.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N43' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N43.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N43' (45#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N43.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N44' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N44.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N44' (46#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N44.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N45' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N45.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N45' (47#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N45.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N46' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N46.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N46' (48#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N46.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N47' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N47.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N47' (49#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N47.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N48' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N48.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N48' (50#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N48.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N49' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N49.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N49' (51#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N49.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N50' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N50.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N50' (52#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N50.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N51' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N51.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N51' (53#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N51.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N52' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N52.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N52' (54#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N52.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N53' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N53.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N53' (55#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N53.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N54' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N54.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N54' (56#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N54.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N55' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N55.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N55' (57#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N55.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N56' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N56.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N56' (58#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N56.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N57' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N57.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N57' (59#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N57.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N58' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N58.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N58' (60#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N58.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N59' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N59.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N59' (61#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N59.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N60' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N60.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N60' (62#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N60.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N61' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N61.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N61' (63#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N61.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N62' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N62.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N62' (64#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N62.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer0_N63' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N63.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0_N63' (65#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0_N63.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer0' (66#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer0.v:1]
+INFO: [Synth 8-6157] synthesizing module 'myreg__parameterized0' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/myreg.v:1]
+	Parameter DataWidth bound to: 128 - type: integer 
+INFO: [Synth 8-6155] done synthesizing module 'myreg__parameterized0' (66#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/myreg.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N0' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N0.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N0' (67#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N0.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N1' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N1.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N1' (68#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N1.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N2' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N2.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N2' (69#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N2.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N3' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N3.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N3' (70#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N3.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N4' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N4.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N4' (71#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N4.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N5' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N5.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N5' (72#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N5.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N6' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N6.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N6' (73#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N6.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N7' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N7.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N7' (74#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N7.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N8' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N8.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N8' (75#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N8.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N9' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N9.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N9' (76#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N9.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N10' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N10.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N10' (77#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N10.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N11' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N11.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N11' (78#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N11.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N12' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N12.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N12' (79#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N12.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N13' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N13.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N13' (80#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N13.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N14' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N14.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N14' (81#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N14.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N15' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N15.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N15' (82#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N15.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N16' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N16.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N16' (83#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N16.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N17' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N17.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N17' (84#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N17.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N18' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N18.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N18' (85#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N18.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N19' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N19.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N19' (86#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N19.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N20' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N20.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N20' (87#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N20.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N21' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N21.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N21' (88#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N21.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N22' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N22.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N22' (89#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N22.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N23' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N23.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N23' (90#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N23.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N24' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N24.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N24' (91#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N24.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N25' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N25.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N25' (92#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N25.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N26' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N26.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N26' (93#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N26.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N27' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N27.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N27' (94#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N27.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N28' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N28.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N28' (95#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N28.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N29' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N29.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N29' (96#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N29.v:1]
+INFO: [Synth 8-6157] synthesizing module 'ens0_layer1_N30' [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N30.v:1]
+INFO: [Common 17-14] Message 'Synth 8-6157' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N30' (97#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N30.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1_N31' (98#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1_N31.v:1]
+INFO: [Synth 8-6155] done synthesizing module 'ens0_layer1' (99#1) [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/ens0_layer1.v:1]
+INFO: [Common 17-14] Message 'Synth 8-6155' appears 100 times and further instances of the messages will be disabled. Use the Tcl command set_msg_config to change the current settings.
+	Parameter DataWidth bound to: 64 - type: integer 
+---------------------------------------------------------------------------------
+Finished RTL Elaboration : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 2821.168 ; gain = 255.590 ; free physical = 1357 ; free virtual = 18576
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 2836.012 ; gain = 270.434 ; free physical = 1364 ; free virtual = 18583
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 1 : Time (s): cpu = 00:00:02 ; elapsed = 00:00:03 . Memory (MB): peak = 2836.012 ; gain = 270.434 ; free physical = 1364 ; free virtual = 18583
+---------------------------------------------------------------------------------
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.01 . Memory (MB): peak = 2836.012 ; gain = 0.000 ; free physical = 1359 ; free virtual = 18578
+INFO: [Project 1-570] Preparing netlist for logic optimization
+
+Processing XDC Constraints
+Initializing timing engine
+Parsing XDC File [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/logicnet.xdc]
+Finished Parsing XDC File [/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/logicnet.xdc]
+Completed Processing XDC Constraints
+
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3014.605 ; gain = 0.000 ; free physical = 1174 ; free virtual = 18410
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+Constraint Validation Runtime : Time (s): cpu = 00:00:00 ; elapsed = 00:00:00.01 . Memory (MB): peak = 3014.605 ; gain = 0.000 ; free physical = 1173 ; free virtual = 18409
+---------------------------------------------------------------------------------
+Finished Constraint Validation : Time (s): cpu = 00:00:06 ; elapsed = 00:00:08 . Memory (MB): peak = 3014.605 ; gain = 449.027 ; free physical = 1217 ; free virtual = 18454
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Loading Part and Timing Information
+---------------------------------------------------------------------------------
+Loading part: xcvu9p-flgb2104-2-i
+INFO: [Synth 8-6742] Reading net delay rules and data
+---------------------------------------------------------------------------------
+Finished Loading Part and Timing Information : Time (s): cpu = 00:00:06 ; elapsed = 00:00:08 . Memory (MB): peak = 3014.605 ; gain = 449.027 ; free physical = 1217 ; free virtual = 18454
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying 'set_property' XDC Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished applying 'set_property' XDC Constraints : Time (s): cpu = 00:00:06 ; elapsed = 00:00:08 . Memory (MB): peak = 3014.605 ; gain = 449.027 ; free physical = 1217 ; free virtual = 18454
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished RTL Optimization Phase 2 : Time (s): cpu = 00:00:06 ; elapsed = 00:00:09 . Memory (MB): peak = 3014.605 ; gain = 449.027 ; free physical = 1175 ; free virtual = 18413
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start RTL Component Statistics 
+---------------------------------------------------------------------------------
+Detailed RTL Component Info : 
++---Registers : 
+	              128 Bit    Registers := 1     
+	               64 Bit    Registers := 3     
+	               32 Bit    Registers := 1     
++---Muxes : 
+	   2 Input  128 Bit        Muxes := 1     
+	   2 Input   64 Bit        Muxes := 3     
+	   2 Input   32 Bit        Muxes := 1     
+---------------------------------------------------------------------------------
+Finished RTL Component Statistics 
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Part Resource Summary
+---------------------------------------------------------------------------------
+Part Resources:
+DSPs: 6840 (col length:120)
+BRAMs: 4320 (col length: RAMB18 360 RAMB36 180)
+---------------------------------------------------------------------------------
+Finished Part Resource Summary
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Cross Boundary and Area Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Cross Boundary and Area Optimization : Time (s): cpu = 00:00:08 ; elapsed = 00:00:11 . Memory (MB): peak = 3014.605 ; gain = 449.027 ; free physical = 1137 ; free virtual = 18387
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start ROM, RAM, DSP and Shift Register Reporting
+---------------------------------------------------------------------------------
+
+ROM: Preliminary Mapping	Report
++----------------+-------------------------------------------+---------------+----------------+
+|Module Name     | RTL Object                                | Depth x Width | Implemented As | 
++----------------+-------------------------------------------+---------------+----------------+
+|ens0_layer0_N0  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N1  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N2  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N3  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N4  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N5  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N6  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N7  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N8  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N9  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N10 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N11 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N12 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N13 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N14 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N15 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N16 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N17 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N18 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N19 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N20 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N21 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N22 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N23 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N24 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N25 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N26 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N27 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N28 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N29 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N30 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N31 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N32 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N33 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N34 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N35 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N36 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N37 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N38 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N39 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N40 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N41 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N42 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N43 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N44 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N45 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N46 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N47 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N48 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N49 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N50 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N51 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N52 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N53 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N54 | M1r                                       | 64x1          | LUT            | 
+|ens0_layer0_N55 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N56 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N57 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N58 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N59 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N60 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N61 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N62 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer0_N63 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N0  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N1  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N2  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N3  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N4  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N5  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N6  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N7  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N8  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N9  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N10 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N11 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N12 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N13 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N14 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N15 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N16 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N17 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N18 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N19 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N20 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N21 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N22 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N23 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N24 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N25 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N26 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N27 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N28 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N29 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N30 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer1_N31 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N0  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N1  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N2  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N3  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N4  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N5  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N6  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N7  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N8  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N9  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N10 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N11 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N12 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N13 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N14 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N15 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N16 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N17 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N18 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N19 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N20 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N21 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N22 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N23 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N24 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N25 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N26 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N27 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N28 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N29 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N30 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer2_N31 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N0  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N1  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N2  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N3  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N4  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N5  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N6  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N7  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N8  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N9  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N10 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N11 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N12 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N13 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N14 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N15 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N16 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N17 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N18 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N19 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N20 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N21 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N22 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N23 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N24 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N25 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N26 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N27 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N28 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N29 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N30 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer3_N31 | M1r                                       | 64x2          | LUT            | 
+|ens0_layer4_N0  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer4_N1  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer4_N2  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer4_N3  | M1r                                       | 64x2          | LUT            | 
+|ens0_layer4_N4  | M1r                                       | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer0_inst/ens0_layer0_N20_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N21_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N22_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N23_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N24_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N25_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N26_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N27_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N28_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N29_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N30_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer1_inst/ens0_layer1_N31_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N0_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N1_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N2_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N3_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N4_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N5_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N6_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N7_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N8_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N9_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N10_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N11_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N12_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N13_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N14_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N15_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N16_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N17_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N18_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N19_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N20_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N21_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N22_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N23_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N24_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N25_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N26_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N27_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N28_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N29_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N30_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer2_inst/ens0_layer2_N31_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N0_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N1_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N2_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N3_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N4_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N5_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N6_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N7_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N8_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N9_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N10_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N11_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N12_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N13_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N14_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N15_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N16_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N17_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N18_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N19_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N20_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N21_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N22_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N23_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N24_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N25_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N26_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N27_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N28_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N29_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N30_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer3_inst/ens0_layer3_N31_inst/M1r | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer4_inst/ens0_layer4_N0_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer4_inst/ens0_layer4_N1_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer4_inst/ens0_layer4_N2_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer4_inst/ens0_layer4_N3_inst/M1r  | 64x2          | LUT            | 
+|logicnet_0      | ens0_layer4_inst/ens0_layer4_N4_inst/M1r  | 64x2          | LUT            | 
++----------------+-------------------------------------------+---------------+----------------+
+
+---------------------------------------------------------------------------------
+Finished ROM, RAM, DSP and Shift Register Reporting
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Applying XDC Timing Constraints
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Applying XDC Timing Constraints : Time (s): cpu = 00:00:15 ; elapsed = 00:00:27 . Memory (MB): peak = 3269.324 ; gain = 703.746 ; free physical = 927 ; free virtual = 17929
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Timing Optimization
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Timing Optimization : Time (s): cpu = 00:00:15 ; elapsed = 00:00:27 . Memory (MB): peak = 3299.371 ; gain = 733.793 ; free physical = 901 ; free virtual = 17903
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Technology Mapping
+---------------------------------------------------------------------------------
+INFO: [Synth 8-5816] Retiming module `logicnet_0`
+	Numbers of forward move = 0, and backward move = 0
+
+
+INFO: [Synth 8-5816] Retiming module `logicnet_0' done
+
+
+---------------------------------------------------------------------------------
+Finished Technology Mapping : Time (s): cpu = 00:00:15 ; elapsed = 00:00:27 . Memory (MB): peak = 3299.371 ; gain = 733.793 ; free physical = 901 ; free virtual = 17903
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Flattening Before IO Insertion
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Final Netlist Cleanup
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished IO Insertion : Time (s): cpu = 00:00:16 ; elapsed = 00:00:28 . Memory (MB): peak = 3299.371 ; gain = 733.793 ; free physical = 838 ; free virtual = 17840
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Instances
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Instances : Time (s): cpu = 00:00:16 ; elapsed = 00:00:28 . Memory (MB): peak = 3299.371 ; gain = 733.793 ; free physical = 838 ; free virtual = 17840
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Rebuilding User Hierarchy
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Rebuilding User Hierarchy : Time (s): cpu = 00:00:16 ; elapsed = 00:00:28 . Memory (MB): peak = 3299.371 ; gain = 733.793 ; free physical = 838 ; free virtual = 17840
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Ports
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Ports : Time (s): cpu = 00:00:16 ; elapsed = 00:00:28 . Memory (MB): peak = 3299.371 ; gain = 733.793 ; free physical = 838 ; free virtual = 17840
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Handling Custom Attributes
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Handling Custom Attributes : Time (s): cpu = 00:00:16 ; elapsed = 00:00:28 . Memory (MB): peak = 3299.371 ; gain = 733.793 ; free physical = 838 ; free virtual = 17840
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Renaming Generated Nets
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Finished Renaming Generated Nets : Time (s): cpu = 00:00:16 ; elapsed = 00:00:28 . Memory (MB): peak = 3299.371 ; gain = 733.793 ; free physical = 838 ; free virtual = 17840
+---------------------------------------------------------------------------------
+---------------------------------------------------------------------------------
+Start Writing Synthesis Report
+---------------------------------------------------------------------------------
+
+Report BlackBoxes: 
++-+--------------+----------+
+| |BlackBox name |Instances |
++-+--------------+----------+
++-+--------------+----------+
+
+Report Cell Usage: 
++------+-----+------+
+|      |Cell |Count |
++------+-----+------+
+|1     |LUT1 |     1|
+|2     |LUT2 |     9|
+|3     |LUT3 |     6|
+|4     |LUT4 |    20|
+|5     |LUT5 |    16|
+|6     |LUT6 |   193|
+|7     |FDRE |   270|
++------+-----+------+
+---------------------------------------------------------------------------------
+Finished Writing Synthesis Report : Time (s): cpu = 00:00:16 ; elapsed = 00:00:28 . Memory (MB): peak = 3299.371 ; gain = 733.793 ; free physical = 838 ; free virtual = 17840
+---------------------------------------------------------------------------------
+Synthesis finished with 0 errors, 0 critical warnings and 0 warnings.
+Synthesis Optimization Runtime : Time (s): cpu = 00:00:14 ; elapsed = 00:00:25 . Memory (MB): peak = 3299.371 ; gain = 555.199 ; free physical = 891 ; free virtual = 17893
+Synthesis Optimization Complete : Time (s): cpu = 00:00:16 ; elapsed = 00:00:28 . Memory (MB): peak = 3299.379 ; gain = 733.793 ; free physical = 891 ; free virtual = 17893
+INFO: [Project 1-571] Translating synthesized netlist
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3311.340 ; gain = 0.000 ; free physical = 963 ; free virtual = 17965
+INFO: [Project 1-570] Preparing netlist for logic optimization
+INFO: [Opt 31-138] Pushed 0 inverter(s) to 0 load pin(s).
+Netlist sorting complete. Time (s): cpu = 00:00:00 ; elapsed = 00:00:00 . Memory (MB): peak = 3360.723 ; gain = 0.000 ; free physical = 957 ; free virtual = 17959
+INFO: [Project 1-111] Unisim Transformation Summary:
+No Unisim elements were transformed.
+
+INFO: [Common 17-83] Releasing license: Synthesis
+218 Infos, 0 Warnings, 0 Critical Warnings and 0 Errors encountered.
+synth_design completed successfully
+synth_design: Time (s): cpu = 00:00:23 ; elapsed = 00:00:38 . Memory (MB): peak = 3360.723 ; gain = 1235.273 ; free physical = 1070 ; free virtual = 18073
+INFO: [Common 17-1381] The checkpoint '/workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/vivadocompile/vivadocompile.runs/synth_1/logicnet_0.dcp' has been generated.
+INFO: [runtcl-4] Executing : report_utilization -file logicnet_0_utilization_synth.rpt -pb logicnet_0_utilization_synth.pb
+INFO: [Common 17-206] Exiting Vivado at Thu Aug 15 22:37:20 2024...

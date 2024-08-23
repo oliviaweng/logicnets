@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2020.1 (64-bit)
+# SW Build 2902540 on Wed May 27 19:54:35 MDT 2020
+# IP Build 2902112 on Wed May 27 22:43:36 MDT 2020
+# Start of session at: Thu Aug 15 22:36:31 2024
+# Process ID: 494
+# Current directory: /workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet
+# Command line: vivado -mode tcl -source logicnet.tcl -tclargs logicnet
+# Log file: /workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/vivado.log
+# Journal file: /workspace/logicnets/examples/jet_substructure/jscs_synth_test/verilog/results_logicnet/vivado.jou
+#-----------------------------------------------------------
+source logicnet.tcl
