@@ -17,9 +17,10 @@
 DATA_DIR=./data/hgcal22data_signal_driven_ttbar_v11/nElinks_5/
 DATA_FILE=./data/hgcal22data_signal_driven_ttbar_v11/hgcal22data_signal_driven_ttbar_v11_nELinks5.npy 
 SAVE_DIR=./autoencoder_synth
-EXP_NAME=small_3ns
-CONFIG=./pareto_configs/small_pareto_model/small_pareto_model.yml
-CKPT=./pareto_configs/small_pareto_model/small_pareto_model_best_loss.pth
+CLOCK=1
+EXP_NAME="large_${CLOCK}ns"
+CONFIG=./pareto_configs/large_pareto_model/large_pareto_model.yml
+CKPT=./pareto_configs/large_pareto_model/large_pareto_model_best_loss.pth
 
 
 CUDA_VISIBLE_DEVICES=0 python neq2lut.py \
@@ -30,7 +31,8 @@ CUDA_VISIBLE_DEVICES=0 python neq2lut.py \
    --checkpoint $CKPT \
    --hparams_config $CONFIG \
    --add_registers \
-   --clock_period 3
-   # --simulate_pre_synthesis_verilog \
-   # --compute_emd \
-   # --gpu \
+   --clock_period $CLOCK \
+   --simulate_pre_synthesis_verilog \
+   --compute_emd \
+   --test_model \
+   # --gpu \ # Don't run on gpu
