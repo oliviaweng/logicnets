@@ -163,24 +163,51 @@ if __name__ == "__main__":
     if "same_output_scale" not in config:
         config["same_output_scale"] = False # Default
 
-    model = AveragingJetNeqModel(config, config["ensemble_size"])
-
+    # Instantiate NEQ and LUT-based models
+    if "ensemble_method" in config:
+        if config["ensemble_method"] == "averaging":
+            print("Averaging ensemble method")
+            model = AveragingJetNeqModel(config, config["ensemble_size"])
+            lut_model = AveragingJetLUTModel(
+                config, config["ensemble_size"], quantize_avg=quantize_avg
+            )
+        # elif config["ensemble_method"] == "bagging":
+        #     print("Bagging ensemble method")
+        #     if "independent" not in config:
+        #         config["independent"] = False # Default
+        #     lut_model = BaggingJetNeqModel(
+        #         config,
+        #         config["ensemble_size"],
+        #         quantize_avg=quantize_avg,
+        #         single_model_mode=args.train,
+        #     )
+        # elif config["ensemble_method"] == "adaboost":
+        #     print("AdaBoost ensemble method")
+        #     if "independent" not in config:
+        #         config["independent"] = False # Default
+        #     lut_model = AdaBoostJetNeqModel(
+        #         config,
+        #         config["ensemble_size"],
+        #         len(dataset["train"]),
+        #         quantize_avg=quantize_avg,
+        #         single_model_mode=args.train,
+        #     )
+        else:
+            raise ValueError(f"Unknown ensemble method: {config['ensemble_method']}")
+    else:  # Single model learning
+        model = JetSubstructureNeqModel(config)
+        lut_model = JetSubstructureLutModel(config)
+    
     # Load the model weights
     checkpoint = torch.load(args.checkpoint)
     model.load_state_dict(checkpoint['model_dict'])
-
     # Test the PyTorch model
     print("Running inference on baseline model...")
     model.eval()
     baseline_accuracy, baseline_avg_roc_auc, _ = test(model, test_loader, cuda=False)
     print("Baseline accuracy: %f" % (baseline_accuracy))
     print("Baseline AVG ROC AUC: %f" % (baseline_avg_roc_auc))
-
-    # Instantiate LUT-based model
-    # lut_model = JetSubstructureLutModel(model_cfg)
-    # lut_model.load_state_dict(checkpoint['model_dict'])
-
-    lut_model = AveragingJetLUTModel(config, config["ensemble_size"])
+    # Load LUT model weights
     lut_model.load_state_dict(checkpoint['model_dict'])
 
     # Generate the truth tables in the LUT module
@@ -203,44 +230,51 @@ if __name__ == "__main__":
     torch.save(modelSave, args.log_dir + "/lut_based_model.pth")
 
     print("Generating verilog in %s..." % (args.log_dir))
-    ensemble_to_verilog_module(
-        lut_model.ensemble,
-        "logicnet", 
-        args.log_dir, 
-        add_registers=args.add_registers,
-        generate_bench=args.generate_bench,
-    )
-    # for i, lm in enumerate(lut_model.ensemble):
-    #     module_list_to_verilog_module(
-    #         lm.module_list, 
-    #         "logicnet", 
-    #         args.log_dir, 
-    #         ensemble_member_idx=i,
-    #         add_registers=args.add_registers,
-    #         generate_bench=args.generate_bench,
-    #     )
-    #     print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
+    if "ensemble_method" in config:
+        ensemble_to_verilog_module(
+            lut_model.ensemble,
+            "logicnet", 
+            args.log_dir, 
+            add_registers=args.add_registers,
+            generate_bench=args.generate_bench,
+        )
+    else: # single model
+        module_list_to_verilog_module(
+            lut_model.module_list, 
+            "logicnet", 
+            args.log_dir, 
+            add_registers=args.add_registers,
+            generate_bench=args.generate_bench,
+        )
+        print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
 
     # END - pyverilator doesn't really work well...
 
 
-    # if args.dump_io:
-    #     io_filename = options_cfg["log_dir"] + f"io_{args.dataset_split}.txt"
-    #     with open(io_filename, 'w') as f:
-    #         pass # Create an empty file.
-    #     print(f"Dumping verilog I/O to {io_filename}...")
-    # else:
-    #     io_filename = None
+    if args.dump_io:
+        io_filename = os.path.join(args.log_dir, f"io_{args.dataset_split}.txt")
+        with open(io_filename, 'w') as f:
+            pass # Create an empty file.
+        print(f"Dumping verilog I/O to {io_filename}...")
+    else:
+        io_filename = None
 
-    # if args.simulate_pre_synthesis_verilog:
-    #     print("Running inference simulation of Verilog-based model...")
-    #     lut_model.verilog_inference(options_cfg["log_dir"], "logicnet.v", logfile=io_filename, add_registers=options_cfg["add_registers"])
-    #     verilog_accuracy, verilog_avg_roc_auc = test(lut_model, test_loader, cuda=False)
-    #     print("Verilog-Based Model accuracy: %f" % (verilog_accuracy))
-    #     print("Verilog-Based AVG ROC AUC: %f" % (verilog_avg_roc_auc))
+    if args.simulate_pre_synthesis_verilog:
+        print("Running inference simulation of Verilog-based model...")
+        lut_model.verilog_inference(args.log_dir, "logicnet.v", logfile=io_filename, add_registers=args.add_registers)
+        verilog_accuracy, verilog_avg_roc_auc = test(lut_model, test_loader, cuda=False)
+        print("Verilog-Based Model accuracy: %f" % (verilog_accuracy))
+        print("Verilog-Based AVG ROC AUC: %f" % (verilog_avg_roc_auc))
 
-    # print("Running out-of-context synthesis")
-    # ret = synthesize_and_get_resource_counts(options_cfg["log_dir"], "logicnet", fpga_part="xcu280-fsvh2892-2L-e", clk_period_ns=args.clock_period, post_synthesis = 1)
+    print("Running out-of-context synthesis")
+    ret = synthesize_and_get_resource_counts(
+        args.log_dir, 
+        "logicnet", 
+        # fpga_part="xcu280-fsvh2892-2L-e", 
+        fpga_part="xcvu9p-flgb2104-2-i", # LogicNets default
+        clk_period_ns=args.clock_period, 
+        post_synthesis=1
+    )
 
     # if args.simulate_post_synthesis_verilog:
     #     print("Running post-synthesis inference simulation of Verilog-based model...")

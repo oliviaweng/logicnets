@@ -118,15 +118,16 @@ def main(args):
         hparams_log = os.path.join(experiment_dir, "hparams.yml")
         with open(hparams_log, "w") as f:
             yaml.dump(config, f)
-        if config["ensemble_method"] == "bagging":
-            train_bagging(
-                model, dataset, config, cuda=args.cuda, log_dir=experiment_dir
-            )
-        elif config["ensemble_method"] == "adaboost":
-            train_adaboost(
-                model, dataset, config, cuda=args.cuda, log_dir=experiment_dir
-            )
-        else:
+        if "ensemble_method" in config and config["ensemble_method"] != "averaging":
+            if config["ensemble_method"] == "bagging":
+                train_bagging(
+                    model, dataset, config, cuda=args.cuda, log_dir=experiment_dir
+                )
+            elif config["ensemble_method"] == "adaboost":
+                train_adaboost(
+                    model, dataset, config, cuda=args.cuda, log_dir=experiment_dir
+                )
+        else: # Single model / Averaging training
             train(model, dataset, config, cuda=args.cuda, log_dir=experiment_dir)
     # Evaluate model
     evaluate_model = False
