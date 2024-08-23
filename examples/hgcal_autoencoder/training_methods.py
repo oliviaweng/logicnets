@@ -1022,7 +1022,7 @@ def train_adaboost(
         model_err = torch.sum(model.weights * obs_err)
         if model_err > 0.5:
             model.num_models = len(model.encoder_ensemble)
-            print("Exiting Adaboost training early bc model_err > 0.5. model_err = {model_err}")
+            print(f"Exiting Adaboost training early bc model_err > 0.5. model_err = {model_err}")
             break
         beta = model.update_betas(model_err)
         model.update_model_weights()

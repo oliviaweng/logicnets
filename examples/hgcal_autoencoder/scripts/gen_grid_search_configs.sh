@@ -43,8 +43,8 @@
 # python3 grid_search.py -c search_configs/voting_weak2_model_grid_search.yml -d ensemble_configs/averaging/weak2_fixed_mask --experiment_prefix averaging_weak2_fixed_mask
 
 # Averaging w/o weight decay
-python3 grid_search.py -c search_configs/voting_small_model_grid_search.yml -d ensemble_configs/averaging/small_fixed_mask_no_wd --experiment_prefix averaging_small_fixed_mask_no_wd
-python3 grid_search.py -c search_configs/voting_large_model_grid_search.yml -d ensemble_configs/averaging/large_fixed_mask_no_wd --experiment_prefix averaging_large_fixed_mask_no_wd
+# python3 grid_search.py -c search_configs/voting_small_model_grid_search.yml -d ensemble_configs/averaging/small_fixed_mask_no_wd --experiment_prefix averaging_small_fixed_mask_no_wd
+# python3 grid_search.py -c search_configs/voting_large_model_grid_search.yml -d ensemble_configs/averaging/large_fixed_mask_no_wd --experiment_prefix averaging_large_fixed_mask_no_wd
 
 # Snapshot Ensemble
 # python3 grid_search.py -c search_configs/sse_large_model_grid_search.yml -d ensemble_configs/sse/large_more_epochs --experiment_prefix sse_large
@@ -73,3 +73,11 @@ python3 grid_search.py -c search_configs/voting_large_model_grid_search.yml -d e
 # python3 grid_search.py -c search_configs/bagging_small_model_grid_search.yml  -d ensemble_configs/bagging/small_seq  --experiment_prefix bagging_small_seq
 # python3 grid_search.py -c search_configs/bagging_medium_model_grid_search.yml -d ensemble_configs/bagging/medium_seq --experiment_prefix bagging_medium_seq
 # python3 grid_search.py -c search_configs/bagging_large_model_grid_search.yml  -d ensemble_configs/bagging/large_seq  --experiment_prefix bagging_large_seq
+
+
+
+# Jet tagger model
+
+# python3 grid_search.py -c search_configs/jsc_s_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_small
+python3 grid_search.py -c search_configs/jsc_m_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_medium
+python3 grid_search.py -c search_configs/jsc_l_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_large

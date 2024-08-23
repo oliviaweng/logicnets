@@ -239,7 +239,7 @@ def main(args):
             if ensemble_method == "adaboost":
                 model.model_weights = checkpoint["model_weights"]
                 if args.gpu:
-                    model.model_weights.cuda()
+                    model.model_weights = model.model_weights.cuda()
             if (
                 ensemble_method == "snapshot"
                 or ensemble_method == "fge"
