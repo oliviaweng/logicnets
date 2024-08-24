@@ -27,12 +27,16 @@
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_same_output_scale_post_trans --experiment_prefix medium_same_output_scale_post_trans
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_same_output_scale_post_trans --experiment_prefix large_same_output_scale_post_trans
 
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_same_input_scale --experiment_prefix small_same_input_scale
+python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_same_input_scale --experiment_prefix medium_same_input_scale
+python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_same_input_scale --experiment_prefix large_same_input_scale
+
 # Bagging
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/bagging/small_independent_configs --experiment_prefix bagging_small_independent
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/bagging/medium_independent_configs  --experiment_prefix bagging_medium_independent
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/bagging/large_independent_configs  --experiment_prefix bagging_large_independent
 
 # AdaBoost
-python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/small_independent_configs --experiment_prefix adaboost_small_independent
-python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/medium_independent_configs  --experiment_prefix adaboost_medium_independent
-python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/large_independent_configs  --experiment_prefix adaboost_large_independent
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/small_independent_configs --experiment_prefix adaboost_small_independent
+# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/medium_independent_configs  --experiment_prefix adaboost_medium_independent
+# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/large_independent_configs  --experiment_prefix adaboost_large_independent

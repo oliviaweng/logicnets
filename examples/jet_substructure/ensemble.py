@@ -20,6 +20,7 @@ class AveragingJetNeqModel(nn.Module):
         self.model_config = model_config
         self.num_models = num_models
         self.quantize_avg = quantize_avg
+        self.same_input_scale = model_config["same_input_scale"]
         self.same_output_scale = model_config["same_output_scale"]
         self.ensemble = nn.ModuleList(
             [JetSubstructureNeqModel(model_config) for _ in range(num_models)]
@@ -32,6 +33,15 @@ class AveragingJetNeqModel(nn.Module):
                     quant_type=QuantType.INT,
                 )
             )
+        if self.same_input_scale:
+            # Share input quantizer among ensemble members
+            for model in self.ensemble[1:]:
+                # Set all ensemble member's input quantizer to be the same as the
+                # first model's input quantizer
+                model.module_list[0].input_quant = self.ensemble[0].module_list[0].input_quant
+                # print("AFTER: input quantizer for each ensemble member:")
+                # for model in self.ensemble:
+                #     print(f"\t{hex(id(model.module_list[0].input_quant))}")
         if self.same_output_scale:
             # FOR DEBUGGING: Print output quantizer for each ensemble member
             # print("BEFORE: Output quantizer for each ensemble member:")

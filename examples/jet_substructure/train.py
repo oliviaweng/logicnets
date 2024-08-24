@@ -72,6 +72,8 @@ def main(args):
         config["post_transform_output"] = True # Default
     if "same_output_scale" not in config:
         config["same_output_scale"] = False # Default
+    if "same_input_scale" not in config:
+        config["same_input_scale"] = False # Default
     
 
     if "ensemble_method" in config:

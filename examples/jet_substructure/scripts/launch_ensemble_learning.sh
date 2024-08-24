@@ -50,6 +50,17 @@
 # tmux new-session -d -s jsc_sopt00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_post_trans_configs/config4 ./averaging"
 # tmux new-session -d -s jsc_sopt01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_output_scale_post_trans_configs/config5 ./averaging"
 
+# tmux new-session -d -s sinp00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_input_scale_configs/config1 ./averaging"
+# tmux new-session -d -s sinp01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_input_scale_configs/config2 ./averaging"
+# tmux new-session -d -s sinp02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_input_scale_configs/config3 ./averaging"
+
+tmux new-session -d -s minp00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config1 ./averaging"
+tmux new-session -d -s minp01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config2 ./averaging"
+tmux new-session -d -s minp02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config3 ./averaging"
+
+tmux new-session -d -s linp00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config1 ./averaging"
+tmux new-session -d -s linp01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config2 ./averaging"
+tmux new-session -d -s linp02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config3 ./averaging"
 
 # Bagging
 # tmux new-session -d -s jscs_bag "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/small_configs ./bagging"
@@ -62,6 +73,6 @@
 
 
 # Adaboost
-tmux new-session -d -s jscs_ada_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/small_independent_configs ./adaboost"
-tmux new-session -d -s jscm_ada_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/medium_independent_configs ./adaboost"
-tmux new-session -d -s jscl_ada_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/large_independent_configs ./adaboost"
+# tmux new-session -d -s jscs_ada_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/small_independent_configs ./adaboost"
+# tmux new-session -d -s jscm_ada_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/medium_independent_configs ./adaboost"
+# tmux new-session -d -s jscl_ada_ind "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/large_independent_configs ./adaboost"
