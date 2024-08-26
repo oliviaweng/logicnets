@@ -54,13 +54,13 @@
 # tmux new-session -d -s sinp01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_input_scale_configs/config2 ./averaging"
 # tmux new-session -d -s sinp02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_input_scale_configs/config3 ./averaging"
 
-tmux new-session -d -s minp00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config1 ./averaging"
-tmux new-session -d -s minp01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config2 ./averaging"
-tmux new-session -d -s minp02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config3 ./averaging"
+# tmux new-session -d -s minp00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config1 ./averaging"
+# tmux new-session -d -s minp01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config2 ./averaging"
+# tmux new-session -d -s minp02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config3 ./averaging"
 
-tmux new-session -d -s linp00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config1 ./averaging"
-tmux new-session -d -s linp01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config2 ./averaging"
-tmux new-session -d -s linp02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config3 ./averaging"
+# tmux new-session -d -s linp00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config1 ./averaging"
+# tmux new-session -d -s linp01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config2 ./averaging"
+# tmux new-session -d -s linp02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config3 ./averaging"
 
 # Bagging
 # tmux new-session -d -s jscs_bag "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/small_configs ./bagging"
