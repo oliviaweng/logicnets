@@ -36,6 +36,7 @@ class JetSubstructureNeqModel(nn.Module):
         self.model_config = model_config
         self.num_neurons = [model_config["input_length"]] + model_config["hidden_layers"] + [model_config["output_length"]]
         self.post_transform_output = model_config["post_transform_output"]
+        self.uniform_input_connectivity = model_config["uniform_input_connectivity"]
         layer_list = []
         for i in range(1, len(self.num_neurons)):
             in_features = self.num_neurons[i-1]
@@ -55,8 +56,19 @@ class JetSubstructureNeqModel(nn.Module):
                     pre_transforms=[bn_in, input_bias]
                 )
                 output_quant = QuantBrevitasActivation(QuantReLU(bit_width=model_config["hidden_bitwidth"], max_val=1.61, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn])
-                mask = RandomFixedSparsityMask2D(in_features, out_features, fan_in=model_config["input_fanin"])
-                layer = SparseLinearNeq(in_features, out_features, input_quant=input_quant, output_quant=output_quant, sparse_linear_kws={'mask': mask})
+                mask = RandomFixedSparsityMask2D(
+                    in_features, 
+                    out_features, 
+                    fan_in=model_config["input_fanin"],
+                    uniform_input_connectivity=self.uniform_input_connectivity,
+                )
+                layer = SparseLinearNeq(
+                    in_features, 
+                    out_features, 
+                    input_quant=input_quant, 
+                    output_quant=output_quant, 
+                    sparse_linear_kws={'mask': mask}
+                )
                 layer_list.append(layer)
             elif i == len(self.num_neurons) - 1: # Output layer
                 post_transforms = []

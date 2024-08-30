@@ -1,5 +1,14 @@
 #!/bin/bash
 
+
+# Uniform input connectivity
+# tmux new-session -d -s u00 "./scripts/run_gen_ensemble_exp.sh 0 ./logicnet_configs/uniform_input_small ./jsc_single_models/"
+# tmux new-session -d -s u01 "./scripts/run_gen_ensemble_exp.sh 0 ./logicnet_configs/uniform_input_medium ./jsc_single_models/"
+# tmux new-session -d -s u02 "./scripts/run_gen_ensemble_exp.sh 0 ./logicnet_configs/uniform_input_large ./jsc_single_models/"
+# tmux new-session -d -s uavg00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_small_configs/config0 ./averaging"
+tmux new-session -d -s uavg03 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_small_configs/config3 ./averaging"
+
+
 # Averaging jet tagger
 # tmux new-session -d -s jscs00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_configs/config1 ./averaging"
 # tmux new-session -d -s jscs01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_configs/config2 ./averaging"
@@ -52,7 +61,7 @@
 
 # tmux new-session -d -s sinp00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_input_scale_configs/config1 ./averaging"
 # tmux new-session -d -s sinp01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_input_scale_configs/config2 ./averaging"
-tmux new-session -d -s sinp02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_input_scale_configs/config3 ./averaging"
+# tmux new-session -d -s sinp02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_same_input_scale_configs/config3 ./averaging"
 
 # tmux new-session -d -s minp00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config1 ./averaging"
 # tmux new-session -d -s minp01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_same_input_scale_configs/config2 ./averaging"

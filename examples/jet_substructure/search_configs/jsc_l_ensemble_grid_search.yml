@@ -1,5 +1,5 @@
 # Fixed params
-ensemble_method: averaging
+# ensemble_method: averaging
 hidden_layers:
 - 32
 - 64
@@ -16,18 +16,23 @@ weight_decay: 0.001
 batch_size: 1024
 epochs: 1000
 learning_rate: 0.001
-seed: 16
+# seed: 16
 checkpoint: null
 quantize_avg: false
 post_transform_output: true
 same_output_scale: false
-same_input_scale: true
+same_input_scale: false
+uniform_input_connectivity: true
 
 # Params to grid search
 grid_search_params:
-  ensemble_size:
-  - 2
-  - 4
-  - 8
+  seed:
+  - 0
+  - 1
   - 16
-  - 32
+  # ensemble_size:
+  # - 2
+  # - 4
+  # - 8
+  # - 16
+  # - 32

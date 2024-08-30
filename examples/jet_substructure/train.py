@@ -74,7 +74,8 @@ def main(args):
         config["same_output_scale"] = False # Default
     if "same_input_scale" not in config:
         config["same_input_scale"] = False # Default
-    
+    if "uniform_input_connectivity" not in config:
+        config["uniform_input_connectivity"] = False # Default
 
     if "ensemble_method" in config:
         if config["ensemble_method"] == "averaging":
@@ -154,7 +155,8 @@ def main(args):
     elif args.train:
         evaluate_model = True  # Evaluate the model after training
         if (
-            config["ensemble_method"] in ENSEMBLING_METHODS
+            "ensemble_method" in config
+            and config["ensemble_method"] in ENSEMBLING_METHODS
             and config["ensemble_method"] != "averaging"
         ):
             ensemble_ckpt_path = os.path.join(experiment_dir, "last_ensemble_ckpt.pth")
