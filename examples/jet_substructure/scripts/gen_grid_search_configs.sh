@@ -19,7 +19,9 @@
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./logicnet_configs/uniform_input_medium --experiment_prefix uniform_input_medium
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./logicnet_configs/uniform_input_large --experiment_prefix uniform_input_large
 
-python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_small --experiment_prefix uniform_input_small
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_small --experiment_prefix uniform_input_small
+python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_medium --experiment_prefix uniform_input_medium
+python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_large --experiment_prefix uniform_input_large
 
 # Averaging
 # python3 grid_search.py -c search_configs/jsc_s_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_small

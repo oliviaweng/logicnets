@@ -6,7 +6,16 @@
 # tmux new-session -d -s u01 "./scripts/run_gen_ensemble_exp.sh 0 ./logicnet_configs/uniform_input_medium ./jsc_single_models/"
 # tmux new-session -d -s u02 "./scripts/run_gen_ensemble_exp.sh 0 ./logicnet_configs/uniform_input_large ./jsc_single_models/"
 # tmux new-session -d -s uavg00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_small_configs/config0 ./averaging"
-tmux new-session -d -s uavg03 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_small_configs/config3 ./averaging"
+# tmux new-session -d -s uavg01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_small_configs/config1 ./averaging"
+# tmux new-session -d -s uavg02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_small_configs/config2 ./averaging"
+# tmux new-session -d -s uavg03 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_small_configs/config3 ./averaging"
+
+tmux new-session -d -s umavg00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_medium_configs/config1 ./averaging"
+tmux new-session -d -s umavg01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_medium_configs/config2 ./averaging"
+# tmux new-session -d -s ulavg02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_medium_configs/config3 ./averaging"
+tmux new-session -d -s ulavg00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/uniform_input_large_configs/config1 ./averaging"
+tmux new-session -d -s ulavg01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/uniform_input_large_configs/config2 ./averaging"
+tmux new-session -d -s ulavg02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/uniform_input_large_configs/config3 ./averaging"
 
 
 # Averaging jet tagger
