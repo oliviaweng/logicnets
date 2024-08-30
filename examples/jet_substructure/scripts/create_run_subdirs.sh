@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 
-CONFIG_DIR=./ensemble_configs/averaging/large_same_input_scale
+CONFIG_DIR=./ensemble_configs/averaging/uniform_input_large
 
 for i in {1..3}; do 
 new_dir=${CONFIG_DIR}_configs/config${i}
