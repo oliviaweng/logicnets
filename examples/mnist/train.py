@@ -112,6 +112,8 @@ def main(args):
         config["post_transform_output"] = True # Default
     if "same_output_scale" not in config:
         config["same_output_scale"] = False # Default
+    if "same_input_scale" not in config:
+        config["same_input_scale"] = False # Default
 
     if "ensemble_method" in config:
         if config["ensemble_method"] == "averaging":
@@ -161,7 +163,7 @@ def main(args):
         # start a new wandb run to track this script
         wandb.init(
             # set the wandb project where this run will be logged
-            project="PolyLUT",
+            project="PolyLUT-ensemble",
             name=args.experiment_name,
             # track hyperparameters and run metadata
             config={
@@ -170,7 +172,7 @@ def main(args):
                 "hidden_bitwidth": config["hidden_bitwidth"],
                 "output_bitwidth": config["output_bitwidth"],
                 "input_fanin": config["input_fanin"],
-                "degree": config["degree"],
+                "width_n": config["width_n"],
                 "hidden_fanin": config["hidden_fanin"],
                 "output_fanin": config["output_fanin"],
                 "weight_decay": config["weight_decay"],

@@ -44,9 +44,7 @@ from logicnets.quant import QuantBrevitasActivation
 from logicnets.nn import (
     SparseLinearNeq, 
     ScalarBiasScale, 
-    PolyMask, 
     FeatureMask, 
-    InputTerms,
 )
 # from polylut.init import random_restrict_fanin
 
@@ -87,21 +85,10 @@ class MnistNeqModel(nn.Module):
                     ),
                     pre_transforms=[bn],
                 )
-                terms = InputTerms(
-                    fan_in=model_config["input_fanin"], degree=model_config["degree"]
-                )
-                new_in_features = len(terms)
-                mask = PolyMask(
-                    fan_in=model_config["input_fanin"],
-                    # degree=model_config["degree"],
-                    terms=terms,
-                    gpu=model_config["gpu"],
-                )
                 imask = FeatureMask(
                     in_features,
                     out_features,
                     fan_in=model_config["input_fanin"],
-                    degree=model_config["degree"],
                     gpu=model_config["gpu"],
                 )
                 layer = SparseLinearNeq(
@@ -109,11 +96,9 @@ class MnistNeqModel(nn.Module):
                     out_features,
                     input_quant=input_quant,
                     output_quant=output_quant,
-                    mask=mask,
                     imask=imask,
-                    new_in_features=new_in_features,
                     fan_in=model_config["input_fanin"],
-                    # degree=model_config["degree"],
+                    width_n=model_config["width_n"],
                 )
                 layer_list.append(layer)
             elif i == len(self.num_neurons) - 1:
@@ -129,21 +114,10 @@ class MnistNeqModel(nn.Module):
                     pre_transforms=[bn],
                     post_transforms=[output_bias_scale],
                 )
-                terms = InputTerms(
-                    fan_in=model_config["output_fanin"], degree=model_config["degree"]
-                )
-                new_in_features = len(terms)
-                mask = PolyMask(
-                    fan_in=model_config["output_fanin"],
-                    # degree=model_config["degree"],
-                    terms=terms,
-                    gpu=model_config["gpu"],
-                )
                 imask = FeatureMask(
                     in_features,
                     out_features,
                     fan_in=model_config["output_fanin"],
-                    degree=model_config["degree"],
                     gpu=model_config["gpu"],
                 )
                 layer = SparseLinearNeq(
@@ -151,11 +125,9 @@ class MnistNeqModel(nn.Module):
                     out_features,
                     input_quant=layer_list[-1].output_quant,
                     output_quant=output_quant,
-                    mask=mask,
                     imask=imask,
-                    new_in_features=new_in_features,
                     fan_in=model_config["output_fanin"],
-                    # degree=model_config["degree"],
+                    width_n=model_config["width_n"],
                     apply_input_quant=False,
                 )
                 layer_list.append(layer)
@@ -169,21 +141,10 @@ class MnistNeqModel(nn.Module):
                     ),
                     pre_transforms=[bn],
                 )
-                terms = InputTerms(
-                    fan_in=model_config["hidden_fanin"], degree=model_config["degree"]
-                )
-                new_in_features = len(terms)
-                mask = PolyMask(
-                    fan_in=model_config["hidden_fanin"],
-                    # degree=model_config["degree"],
-                    terms=terms,
-                    gpu=model_config["gpu"],
-                )
                 imask = FeatureMask(
                     in_features,
                     out_features,
                     fan_in=model_config["hidden_fanin"],
-                    degree=model_config["degree"],
                     gpu=model_config["gpu"],
                 )
                 layer = SparseLinearNeq(
@@ -191,11 +152,9 @@ class MnistNeqModel(nn.Module):
                     out_features,
                     input_quant=layer_list[-1].output_quant,
                     output_quant=output_quant,
-                    mask=mask,
                     imask=imask,
-                    new_in_features=new_in_features,
                     fan_in=model_config["hidden_fanin"],
-                    # degree=model_config["degree"],
+                    width_n=model_config["width_n"],
                     apply_input_quant=False,
                 )
                 layer_list.append(layer)

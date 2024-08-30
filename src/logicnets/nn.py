@@ -97,27 +97,32 @@ def module_list_to_verilog_module(module_list: nn.ModuleList, module_name: str, 
         f.write(module_list_verilog)
 
 class SparseLinear(nn.Linear):
-    def __init__(self, in_features: int, out_features: int, new_in_features: int, bias: bool = True) -> None:
+    def __init__(self, in_features: int, out_features: int, bias: bool = True) -> None:
         super(SparseLinear, self).__init__(in_features=in_features, out_features=out_features, bias=bias)
-        y = 1.0 / np.sqrt(new_in_features)
-        self.weight = torch.nn.Parameter(torch.randn(out_features, new_in_features))
-        self.weight.data.uniform_(-y, y)
 
     def forward(self, input: Tensor) -> Tensor:
         return (input * self.weight).sum(dim=-1) + self.bias
 
 # TODO: Perhaps make this two classes, separating the LUT and NEQ code.
 class SparseLinearNeq(nn.Module):
-    def __init__(self, in_features: int, out_features: int, input_quant, output_quant, mask, imask, new_in_features, fan_in, apply_input_quant=True, apply_output_quant=True) -> None:
+    def __init__(self, in_features: int, out_features: int, input_quant, output_quant, imask, fan_in, width_n, apply_input_quant=True, apply_output_quant=True) -> None:
         super(SparseLinearNeq, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.input_quant = input_quant
-        self.fc = SparseLinear(in_features, out_features, new_in_features)
+        
+        self.width_n = width_n
+
+        self.relu = nn.ReLU()
+        self.fc1 = SparseLinear(fan_in, out_features*width_n)
+        self.fc2 = SparseLinear(width_n, out_features*width_n)
+        self.fc3 = SparseLinear(width_n, out_features*width_n)
+        self.fc4 = SparseLinear(width_n, out_features)
+        self.res0 = SparseLinear(fan_in, out_features*width_n)
+        self.res1 = SparseLinear(width_n, out_features)
+
         self.output_quant = output_quant
-        self.mask = Parameter(mask, requires_grad=False)   # mask for the polynomial degrees
         self.imask = Parameter(imask, requires_grad=False) # mask for input fan-in
-        self.new_in_features = new_in_features             # number of input features after poly expansion
         self.fan_in = fan_in
         self.is_lut_inference = False
         self.neuron_truth_tables = None
@@ -260,8 +265,23 @@ class SparseLinearNeq(nn.Module):
             if self.apply_input_quant:
                 x = self.input_quant(x)
             x = x[:, self.imask]
-            x = x.unsqueeze(dim=-2).pow(self.mask).prod(dim=-1)
-            x = self.fc(x)
+            x = x.repeat(1,1,self.width_n).reshape(x.size(0), x.size(1)*self.width_n, self.fan_in)
+            residual0 = self.res0(x)
+            x = self.fc1(x)
+            x = self.relu(x)
+            x = x.reshape(x.size(0), int(x.size(1)/self.width_n), self.width_n)
+            x = x.repeat(1,1,self.width_n).reshape(x.size(0), x.size(1)*self.width_n, self.width_n)
+            x = self.fc2(x)
+            x = x + residual0
+            x = self.relu(x)
+            x = x.reshape(x.size(0), int(x.size(1)/self.width_n), self.width_n)
+            residual1 = self.res1(x)
+            x = x.repeat(1,1,self.width_n).reshape(x.size(0), x.size(1)*self.width_n, self.width_n)
+            x = self.fc3(x)
+            x = self.relu(x)
+            x = x.reshape(x.size(0), int(x.size(1)/self.width_n), self.width_n)
+            x = self.fc4(x)
+            x = x + residual1
             if self.apply_output_quant:
                 x = self.output_quant(x)
         return x
@@ -311,31 +331,7 @@ class SparseLinearNeq(nn.Module):
         self.neuron_truth_tables = neuron_truth_tables
 
 
-def InputTerms(fan_in, degree):
-    return list(
-        itertools.chain(
-            *[
-                list(itertools.combinations_with_replacement(range(fan_in), d + 1))
-                for d in range(degree)
-            ]
-        )
-    )
-
-
-def PolyMask(fan_in, terms, gpu):
-    T = len(terms)
-    mask = torch.zeros((T, fan_in))
-    if gpu:
-        mask = torch.zeros((T, fan_in)).cuda()
-    else:
-        mask = torch.zeros((T, fan_in))
-    for t, ks in enumerate(terms):
-        for k in ks:
-            mask[t, k] += 1
-    return mask
-
-
-def FeatureMask(in_features: int, out_features: int, fan_in: int, degree: int, gpu: bool):
+def FeatureMask(in_features: int, out_features: int, fan_in: int, gpu: bool):
     if gpu:
         imask = torch.zeros((out_features, fan_in), dtype=torch.long).cuda()
     else:

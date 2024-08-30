@@ -21,6 +21,7 @@ class AveragingMnistNeqModel(nn.Module):
         self.num_models = num_models
         self.quantize_avg = quantize_avg
         self.same_output_scale = model_config["same_output_scale"]
+        self.same_input_scale = model_config["same_input_scale"]
         self.ensemble = nn.ModuleList(
             [MnistNeqModel(model_config) for _ in range(num_models)]
         )
@@ -45,6 +46,19 @@ class AveragingMnistNeqModel(nn.Module):
             print("AFTER: Output quantizer for each ensemble member:")
             for model in self.ensemble:
                 print(f"\t{hex(id(model.module_list[-1].output_quant))}")
+        if self.same_input_scale:
+            # FOR DEBUGGING: Print input quantizer for each ensemble member
+            print("BEFORE: Input quantizer for each ensemble member:")
+            for model in self.ensemble:
+                print(f"\t{hex(id(model.module_list[0].input_quant))}")
+            # Set all ensemble member's input quantizer to be the same as the
+            # first model's input quantizer
+            for model in self.ensemble[1:]:
+                model.module_list[0].input_quant = self.ensemble[0].module_list[0].input_quant
+            # FOR DEBUGGING: Print input quantizer for each ensemble member
+            print("AFTER: Input quantizer for each ensemble member:")
+            for model in self.ensemble:
+                print(f"\t{hex(id(model.module_list[0].input_quant))}")
             
     def forward(self, x):
         if self.is_verilog_inference:
