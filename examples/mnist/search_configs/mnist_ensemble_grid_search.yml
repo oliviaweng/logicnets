@@ -10,7 +10,7 @@ input_bitwidth: 2
 hidden_bitwidth: 2
 output_bitwidth: 2
 input_fanin: 6
-degree: 1
+degree: 4
 hidden_fanin: 6
 output_fanin: 6
 weight_decay: 0
@@ -25,6 +25,6 @@ grid_search_params:
   ensemble_size:
   # - 2
   # - 4
-  # - 8
+  - 8
   # - 16
-  - 32
+  # - 32

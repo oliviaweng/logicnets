@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONFIG_DIR=./ensemble_configs/averaging/deg1_same_output_scale_post_trans
+CONFIG_DIR=./ensemble_configs/averaging/deg4
 
 for i in {1..3}; do 
 new_dir=${CONFIG_DIR}_configs/config${i}
