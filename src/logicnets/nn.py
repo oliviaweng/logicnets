@@ -105,7 +105,8 @@ class SparseLinear(nn.Linear):
 
 # TODO: Perhaps make this two classes, separating the LUT and NEQ code.
 class SparseLinearNeq(nn.Module):
-    def __init__(self, in_features: int, out_features: int, input_quant, output_quant, imask, fan_in, width_n, apply_input_quant=True, apply_output_quant=True) -> None:
+    def __init__(self, in_features: int, out_features: int, input_quant, output_quant, imask, fan_in, width_n, apply_input_quant=True, apply_output_quant=True, output_pre_transform = None,
+                input_post_transform = None) -> None:
         super(SparseLinearNeq, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -128,6 +129,8 @@ class SparseLinearNeq(nn.Module):
         self.neuron_truth_tables = None
         self.apply_input_quant = apply_input_quant
         self.apply_output_quant = apply_output_quant
+        self.output_pre_transform = output_pre_transform
+        self.input_post_transform = input_post_transform
 
     def lut_cost(self):
         """
@@ -264,6 +267,8 @@ class SparseLinearNeq(nn.Module):
         else:
             if self.apply_input_quant:
                 x = self.input_quant(x)
+            if self.input_post_transform is not None:
+                x = self.input_post_transform(x)
             x = x[:, self.imask]
             x = x.repeat(1,1,self.width_n).reshape(x.size(0), x.size(1)*self.width_n, self.fan_in)
             residual0 = self.res0(x)
@@ -282,6 +287,8 @@ class SparseLinearNeq(nn.Module):
             x = x.reshape(x.size(0), int(x.size(1)/self.width_n), self.width_n)
             x = self.fc4(x)
             x = x + residual1
+            if self.output_pre_transform is not None:
+                x = self.output_pre_transform(x)
             if self.apply_output_quant:
                 x = self.output_quant(x)
         return x

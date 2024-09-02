@@ -4,7 +4,7 @@ import torch.nn as nn
 from brevitas.core.quant import QuantType
 from brevitas.nn import QuantIdentity
 from logicnets.quant import QuantBrevitasActivation
-
+from logicnets.nn import ScalarBiasScale
 
 from models import MnistNeqModel
 
@@ -40,7 +40,9 @@ class AveragingMnistNeqModel(nn.Module):
                 print(f"\t{hex(id(model.module_list[-1].output_quant))}")
             # Set all ensemble member's output quantizer to be the same as the
             # first model's output quantizer
+            self.ensemble[0].module_list[-1].output_pre_transform = ScalarBiasScale(scale=True, scale_init=1/num_models)
             for model in self.ensemble[1:]:
+                model.module_list[-1].output_pre_transform = ScalarBiasScale(scale=True, scale_init=1/num_models)
                 model.module_list[-1].output_quant = self.ensemble[0].module_list[-1].output_quant
             # FOR DEBUGGING: Print output quantizer for each ensemble member
             print("AFTER: Output quantizer for each ensemble member:")
@@ -53,7 +55,9 @@ class AveragingMnistNeqModel(nn.Module):
                 print(f"\t{hex(id(model.module_list[0].input_quant))}")
             # Set all ensemble member's input quantizer to be the same as the
             # first model's input quantizer
+            self.ensemble[0].module_list[0].input_post_transform = ScalarBiasScale(scale=True)
             for model in self.ensemble[1:]:
+                model.module_list[0].input_post_transform = ScalarBiasScale(scale=True)
                 model.module_list[0].input_quant = self.ensemble[0].module_list[0].input_quant
             # FOR DEBUGGING: Print input quantizer for each ensemble member
             print("AFTER: Input quantizer for each ensemble member:")
@@ -67,7 +71,7 @@ class AveragingMnistNeqModel(nn.Module):
 
     def pytorch_forward(self, x):
         outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
-        outputs = outputs.mean(dim=0)
+        outputs = outputs.sum(dim=0)
         if self.quantize_avg: # For packing averaging into a LUT
             outputs = self.avg_quant(outputs)
         return outputs
