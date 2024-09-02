@@ -71,7 +71,10 @@ class AveragingMnistNeqModel(nn.Module):
 
     def pytorch_forward(self, x):
         outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
-        outputs = outputs.sum(dim=0)
+        if self.same_output_scale:
+            outputs = outputs.sum(dim=0)
+        else:
+            outputs = outputs.mean(dim=0)
         if self.quantize_avg: # For packing averaging into a LUT
             outputs = self.avg_quant(outputs)
         return outputs
