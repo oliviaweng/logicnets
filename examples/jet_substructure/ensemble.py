@@ -4,6 +4,7 @@ import torch.nn as nn
 from brevitas.core.quant import QuantType
 from brevitas.nn import QuantIdentity
 from logicnets.quant import QuantBrevitasActivation
+from logicnets.nn import ScalarBiasScale, ScalarScaleBias
 
 
 from models import JetSubstructureNeqModel
@@ -21,7 +22,10 @@ class AveragingJetNeqModel(nn.Module):
         self.num_models = num_models
         self.quantize_avg = quantize_avg
         self.same_input_scale = model_config["same_input_scale"]
+        self.input_post_trans_sbs = model_config["input_post_trans_sbs"] # ScalarBiasScale
+        self.input_post_trans_ssb = model_config["input_post_trans_ssb"] # ScalarScaleBias
         self.same_output_scale = model_config["same_output_scale"]
+        # TODO: Add output_pre_transforms
         self.ensemble = nn.ModuleList(
             [JetSubstructureNeqModel(model_config) for _ in range(num_models)]
         )
@@ -35,9 +39,18 @@ class AveragingJetNeqModel(nn.Module):
             )
         if self.same_input_scale:
             # Share input quantizer among ensemble members
+            if self.input_post_trans_ssb:
+                self.ensemble[0].module_list[0].input_post_transform = ScalarScaleBias(scale=True)
+            elif self.input_post_trans_sbs:
+                print("Setting input_post_transform to ScalarBiasScale")
+                self.ensemble[0].module_list[0].input_post_transform = ScalarBiasScale(scale=True)
             for model in self.ensemble[1:]:
                 # Set all ensemble member's input quantizer to be the same as the
                 # first model's input quantizer
+                if self.input_post_trans_ssb:
+                    model.module_list[0].input_post_transform = ScalarScaleBias(scale=True)
+                elif self.input_post_trans_sbs:
+                    model.module_list[0].input_post_transform = ScalarBiasScale(scale=True)
                 model.module_list[0].input_quant = self.ensemble[0].module_list[0].input_quant
                 # print("AFTER: input quantizer for each ensemble member:")
                 # for model in self.ensemble:
