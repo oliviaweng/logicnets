@@ -1,0 +1,16 @@
+Single model 1 test loss: 0.19537974894046783	Accuracy = 95.34
+Ensemble size 1 test loss: 0.19537974894046783	Accuracy = 95.34
+Single model 2 test loss: 0.1740626096725464	Accuracy = 95.7
+Ensemble size 2 test loss: 0.1283031553030014	Accuracy = 96.62
+Single model 3 test loss: 0.17715279757976532	Accuracy = 95.67
+Ensemble size 3 test loss: 0.1136557012796402	Accuracy = 96.92
+Single model 4 test loss: 0.17577695846557617	Accuracy = 95.77
+Ensemble size 4 test loss: 0.10890336334705353	Accuracy = 97.13
+Single model 5 test loss: 0.18482668697834015	Accuracy = 95.72
+Ensemble size 5 test loss: 0.10449090600013733	Accuracy = 97.22
+Single model 6 test loss: 0.18879984319210052	Accuracy = 95.81
+Ensemble size 6 test loss: 0.10283322632312775	Accuracy = 97.27
+Single model 7 test loss: 0.17350611090660095	Accuracy = 95.84
+Ensemble size 7 test loss: 0.10074734687805176	Accuracy = 97.38
+Single model 8 test loss: 0.18000654876232147	Accuracy = 95.59
+Ensemble size 8 test loss: 0.09861737489700317	Accuracy = 97.35

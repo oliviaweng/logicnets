@@ -20,8 +20,8 @@
 
 # Bagging
 # tmux new-session -d -s bag "./scripts/run_train_exp.sh 1 ./ensemble_configs/bagging/deg1_configs ./bagging"
-tmux new-session -d -s bag "./scripts/run_train_exp.sh 0 ./ensemble_configs/bagging/deg4_configs ./bagging"
+# tmux new-session -d -s bag "./scripts/run_train_exp.sh 0 ./ensemble_configs/bagging/deg4_configs ./bagging"
 
 # AdaBoost
 # tmux new-session -d -s ada "./scripts/run_train_exp.sh 0 ./ensemble_configs/adaboost/deg1_configs ./adaboost"
-# tmux new-session -d -s ada "./scripts/run_train_exp.sh 1 ./ensemble_configs/adaboost/deg4_configs ./adaboost"
+tmux new-session -d -s ada "./scripts/run_train_exp.sh 1 ./ensemble_configs/adaboost/deg4_configs ./adaboost"
