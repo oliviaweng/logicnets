@@ -1,0 +1,16 @@
+hidden_layers:
+- 64
+- 32
+input_bitwidth: 3
+hidden_bitwidth: 3
+output_bitwidth: 3
+input_fanin: 4
+degree: 6
+hidden_fanin: 4
+output_fanin: 4
+weight_decay: 0
+batch_size: 1024
+epochs: 1000
+learning_rate: 0.001
+seed: 1697
+checkpoint: null

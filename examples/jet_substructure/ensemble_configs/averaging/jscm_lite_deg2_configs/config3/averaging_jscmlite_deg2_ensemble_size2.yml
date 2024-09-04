@@ -1,0 +1,18 @@
+batch_size: 1024
+checkpoint: null
+degree: 2
+ensemble_method: averaging
+ensemble_size: 2
+epochs: 1000
+hidden_bitwidth: 3
+hidden_fanin: 4
+hidden_layers:
+- 64
+- 32
+input_bitwidth: 3
+input_fanin: 4
+learning_rate: 0.001
+output_bitwidth: 3
+output_fanin: 4
+seed: 1697
+weight_decay: 0

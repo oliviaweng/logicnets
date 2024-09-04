@@ -36,7 +36,7 @@ class JetSubstructureDataset(Dataset):
             tree_array = h5py_file["t_allpar_new"][()]
 
         with open(config_file, 'r') as f:
-           self.config = yaml.load(f) 
+           self.config = yaml.safe_load(f) 
 
         # TODO: Add warnings about unused dictionary entries
         self.feature_labels = self.config["Inputs"]
