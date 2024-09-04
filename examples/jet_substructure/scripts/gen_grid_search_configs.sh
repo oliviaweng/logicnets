@@ -20,8 +20,12 @@
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./logicnet_configs/uniform_input_large --experiment_prefix uniform_input_large
 
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_small --experiment_prefix uniform_input_small
-python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_medium --experiment_prefix uniform_input_medium
-python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_large --experiment_prefix uniform_input_large
+# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_medium --experiment_prefix uniform_input_medium
+# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_large --experiment_prefix uniform_input_large
+
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./logicnet_configs/uniform_all_small --experiment_prefix uniform_all_small
+# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./logicnet_configs/uniform_all_medium --experiment_prefix uniform_all_medium
+# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./logicnet_configs/uniform_all_large --experiment_prefix uniform_all_large
 
 # Averaging
 # python3 grid_search.py -c search_configs/jsc_s_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_small
@@ -39,6 +43,10 @@ python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ens
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_same_input_scale --experiment_prefix small_same_input_scale
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_same_input_scale --experiment_prefix medium_same_input_scale
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_same_input_scale --experiment_prefix large_same_input_scale
+
+python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_input_post_trans_sbs --experiment_prefix small_input_post_trans_sbs
+python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_input_post_trans_sbs --experiment_prefix medium_input_post_trans_sbs
+python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_input_post_trans_sbs --experiment_prefix large_input_post_trans_sbs
 
 # Bagging
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/bagging/small_independent_configs --experiment_prefix bagging_small_independent

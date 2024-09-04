@@ -21,8 +21,10 @@ checkpoint: null
 quantize_avg: false
 post_transform_output: true
 same_output_scale: false
-same_input_scale: false
+same_input_scale: true
+input_post_trans_sbs: true
 uniform_input_connectivity: true
+uniform_connectivity: true
 
 # Params to grid search
 grid_search_params:
@@ -30,5 +32,5 @@ grid_search_params:
   - 2
   - 4
   - 8
-  - 16
-  - 32
+  # - 16
+  # - 32

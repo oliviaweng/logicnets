@@ -37,6 +37,7 @@ class JetSubstructureNeqModel(nn.Module):
         self.num_neurons = [model_config["input_length"]] + model_config["hidden_layers"] + [model_config["output_length"]]
         self.post_transform_output = model_config["post_transform_output"]
         self.uniform_input_connectivity = model_config["uniform_input_connectivity"]
+        self.uniform_connectivity = model_config["uniform_connectivity"]
         layer_list = []
         for i in range(1, len(self.num_neurons)):
             in_features = self.num_neurons[i-1]
@@ -60,7 +61,9 @@ class JetSubstructureNeqModel(nn.Module):
                     in_features, 
                     out_features, 
                     fan_in=model_config["input_fanin"],
-                    uniform_input_connectivity=self.uniform_input_connectivity,
+                    uniform_input_connectivity=(
+                        self.uniform_input_connectivity or self.uniform_connectivity
+                    ),
                 )
                 layer = SparseLinearNeq(
                     in_features, 
@@ -87,7 +90,10 @@ class JetSubstructureNeqModel(nn.Module):
                     post_transforms=post_transforms,
                 )
                 mask = RandomFixedSparsityMask2D(
-                    in_features, out_features, fan_in=model_config["output_fanin"]
+                    in_features, 
+                    out_features, 
+                    fan_in=model_config["output_fanin"],
+                    uniform_input_connectivity=self.uniform_connectivity,
                 )
                 layer = SparseLinearNeq(
                     in_features, 
@@ -109,7 +115,10 @@ class JetSubstructureNeqModel(nn.Module):
                     pre_transforms=[bn]
                 )
                 mask = RandomFixedSparsityMask2D(
-                    in_features, out_features, fan_in=model_config["hidden_fanin"]
+                    in_features, 
+                    out_features, 
+                    fan_in=model_config["hidden_fanin"],
+                    uniform_input_connectivity=self.uniform_connectivity,
                 )
                 layer = SparseLinearNeq(
                     in_features, 

@@ -134,7 +134,19 @@ class SparseLinear(nn.Linear):
 
 # TODO: Perhaps make this two classes, separating the LUT and NEQ code.
 class SparseLinearNeq(nn.Module):
-    def __init__(self, in_features: int, out_features: int, input_quant, output_quant, sparse_linear_kws={}, apply_input_quant=True, apply_output_quant=True) -> None:
+    def __init__(
+        self, 
+        in_features: int, 
+        out_features: int, 
+        input_quant, 
+        output_quant, 
+        sparse_linear_kws={}, 
+        apply_input_quant=True, 
+        apply_output_quant=True,
+        output_pre_transform=None,
+        input_post_transform=None,
+
+    ) -> None:
         super(SparseLinearNeq, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -145,6 +157,8 @@ class SparseLinearNeq(nn.Module):
         self.neuron_truth_tables = None
         self.apply_input_quant = apply_input_quant
         self.apply_output_quant = apply_output_quant
+        self.output_pre_transform = output_pre_transform
+        self.input_post_transform = input_post_transform
 
     def lut_cost(self):
         """
@@ -281,7 +295,11 @@ class SparseLinearNeq(nn.Module):
         else:
             if self.apply_input_quant:
                 x = self.input_quant(x)
+            if self.input_post_transform:
+                x = self.input_post_transform(x)
             x = self.fc(x)
+            if self.output_pre_transform:
+                x = self.output_pre_transform(x)
             if self.apply_output_quant:
                 x = self.output_quant(x)
         return x
@@ -398,7 +416,7 @@ class RandomFixedSparsityMask2D(nn.Module):
             # print(list(input_i_usage_q.items()))
             if torch.all(torch.tensor(input_i_usage_l) == input_i_usage_l[0]):
                 print("All indices used equally -> make a random choice")
-                index = torch.randint(0, self.in_features)
+                index = np.random.randint(0, self.in_features)
                 nzw_indices = torch.concat([nzw_indices, torch.tensor([int(index)]) ])
                 rem_nzws = rem_nzws - 1
                 input_i_usage_q[index] = input_i_usage_q[index]+1
