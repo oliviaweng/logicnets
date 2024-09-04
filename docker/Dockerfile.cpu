@@ -77,7 +77,7 @@ RUN conda install -y zsh -c conda-forge && \
 
 # Install prerequisites for the JSC/NIDS examples
 # Later versions of protobuf (>=3.19) require GLIBC >=3.4
-RUN conda install -y wget h5py pyyaml=5 numpy pandas scikit-learn tensorboard protobuf\<3.19 && \
+RUN conda install -y wget h5py pyyaml=5 numpy pandas scikit-learn tensorboard protobuf\<3.19 heapdict && \
     conda clean -ya
 
 # Install pip-based prerequisites
