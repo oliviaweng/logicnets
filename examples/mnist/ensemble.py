@@ -6,7 +6,18 @@ from brevitas.nn import QuantIdentity
 from logicnets.quant import QuantBrevitasActivation
 from logicnets.nn import ScalarBiasScale
 
+from brevitas.core.quant import QuantType
+from brevitas.core.scaling import ScalingImplType
+from brevitas.nn import QuantHardTanh, QuantReLU
+
 from models import MnistNeqModel
+
+from logicnets.quant import QuantBrevitasActivation
+from logicnets.nn import (
+    SparseLinearNeq, 
+    ScalarBiasScale, 
+    FeatureMask, 
+)
 
 
 class AveragingMnistNeqModel(nn.Module):
@@ -50,19 +61,63 @@ class AveragingMnistNeqModel(nn.Module):
                 print(f"\t{hex(id(model.module_list[-1].output_quant))}")
         if self.same_input_scale:
             # FOR DEBUGGING: Print input quantizer for each ensemble member
-            print("BEFORE: Input quantizer for each ensemble member:")
-            for model in self.ensemble:
-                print(f"\t{hex(id(model.module_list[0].input_quant))}")
+            # print("BEFORE: Input quantizer for each ensemble member:")
+            # for model in self.ensemble:
+            #     print(f"\t{hex(id(model.module_list[0].input_quant))}")
             # Set all ensemble member's input quantizer to be the same as the
             # first model's input quantizer
-            self.ensemble[0].module_list[0].input_post_transform = ScalarBiasScale(scale=True)
-            for model in self.ensemble[1:]:
-                model.module_list[0].input_post_transform = ScalarBiasScale(scale=True)
-                model.module_list[0].input_quant = self.ensemble[0].module_list[0].input_quant
+            # self.ensemble[0].module_list[0].input_post_transform = ScalarBiasScale(scale=True)
+            # for model in self.ensemble[1:]:
+                # model.module_list[0].input_post_transform = ScalarBiasScale(scale=True)
+                # model.module_list[0].input_quant = self.ensemble[0].module_list[0].input_quant
             # FOR DEBUGGING: Print input quantizer for each ensemble member
-            print("AFTER: Input quantizer for each ensemble member:")
-            for model in self.ensemble:
-                print(f"\t{hex(id(model.module_list[0].input_quant))}")
+            # print("AFTER: Input quantizer for each ensemble member:")
+            # for model in self.ensemble:
+            #     print(f"\t{hex(id(model.module_list[0].input_quant))}")
+
+            #Create a new shared layer
+            bn_in = nn.BatchNorm1d(self.ensemble[0].module_list[0].in_features)
+            bn = nn.BatchNorm1d(self.ensemble[0].module_list[0].out_features*self.num_models*self.ensemble[0].module_list[0].fan_in)
+            input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
+            input_quant = QuantBrevitasActivation(
+                QuantHardTanh(
+                    8,
+                    max_val=1.0,
+                    narrow_range=False,
+                    quant_type=QuantType.INT,
+                    scaling_impl_type=ScalingImplType.PARAMETER,
+                ),
+                pre_transforms=[bn_in, input_bias],
+            )
+            output_quant = QuantBrevitasActivation(
+                QuantReLU(
+                    bit_width=model_config["input_bitwidth"],
+                    max_val=1.61,
+                    quant_type=QuantType.INT,
+                    scaling_impl_type=ScalingImplType.PARAMETER,
+                ),
+                pre_transforms=[bn],
+            )
+            imask = self.ensemble[0].module_list[0].imask
+            self.ensemble[0].module_list[0].imask = torch.nn.Parameter(torch.arange(0, self.ensemble[0].module_list[0].out_features*self.ensemble[0].module_list[0].fan_in).unsqueeze(-1).view(model.module_list[0].imask.size()), requires_grad=False)
+            for idx, model in enumerate(self.ensemble[1:]):
+                imask = torch.cat((imask,model.module_list[0].imask), 0)
+                model.module_list[0].imask = torch.nn.Parameter(torch.arange((idx+1)*model.module_list[0].out_features*self.ensemble[0].module_list[0].fan_in, (idx+2)*model.module_list[0].out_features*self.ensemble[0].module_list[0].fan_in).unsqueeze(-1).view(model.module_list[0].imask.size()), requires_grad=False)
+            imask = imask.view(imask.size(0)*imask.size(1), 1)
+            layer = SparseLinearNeq(
+                self.ensemble[0].module_list[0].in_features,
+                self.ensemble[0].module_list[0].out_features * self.ensemble[0].module_list[0].fan_in * self.num_models,
+                input_quant=input_quant,
+                output_quant=output_quant,
+                imask=imask,
+                fan_in=1,
+                width_n=model_config["width_n"],
+            )
+            for module in self.ensemble:
+                module.module_list[0].in_features = self.ensemble[0].module_list[0].out_features * self.ensemble[0].module_list[0].fan_in * self.num_models
+
+            self.ensemble.insert(0, layer)
+            
             
     def forward(self, x):
         if self.is_verilog_inference:
