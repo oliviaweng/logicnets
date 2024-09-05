@@ -82,9 +82,16 @@
 # tmux new-session -d -s linp01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config2 ./averaging"
 # tmux new-session -d -s linp02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_same_input_scale_configs/config3 ./averaging"
 
-tmux new-session -d -s sinp "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_input_post_trans_sbs ./averaging"
-tmux new-session -d -s minp "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_input_post_trans_sbs ./averaging"
-tmux new-session -d -s linp "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_input_post_trans_sbs ./averaging"
+# tmux new-session -d -s sinp "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_input_post_trans_sbs ./averaging"
+# tmux new-session -d -s minp "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_input_post_trans_sbs ./averaging"
+# tmux new-session -d -s linp "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_input_post_trans_sbs ./averaging"
+
+# tmux new-session -d -s sinpq00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/shared_input_quant_configs/config1 ./averaging"
+# tmux new-session -d -s sinpq01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/shared_input_quant_configs/config2 ./averaging"
+# tmux new-session -d -s sinpl00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/shared_input_layer_configs/config1 ./averaging"
+# tmux new-session -d -s sinpl01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/shared_input_layer_configs/config2 ./averaging"
+
+tmux new-session -d -s sinpl01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/shared_sparse_input_layer_configs/config1 ./averaging"
 
 # Bagging
 # tmux new-session -d -s jscs_bag "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/small_configs ./bagging"

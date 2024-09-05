@@ -2,10 +2,16 @@ import torch
 import torch.nn as nn
 
 from brevitas.core.quant import QuantType
-from brevitas.nn import QuantIdentity
+from brevitas.nn import QuantIdentity, QuantHardTanh
+from brevitas.core.scaling import ScalingImplType
 from logicnets.quant import QuantBrevitasActivation
-from logicnets.nn import ScalarBiasScale, ScalarScaleBias
-
+from logicnets.nn import (
+    ScalarBiasScale, 
+    ScalarScaleBias, 
+    DenseMask2D, 
+    RandomFixedSparsityMask2D,
+    SparseLinearNeq,
+)
 
 from models import JetSubstructureNeqModel
 
@@ -23,8 +29,9 @@ class AveragingJetNeqModel(nn.Module):
         self.quantize_avg = quantize_avg
         self.same_input_scale = model_config["same_input_scale"]
         self.input_post_trans_sbs = model_config["input_post_trans_sbs"] # ScalarBiasScale
-        self.input_post_trans_ssb = model_config["input_post_trans_ssb"] # ScalarScaleBias
         self.same_output_scale = model_config["same_output_scale"]
+        self.shared_input_quant = model_config["shared_input_quant"]
+        self.shared_input_layer = model_config["shared_input_layer"]
         # TODO: Add output_pre_transforms
         self.ensemble = nn.ModuleList(
             [JetSubstructureNeqModel(model_config) for _ in range(num_models)]
@@ -38,10 +45,8 @@ class AveragingJetNeqModel(nn.Module):
                 )
             )
         if self.same_input_scale:
-            # Share input quantizer among ensemble members
-            if self.input_post_trans_ssb:
-                self.ensemble[0].module_list[0].input_post_transform = ScalarScaleBias(scale=True)
-            elif self.input_post_trans_sbs:
+            # Share input quantizer among ensemble members to have same input scaling factor
+            if self.input_post_trans_sbs:
                 print("Setting input_post_transform to ScalarBiasScale")
                 self.ensemble[0].module_list[0].input_post_transform = ScalarBiasScale(scale=True)
             for model in self.ensemble[1:]:
@@ -55,6 +60,40 @@ class AveragingJetNeqModel(nn.Module):
                 # print("AFTER: input quantizer for each ensemble member:")
                 # for model in self.ensemble:
                 #     print(f"\t{hex(id(model.module_list[0].input_quant))}")
+        elif self.shared_input_quant:
+            # Create a shared input quantizer that feeds into each ensemble
+            # member, who each have their own input quantizer
+            bn_in = nn.BatchNorm1d(self.ensemble[0].module_list[0].in_features)
+            input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
+            self.input_quant = QuantBrevitasActivation(
+                QuantHardTanh(
+                    bit_width=model_config["shared_input_bitwidth"],
+                    max_val=1.0,
+                    narrow_range=False,
+                    quant_type=QuantType.INT,
+                    scaling_impl_type=ScalingImplType.PARAMETER,
+                ),
+                pre_transforms=[bn_in, input_bias],
+            )
+            if self.shared_input_layer:
+                mask = RandomFixedSparsityMask2D(
+                    self.ensemble[0].module_list[0].in_features,
+                    self.ensemble[0].module_list[0].in_features,
+                    fan_in=1,
+                    uniform_input_connectivity=True,
+                )
+                # mask = DenseMask2D(
+                #     self.ensemble[0].module_list[0].in_features,
+                #     self.ensemble[0].module_list[0].in_features,
+                # )
+                self.input_quant_layer = SparseLinearNeq(
+                    self.ensemble[0].module_list[0].in_features,
+                    self.ensemble[0].module_list[0].in_features,
+                    input_quant=self.input_quant,
+                    output_quant=None,
+                    apply_output_quant=False,
+                    sparse_linear_kws={"mask": mask},
+                )
         if self.same_output_scale:
             # FOR DEBUGGING: Print output quantizer for each ensemble member
             # print("BEFORE: Output quantizer for each ensemble member:")
@@ -77,6 +116,11 @@ class AveragingJetNeqModel(nn.Module):
         return self.pytorch_forward(x)
 
     def pytorch_forward(self, x):
+        if self.shared_input_quant:
+            if self.shared_input_layer:
+                x = self.input_quant_layer(x)
+            else:
+                x = self.input_quant(x)
         outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
         outputs = outputs.mean(dim=0)
         if self.quantize_avg: # For packing averaging into a LUT

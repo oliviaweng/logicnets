@@ -44,9 +44,13 @@
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_same_input_scale --experiment_prefix medium_same_input_scale
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_same_input_scale --experiment_prefix large_same_input_scale
 
-python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_input_post_trans_sbs --experiment_prefix small_input_post_trans_sbs
-python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_input_post_trans_sbs --experiment_prefix medium_input_post_trans_sbs
-python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_input_post_trans_sbs --experiment_prefix large_input_post_trans_sbs
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_input_post_trans_sbs --experiment_prefix small_input_post_trans_sbs
+# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_input_post_trans_sbs --experiment_prefix medium_input_post_trans_sbs
+# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_input_post_trans_sbs --experiment_prefix large_input_post_trans_sbs
+
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_input_quant --experiment_prefix shared_input_quant
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_input_layer --experiment_prefix shared_input_layer
+python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_sparse_input_layer --experiment_prefix shared_sparse_input_layer
 
 # Bagging
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/bagging/small_independent_configs --experiment_prefix bagging_small_independent

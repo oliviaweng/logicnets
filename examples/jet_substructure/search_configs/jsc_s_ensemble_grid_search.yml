@@ -15,24 +15,29 @@ weight_decay: 0.001
 batch_size: 1024
 epochs: 1000
 learning_rate: 0.001
-seed: 1 # 2
+seed: 2
 checkpoint: null
 quantize_avg: false
 post_transform_output: true
 same_output_scale: false
-same_input_scale: true
-input_post_trans_sbs: true
-uniform_input_connectivity: true
-uniform_connectivity: true
+same_input_scale: false
+input_post_trans_sbs: false
+
+shared_input_quant: true
+shared_input_layer: true
+
+uniform_input_connectivity: false
+uniform_connectivity: false
 
 # Params to grid search
 grid_search_params:
-  # seed:
-  # - 1
+  shared_input_bitwidth: 
+  - 8
+  - 16
   ensemble_size:
   - 2
-  - 4
-  - 8
+  # - 4
+  # - 8
   # - 16
   # - 32
   # - 64
