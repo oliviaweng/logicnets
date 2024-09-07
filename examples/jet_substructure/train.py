@@ -72,6 +72,8 @@ def main(args):
         config["post_transform_output"] = True 
     if "same_output_scale" not in config:
         config["same_output_scale"] = False
+    if "same_output_scale_sum" not in config:
+        config["same_output_scale_sum"] = False
     if "same_input_scale" not in config:
         config["same_input_scale"] = False
     if "input_post_trans_sbs" not in config:

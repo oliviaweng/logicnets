@@ -30,6 +30,7 @@ class AveragingJetNeqModel(nn.Module):
         self.same_input_scale = model_config["same_input_scale"]
         self.input_post_trans_sbs = model_config["input_post_trans_sbs"] # ScalarBiasScale
         self.same_output_scale = model_config["same_output_scale"]
+        self.same_output_scale_sum = model_config["same_output_scale_sum"]
         self.shared_input_quant = model_config["shared_input_quant"]
         self.shared_input_layer = model_config["shared_input_layer"]
         # TODO: Add output_pre_transforms
@@ -47,7 +48,6 @@ class AveragingJetNeqModel(nn.Module):
         if self.same_input_scale:
             # Share input quantizer among ensemble members to have same input scaling factor
             if self.input_post_trans_sbs:
-                print("Setting input_post_transform to ScalarBiasScale")
                 self.ensemble[0].module_list[0].input_post_transform = ScalarBiasScale(scale=True)
             for model in self.ensemble[1:]:
                 # Set all ensemble member's input quantizer to be the same as the
@@ -82,10 +82,6 @@ class AveragingJetNeqModel(nn.Module):
                     fan_in=1,
                     uniform_input_connectivity=True,
                 )
-                # mask = DenseMask2D(
-                #     self.ensemble[0].module_list[0].in_features,
-                #     self.ensemble[0].module_list[0].in_features,
-                # )
                 self.input_quant_layer = SparseLinearNeq(
                     self.ensemble[0].module_list[0].in_features,
                     self.ensemble[0].module_list[0].in_features,
@@ -107,6 +103,16 @@ class AveragingJetNeqModel(nn.Module):
             # print("AFTER: Output quantizer for each ensemble member:")
             # for model in self.ensemble:
             #     print(f"\t{hex(id(model.module_list[-1].output_quant))}")
+        elif self.same_output_scale_sum:
+            # TODO: Double check this line
+            self.ensemble[0].module_list[-1].output_pre_transform = ScalarBiasScale(
+                scale=True, scale_init=1/num_models
+            )
+            for model in self.ensemble[1:]:
+                model.module_list[-1].output_pre_transform = ScalarBiasScale(
+                    scale=True, scale_init=1/num_models
+                )
+                model.module_list[-1].output_quant = self.ensemble[0].module_list[-1].output_quant
 
 
 
@@ -122,7 +128,10 @@ class AveragingJetNeqModel(nn.Module):
             else:
                 x = self.input_quant(x)
         outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
-        outputs = outputs.mean(dim=0)
+        if self.same_output_scale_sum:
+            outputs = outputs.sum(dim=0)
+        else:
+            outputs = outputs.mean(dim=0)
         if self.quantize_avg: # For packing averaging into a LUT
             outputs = self.avg_quant(outputs)
         return outputs

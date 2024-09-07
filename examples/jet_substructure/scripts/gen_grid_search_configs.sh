@@ -50,7 +50,13 @@
 
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_input_quant --experiment_prefix shared_input_quant
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_input_layer --experiment_prefix shared_input_layer
-python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_sparse_input_layer --experiment_prefix shared_sparse_input_layer
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_sparse_input_layer --experiment_prefix shared_sparse_input_layer
+
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_shared_sparse_input_layer_and_output_mean --experiment_prefix small_shared_sparse_input_layer_and_output_mean
+
+python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_shared_sparse_input_layer --experiment_prefix small_shared_sparse_input_layer
+python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_shared_sparse_input_layer --experiment_prefix medium_shared_sparse_input_layer
+python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_shared_sparse_input_layer --experiment_prefix large_shared_sparse_input_layer
 
 # Bagging
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/bagging/small_independent_configs --experiment_prefix bagging_small_independent
