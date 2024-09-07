@@ -33,6 +33,7 @@ class AveragingJetNeqModel(nn.Module):
         self.same_output_scale_sum = model_config["same_output_scale_sum"]
         self.shared_input_quant = model_config["shared_input_quant"]
         self.shared_input_layer = model_config["shared_input_layer"]
+        self.input_length = model_config["input_length"]
         # TODO: Add output_pre_transforms
         self.ensemble = nn.ModuleList(
             [JetSubstructureNeqModel(model_config) for _ in range(num_models)]
@@ -63,7 +64,7 @@ class AveragingJetNeqModel(nn.Module):
         elif self.shared_input_quant:
             # Create a shared input quantizer that feeds into each ensemble
             # member, who each have their own input quantizer
-            bn_in = nn.BatchNorm1d(self.ensemble[0].module_list[0].in_features)
+            bn_in = nn.BatchNorm1d(self.input_length)
             input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
             self.input_quant = QuantBrevitasActivation(
                 QuantHardTanh(
@@ -77,14 +78,14 @@ class AveragingJetNeqModel(nn.Module):
             )
             if self.shared_input_layer:
                 mask = RandomFixedSparsityMask2D(
-                    self.ensemble[0].module_list[0].in_features,
-                    self.ensemble[0].module_list[0].in_features,
+                    self.input_length,
+                    self.input_length * num_models,
                     fan_in=1,
                     uniform_input_connectivity=True,
                 )
                 self.input_quant_layer = SparseLinearNeq(
-                    self.ensemble[0].module_list[0].in_features,
-                    self.ensemble[0].module_list[0].in_features,
+                    self.input_length,
+                    self.input_length * num_models,
                     input_quant=self.input_quant,
                     output_quant=None,
                     apply_output_quant=False,
@@ -127,7 +128,13 @@ class AveragingJetNeqModel(nn.Module):
                 x = self.input_quant_layer(x)
             else:
                 x = self.input_quant(x)
-        outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
+        outputs = torch.stack(
+            [
+                model(x[:, i * self.input_length : (i + 1) * self.input_length])
+                for i, model in enumerate(self.ensemble)
+            ],
+            dim=0,
+        )
         if self.same_output_scale_sum:
             outputs = outputs.sum(dim=0)
         else:
