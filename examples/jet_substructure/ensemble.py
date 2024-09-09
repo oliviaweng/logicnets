@@ -123,18 +123,20 @@ class AveragingJetNeqModel(nn.Module):
         return self.pytorch_forward(x)
 
     def pytorch_forward(self, x):
-        if self.shared_input_quant:
-            if self.shared_input_layer:
-                x = self.input_quant_layer(x)
-            else:
+        if self.shared_input_quant and self.shared_input_layer:
+            x = self.input_quant_layer(x)
+            outputs = torch.stack(
+                [
+                    model(x[:, i * self.input_length : (i + 1) * self.input_length])
+                    for i, model in enumerate(self.ensemble)
+                ],
+                dim=0,
+            )
+        else:
+            if self.shared_input_quant:
                 x = self.input_quant(x)
-        outputs = torch.stack(
-            [
-                model(x[:, i * self.input_length : (i + 1) * self.input_length])
-                for i, model in enumerate(self.ensemble)
-            ],
-            dim=0,
-        )
+            outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
+
         if self.same_output_scale_sum:
             outputs = outputs.sum(dim=0)
         else:
@@ -185,6 +187,7 @@ class BaseEnsembleClassifier(nn.Module):
         self.model_config = model_config
         self.num_models = num_models
         self.quantize_avg = quantize_avg
+        self.shared_input_layer = model_config["shared_input_layer"]
         self.single_model_mode = single_model_mode
         self.model = model_class(model_config)
         if single_model_mode:
@@ -204,6 +207,36 @@ class BaseEnsembleClassifier(nn.Module):
             )
         self.is_verilog_inference = False
 
+        if self.shared_input_layer:
+            # Create a shared input quantizer that feeds into each ensemble
+            # member, who each have their own input quantizer
+            bn_in = nn.BatchNorm1d(self.input_length)
+            input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
+            self.input_quant = QuantBrevitasActivation(
+                QuantHardTanh(
+                    bit_width=model_config["shared_input_bitwidth"],
+                    max_val=1.0,
+                    narrow_range=False,
+                    quant_type=QuantType.INT,
+                    scaling_impl_type=ScalingImplType.PARAMETER,
+                ),
+                pre_transforms=[bn_in, input_bias],
+            )
+            mask = RandomFixedSparsityMask2D(
+                self.input_length,
+                self.input_length * num_models,
+                fan_in=1,
+                uniform_input_connectivity=True,
+            )
+            self.input_quant_layer = SparseLinearNeq(
+                self.input_length,
+                self.input_length * num_models,
+                input_quant=self.input_quant,
+                output_quant=None,
+                apply_output_quant=False,
+                sparse_linear_kws={"mask": mask},
+            )
+
     def forward(self, x):
         if self.is_verilog_inference:
             return self.verilog_forward(x)
@@ -213,7 +246,17 @@ class BaseEnsembleClassifier(nn.Module):
         if self.single_model_mode:
             outputs = self.model(x)
             return outputs
-        outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
+        if self.shared_input_layer:
+            x = self.input_quant_layer(x)
+            outputs = torch.stack(
+                [
+                    model(x[:, i * self.input_length : (i + 1) * self.input_length])
+                    for i, model in enumerate(self.ensemble)
+                ],
+                dim=0,
+            )
+        else: 
+            outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
         outputs = outputs.mean(dim=0)
         if self.quantize_avg:
             outputs = self.avg_quant(outputs)
@@ -322,11 +365,28 @@ class AdaBoostJetNeqModel(BaseEnsembleClassifier):
         if self.single_model_mode:
             outputs = self.model(x)
             return outputs
-        outputs = sum(
-            [
-                alpha * self.adaboost_labels[torch.argmax(model(x), dim=1)]
-                for alpha, model in zip(self.alphas, self.ensemble)
-            ]
-        )
+        if self.shared_input_quant:
+            if self.shared_input_layer:
+                x = self.input_quant_layer(x)
+            else:
+                    x = self.input_quant(x)
+            outputs = sum(
+                [
+                    alpha
+                    * self.adaboost_labels[
+                        torch.argmax(
+                            model(x[:, i * self.input_length : (i + 1) * self.input_length]), dim=1
+                        )
+                    ]
+                    for i, (alpha, model) in enumerate(zip(self.alphas, self.ensemble))
+                ]
+            )
+        else:
+            outputs = sum(
+                [
+                    alpha * self.adaboost_labels[torch.argmax(model(x), dim=1)]
+                    for alpha, model in zip(self.alphas, self.ensemble)
+                ]
+            )
         outputs = outputs / sum(self.alphas)
         return outputs
