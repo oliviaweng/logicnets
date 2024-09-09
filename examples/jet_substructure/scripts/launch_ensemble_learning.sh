@@ -97,6 +97,19 @@
 
 # tmux new-session -d -s sinpl02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_shared_sparse_input_layer_and_output_mean/ ./averaging"
 
+# tmux new-session -d -s avg_jscs00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_shared_sparse_input_layer_configs/config1 ./averaging"
+# tmux new-session -d -s avg_jscs01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_shared_sparse_input_layer_configs/config2 ./averaging"
+# tmux new-session -d -s avg_jscs02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_shared_sparse_input_layer_configs/config3 ./averaging"
+# tmux new-session -d -s avg_jscs03 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_shared_sparse_input_layer_configs/config0 ./averaging"
+
+tmux new-session -d -s avg_jscm00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_shared_sparse_input_layer_configs/config1 ./averaging"
+tmux new-session -d -s avg_jscm01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_shared_sparse_input_layer_configs/config2 ./averaging"
+
+# TODO
+# tmux new-session -d -s avg_jscl00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_shared_sparse_input_layer_configs/config1 ./averaging"
+# tmux new-session -d -s avg_jscl01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_shared_sparse_input_layer_configs/config2 ./averaging"
+# tmux new-session -d -s avg_jscl02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_shared_sparse_input_layer_configs/config3 ./averaging"
+
 # Bagging
 # tmux new-session -d -s jscs_bag "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/small_configs ./bagging"
 # tmux new-session -d -s jscm_bag "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/medium_configs ./bagging"

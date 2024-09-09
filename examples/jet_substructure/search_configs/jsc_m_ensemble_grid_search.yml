@@ -1,5 +1,6 @@
 # Fixed params
-ensemble_method: averaging
+ensemble_method: adaboost
+independent: true
 hidden_layers:
 - 64
 - 32
@@ -18,8 +19,8 @@ learning_rate: 0.001
 seed: 3
 checkpoint: null
 quantize_avg: false
-same_input_scale: true
-input_post_trans_sbs: true
+same_input_scale: false
+input_post_trans_sbs: false
 
 shared_input_quant: true
 shared_input_layer: true
@@ -36,8 +37,8 @@ grid_search_params:
   shared_input_bitwidth: 
   - 6
   ensemble_size:
-  - 2
-  - 4
-  - 8
-  - 16
+  # - 2
+  # - 4
+  # - 8
+  # - 16
   - 32

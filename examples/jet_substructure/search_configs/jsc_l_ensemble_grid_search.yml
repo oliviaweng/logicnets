@@ -1,5 +1,6 @@
 # Fixed params
-ensemble_method: averaging
+ensemble_method: adaboost
+independent: true
 hidden_layers:
 - 32
 - 64
@@ -37,8 +38,8 @@ grid_search_params:
   shared_input_bitwidth: 
   - 6
   ensemble_size:
-  - 2
-  - 4
-  - 8
-  - 16
+  # - 2
+  # - 4
+  # - 8
+  # - 16
   - 32
