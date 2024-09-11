@@ -33,10 +33,22 @@ class AveragingJetNeqModel(nn.Module):
         self.same_output_scale_sum = model_config["same_output_scale_sum"]
         self.shared_input_quant = model_config["shared_input_quant"]
         self.shared_input_layer = model_config["shared_input_layer"]
+        self.shared_output_layer = model_config["shared_output_layer"]
         self.input_length = model_config["input_length"]
+        self.output_length = model_config["output_length"]
+
+        shared_output_bitwidth = None
+        if self.shared_output_layer:
+            shared_output_bitwidth = model_config["shared_output_bitwidth"]
         # TODO: Add output_pre_transforms
         self.ensemble = nn.ModuleList(
-            [JetSubstructureNeqModel(model_config) for _ in range(num_models)]
+            [
+                JetSubstructureNeqModel(
+                    model_config,
+                    shared_output_bitwidth=shared_output_bitwidth,
+                ) 
+                for _ in range(num_models)
+            ]
         )
         self.is_verilog_inference = False
         if quantize_avg: # For packing averaging into a LUT
@@ -87,10 +99,11 @@ class AveragingJetNeqModel(nn.Module):
                     self.input_length,
                     self.input_length * num_models,
                     input_quant=self.input_quant,
-                    output_quant=None,
+                    output_quant=None, 
                     apply_output_quant=False,
                     sparse_linear_kws={"mask": mask},
                 )
+                self.ensemble.insert(0, self.input_quant_layer)
         if self.same_output_scale:
             # FOR DEBUGGING: Print output quantizer for each ensemble member
             # print("BEFORE: Output quantizer for each ensemble member:")
@@ -114,6 +127,35 @@ class AveragingJetNeqModel(nn.Module):
                     scale=True, scale_init=1/num_models
                 )
                 model.module_list[-1].output_quant = self.ensemble[0].module_list[-1].output_quant
+        elif self.shared_output_layer:
+            bn = nn.BatchNorm1d(self.output_length * num_models)
+            output_quant = QuantBrevitasActivation(
+                QuantHardTanh(
+                    bit_width=model_config["output_bitwidth"], 
+                    max_val=1.33, 
+                    narrow_range=False, 
+                    quant_type=QuantType.INT, 
+                    scaling_impl_type=ScalingImplType.PARAMETER
+                ), 
+                pre_transforms=[bn], 
+                post_transforms=[],
+            )
+            mask = RandomFixedSparsityMask2D(
+                self.output_length * num_models,
+                self.output_length * num_models,
+                fan_in=model_config["shared_output_fanin"],
+                diagonal_mask=True,
+            )
+            self.output_quant_layer = SparseLinearNeq(
+                self.output_length * num_models,
+                self.output_length * num_models,
+                input_quant=None,
+                output_quant=output_quant, 
+                apply_input_quant=False,
+                apply_output_quant=True,
+                sparse_linear_kws={"mask": mask},
+            )
+            self.ensemble.append(self.output_quant_layer)
 
 
 
@@ -124,20 +166,40 @@ class AveragingJetNeqModel(nn.Module):
 
     def pytorch_forward(self, x):
         if self.shared_input_quant and self.shared_input_layer:
-            x = self.input_quant_layer(x)
-            outputs = torch.stack(
-                [
-                    model(x[:, i * self.input_length : (i + 1) * self.input_length])
-                    for i, model in enumerate(self.ensemble)
-                ],
-                dim=0,
-            )
+            x = self.ensemble[0](x) # input_quant_layer
+            if self.shared_output_layer:
+                outputs = self.ensemble[1](x[:, 0 : self.input_length])
+                for i in range(1, self.num_models):
+                    outputs = torch.cat(
+                        (
+                            outputs,
+                            self.ensemble[i + 1](
+                                x[:, i * self.input_length : (i + 1) * self.input_length]
+                            ),
+                        ),
+                        dim=1,
+                    )
+            else:
+                outputs = torch.stack(
+                    [
+                        self.ensemble[i + 1](
+                            x[:, i * self.input_length : (i + 1) * self.input_length]
+                        )
+                        for i in range(0, self.num_models)
+                    ],
+                    dim=0,
+                )
         else:
             if self.shared_input_quant:
                 x = self.input_quant(x)
             outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
 
-        if self.same_output_scale_sum:
+        if self.shared_output_layer:
+            outputs = self.ensemble[-1](outputs)
+            # Sum every out_length elements to get the final output
+            outputs = outputs.view(-1, self.num_models, self.output_length)
+            outputs = outputs.sum(dim=1)
+        elif self.same_output_scale_sum:
             outputs = outputs.sum(dim=0)
         else:
             outputs = outputs.mean(dim=0)

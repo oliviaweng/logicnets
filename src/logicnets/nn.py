@@ -368,7 +368,8 @@ class RandomFixedSparsityMask2D(nn.Module):
         in_features: int, 
         out_features: int, 
         fan_in: int, 
-        uniform_input_connectivity : bool = False
+        uniform_input_connectivity : bool = False,
+        diagonal_mask: bool = False,
     ) -> None:
         super(RandomFixedSparsityMask2D, self).__init__()
         self.in_features = in_features
@@ -376,12 +377,17 @@ class RandomFixedSparsityMask2D(nn.Module):
         self.fan_in = fan_in
         self.mask = Parameter(torch.Tensor(out_features, in_features), requires_grad=False)
         self.uniform_input_connectivity = uniform_input_connectivity
+        self.diagonal_mask = diagonal_mask
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
         init.constant_(self.mask, 0.0)
         if self.uniform_input_connectivity:
             self.gen_uniform_input_mask()
+        elif self.diagonal_mask:
+            assert self.fan_in == 1, "Diagonal mask only supported for fan-in 1"
+            for i in range(self.out_features):
+                self.mask[i][i] = 1
         else:
             for i in range(self.out_features):
                 x = torch.randperm(self.in_features)[:self.fan_in]
