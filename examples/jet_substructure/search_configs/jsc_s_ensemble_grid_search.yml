@@ -1,6 +1,6 @@
 # Fixed params
-ensemble_method: adaboost
-independent: true
+ensemble_method: averaging
+# independent: true
 hidden_layers:
 - 64
 - 32
@@ -9,6 +9,7 @@ hidden_layers:
 input_bitwidth: 2
 hidden_bitwidth: 2
 output_bitwidth: 2
+shared_output_bitwidth: 4
 input_fanin: 3
 hidden_fanin: 3
 output_fanin: 3
@@ -24,7 +25,9 @@ input_post_trans_sbs: false
 
 shared_input_quant: true
 shared_input_layer: true
+shared_input_bitwidth: 6
 
+shared_output_layer: true
 post_transform_output: true
 same_output_scale: false
 same_output_scale_sum: false
@@ -34,15 +37,14 @@ uniform_connectivity: false
 
 # Params to grid search
 grid_search_params:
-  shared_input_bitwidth: 
-  - 6
-  # - 8
+  shared_output_fanin: 
+  - 1
   ensemble_size:
-  # - 2
+  - 2
   # - 4
   # - 8
   # - 16
-  - 32
+  # - 32
   # - 64
   # - 128
   # seed:

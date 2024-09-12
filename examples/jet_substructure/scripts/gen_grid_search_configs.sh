@@ -58,6 +58,8 @@
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_shared_sparse_input_layer --experiment_prefix medium_shared_sparse_input_layer
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_shared_sparse_input_layer --experiment_prefix large_shared_sparse_input_layer
 
+python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_shared_sparse_output_layer --experiment_prefix small_shared_sparse_output_layer
+
 # Bagging
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/bagging/small_independent_configs --experiment_prefix bagging_small_independent
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/bagging/medium_independent_configs  --experiment_prefix bagging_medium_independent
@@ -72,6 +74,6 @@
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/medium_independent_configs  --experiment_prefix adaboost_medium_independent
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/large_independent_configs  --experiment_prefix adaboost_large_independent
 
-python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/small_shared_sparse_input_layer --experiment_prefix small_shared_sparse_input_layer
-python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/medium_shared_sparse_input_layer --experiment_prefix medium_shared_sparse_input_layer
-python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/large_shared_sparse_input_layer --experiment_prefix large_shared_sparse_input_layer
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/small_shared_sparse_input_layer --experiment_prefix small_shared_sparse_input_layer
+# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/medium_shared_sparse_input_layer --experiment_prefix medium_shared_sparse_input_layer
+# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/large_shared_sparse_input_layer --experiment_prefix large_shared_sparse_input_layer

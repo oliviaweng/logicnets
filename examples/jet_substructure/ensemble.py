@@ -40,7 +40,6 @@ class AveragingJetNeqModel(nn.Module):
         shared_output_bitwidth = None
         if self.shared_output_layer:
             shared_output_bitwidth = model_config["shared_output_bitwidth"]
-        # TODO: Add output_pre_transforms
         self.ensemble = nn.ModuleList(
             [
                 JetSubstructureNeqModel(
@@ -128,7 +127,8 @@ class AveragingJetNeqModel(nn.Module):
                 )
                 model.module_list[-1].output_quant = self.ensemble[0].module_list[-1].output_quant
         elif self.shared_output_layer:
-            bn = nn.BatchNorm1d(self.output_length * num_models)
+            feature_size = self.output_length * num_models
+            bn = nn.BatchNorm1d(feature_size)
             output_quant = QuantBrevitasActivation(
                 QuantHardTanh(
                     bit_width=model_config["output_bitwidth"], 
@@ -141,14 +141,14 @@ class AveragingJetNeqModel(nn.Module):
                 post_transforms=[],
             )
             mask = RandomFixedSparsityMask2D(
-                self.output_length * num_models,
-                self.output_length * num_models,
+                feature_size,
+                feature_size,
                 fan_in=model_config["shared_output_fanin"],
                 diagonal_mask=True,
             )
             self.output_quant_layer = SparseLinearNeq(
-                self.output_length * num_models,
-                self.output_length * num_models,
+                feature_size,
+                feature_size,
                 input_quant=None,
                 output_quant=output_quant, 
                 apply_input_quant=False,
