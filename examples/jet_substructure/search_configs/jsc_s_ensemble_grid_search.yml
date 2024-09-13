@@ -8,8 +8,9 @@ hidden_layers:
 - 32
 input_bitwidth: 2
 hidden_bitwidth: 2
-output_bitwidth: 2
-shared_output_bitwidth: 4
+output_bitwidth: 2 
+shared_output_bitwidth: 4 # output bitwidth of ensemble members, if defined
+shared_output_fanin: 1
 input_fanin: 3
 hidden_fanin: 3
 output_fanin: 3
@@ -37,15 +38,13 @@ uniform_connectivity: false
 
 # Params to grid search
 grid_search_params:
-  shared_output_fanin: 
-  - 1
   ensemble_size:
   - 2
-  # - 4
-  # - 8
-  # - 16
-  # - 32
-  # - 64
+  - 4
+  - 8
+  - 16
+  - 32
+  - 64
   # - 128
   # seed:
   # - 1
