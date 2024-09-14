@@ -2,25 +2,64 @@
 
 import os
 import subprocess
-# from shell import shell
 
 ps = []
-p1 = subprocess.Popen(["./scripts/run_gen_ensemble_exp.sh", "0", "./ensemble_configs/averaging/medium_shared_sparse_input_layer_configs/config1", "./averaging"])
-p2 = subprocess.Popen(["./scripts/run_gen_ensemble_exp.sh", "0", "./ensemble_configs/averaging/medium_shared_sparse_input_layer_configs/config2", "./averaging"])
+p1 = subprocess.Popen(
+    [
+        "./scripts/run_gen_ensemble_exp.sh",
+        "0",
+        "./ensemble_configs/averaging/medium_shared_input_output_layers_configs/config1",
+        "./averaging",
+    ]
+)
+p2 = subprocess.Popen(
+    [
+        "./scripts/run_gen_ensemble_exp.sh",
+        "0",
+        "./ensemble_configs/averaging/medium_shared_input_output_layers_configs/config2",
+        "./averaging",
+    ]
+)
+p3 = subprocess.Popen(
+    [
+        "./scripts/run_gen_ensemble_exp.sh",
+        "0",
+        "./ensemble_configs/averaging/medium_shared_input_output_layers_configs/config3",
+        "./averaging",
+    ]
+)
+
+p4 = subprocess.Popen(
+    [
+        "./scripts/run_gen_ensemble_exp.sh",
+        "1",
+        "./ensemble_configs/averaging/large_shared_input_output_layers_configs/config1",
+        "./averaging",
+    ]
+)
+p5 = subprocess.Popen(
+    [
+        "./scripts/run_gen_ensemble_exp.sh",
+        "1",
+        "./ensemble_configs/averaging/large_shared_input_output_layers_configs/config2",
+        "./averaging",
+    ]
+)
+p6 = subprocess.Popen(
+    [
+        "./scripts/run_gen_ensemble_exp.sh",
+        "1",
+        "./ensemble_configs/averaging/large_shared_input_output_layers_configs/config3",
+        "./averaging",
+    ]
+)
 ps.append(p1)
 ps.append(p2)
+ps.append(p3)
+ps.append(p4)
+ps.append(p5)
+ps.append(p6)
 
 for p in ps:
     p.wait()
     print("Process finished with exit code: ", p.returncode)
-
-# sh1 = shell("./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_shared_sparse_input_layer_configs/config1 ./averaging")
-# sh2 = shell("./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/medium_shared_sparse_input_layer_configs/config2 ./averaging")
-# print(sh1.output())
-# print(sh1.errors())
-# print(sh2.output())
-# print(sh2.errors())
-# if sh1.pid or sh2.pid:
-#     os.wait()
-#     print("Process 1 finished with exit code: ", sh1.exit_code)
-#     print("Process 2 finished with exit code: ", sh2.exit_code)
