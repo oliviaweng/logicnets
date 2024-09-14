@@ -84,6 +84,8 @@ def main(args):
         config["shared_input_quant"] = False 
     if "shared_input_layer" not in config:
         config["shared_input_layer"] = False
+    if "shared_output_layer" not in config:
+        config["shared_output_layer"] = False
     if "uniform_input_connectivity" not in config:
         config["uniform_input_connectivity"] = False 
     if "uniform_connectivity" not in config:

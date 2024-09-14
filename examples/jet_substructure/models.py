@@ -31,13 +31,14 @@ from logicnets.nn import SparseLinearNeq, ScalarBiasScale, RandomFixedSparsityMa
 from logicnets.init import random_restrict_fanin
 
 class JetSubstructureNeqModel(nn.Module):
-    def __init__(self, model_config):
+    def __init__(self, model_config, shared_output_bitwidth=None):
         super(JetSubstructureNeqModel, self).__init__()
         self.model_config = model_config
         self.num_neurons = [model_config["input_length"]] + model_config["hidden_layers"] + [model_config["output_length"]]
         self.post_transform_output = model_config["post_transform_output"]
         self.uniform_input_connectivity = model_config["uniform_input_connectivity"]
         self.uniform_connectivity = model_config["uniform_connectivity"]
+        self.shared_output_bitwidth = shared_output_bitwidth
         layer_list = []
         for i in range(1, len(self.num_neurons)):
             in_features = self.num_neurons[i-1]
@@ -78,9 +79,13 @@ class JetSubstructureNeqModel(nn.Module):
                 if self.post_transform_output:
                     output_bias_scale = ScalarBiasScale(bias_init=0.33)
                     post_transforms.append(output_bias_scale)
+                if self.shared_output_bitwidth:
+                    output_bitwidth = self.shared_output_bitwidth
+                else:
+                    output_bitwidth = model_config["output_bitwidth"]
                 output_quant = QuantBrevitasActivation(
                     QuantHardTanh(
-                        bit_width=model_config["output_bitwidth"], 
+                        bit_width=output_bitwidth, 
                         max_val=1.33, 
                         narrow_range=False, 
                         quant_type=QuantType.INT, 
@@ -176,7 +181,7 @@ class JetSubstructureNeqModel(nn.Module):
             for j in range(self.latency + 1):
                 #print(self.dut.io.M5)
                 res = self.dut[f"M{num_layers}"]
-                result = f"{res:0{int(total_output_bits)}b}"
+                result = f"{res:0{int(total_output_bits)}b}" # verilog output
                 self.dut.io.clk = 1
                 self.dut.io.clk = 0
             expected = f"{int(ysc_i,2):0{int(total_output_bits)}b}"
