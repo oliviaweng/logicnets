@@ -1,5 +1,11 @@
 trial,accuracy,loss,ensemble_size,model_size
+averaging_jscxl_deg2_ensemble_size16,75.42,0.681,16,jscxl_deg2
+averaging_jscxl_deg2_ensemble_size32,75.37,0.681,32,jscxl_deg2
+averaging_jscxl_deg2_ensemble_size4,75.35,0.684,4,jscxl_deg2
+averaging_jscxl_deg2_ensemble_size8,75.35,0.682,8,jscxl_deg2
+averaging_jscxl_deg2_ensemble_size2,75.04,0.693,2,jscxl_deg2
 averaging_jscmlite_deg2_ensemble_size32,74.91,0.697,32,jscmlite_deg2
+averaging_jscxl_deg2_ensemble_size1,74.81,0.699,1,jscxl_deg2
 averaging_jscmlite_deg2_ensemble_size16,74.7,0.704,16,jscmlite_deg2
 averaging_jscmlite_deg2_ensemble_size8,74.32,0.712,8,jscmlite_deg2
 averaging_jscmlite_deg2_ensemble_size4,73.82,0.726,4,jscmlite_deg2
