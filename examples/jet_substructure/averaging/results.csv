@@ -1,0 +1,7 @@
+trial,accuracy,loss,ensemble_size,model_size
+averaging_jscmlite_deg2_ensemble_size32,74.91,0.697,32,jscmlite_deg2
+averaging_jscmlite_deg2_ensemble_size16,74.7,0.704,16,jscmlite_deg2
+averaging_jscmlite_deg2_ensemble_size8,74.32,0.712,8,jscmlite_deg2
+averaging_jscmlite_deg2_ensemble_size4,73.82,0.726,4,jscmlite_deg2
+averaging_jscmlite_deg2_ensemble_size2,72.94,0.752,2,jscmlite_deg2
+averaging_jscmlite_deg2_ensemble_size1,72.04,0.781,1,jscmlite_deg2

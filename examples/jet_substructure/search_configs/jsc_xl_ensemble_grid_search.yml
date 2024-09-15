@@ -1,5 +1,5 @@
 # Fixed params
-ensemble_method: averaging
+ensemble_method: adaboost
 hidden_layers: 
 - 128
 - 64
@@ -22,9 +22,9 @@ checkpoint: null
 # Params to grid search
 grid_search_params:
   ensemble_size:
-  - 1
-  - 2
-  - 4
-  - 8
-  - 16
+  # - 1
+  # - 2
+  # - 4
+  # - 8
+  # - 16
   - 32
