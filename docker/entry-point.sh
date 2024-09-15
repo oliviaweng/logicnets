@@ -20,7 +20,7 @@ else
     echo "Warning: \$VIVADO_PATH not defined. Continuing but without synthesis support."
 fi
 
-pip install /workspace/logicnets[example-all]
+pip install -e /workspace/logicnets[example-all]
 
 exec "$@"
 
