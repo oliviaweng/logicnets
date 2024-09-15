@@ -1,0 +1,20 @@
+batch_size: 1024
+checkpoint: null
+degree: 2
+ensemble_method: adaboost
+ensemble_size: 32
+epochs: 500
+hidden_bitwidth: 5
+hidden_fanin: 3
+hidden_layers:
+- 128
+- 64
+- 64
+- 64
+input_bitwidth: 7
+input_fanin: 2
+learning_rate: 0.01
+output_bitwidth: 5
+output_fanin: 3
+seed: 1234
+weight_decay: 0
