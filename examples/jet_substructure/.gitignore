@@ -1,1 +1,3 @@
-data/
+data
+**/averaging/**/*.pth
+**/bagging/**/*.pth

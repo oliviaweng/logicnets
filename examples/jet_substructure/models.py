@@ -91,6 +91,7 @@ class JetSubstructureNeqModel(nn.Module):
                     out_features,
                     fan_in=model_config["input_fanin"],
                     degree=model_config["degree"],
+                    gpu=model_config["gpu"],
                 )
                 layer = SparseLinearNeq(
                     in_features,
@@ -130,6 +131,7 @@ class JetSubstructureNeqModel(nn.Module):
                     out_features,
                     fan_in=model_config["output_fanin"],
                     degree=model_config["degree"],
+                    gpu=model_config["gpu"],
                 )
                 layer = SparseLinearNeq(
                     in_features,
@@ -167,6 +169,7 @@ class JetSubstructureNeqModel(nn.Module):
                     out_features,
                     fan_in=model_config["hidden_fanin"],
                     degree=model_config["degree"],
+                    gpu=model_config["gpu"],
                 )
                 layer = SparseLinearNeq(
                     in_features,
