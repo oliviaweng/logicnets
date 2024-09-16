@@ -59,10 +59,19 @@
 
 # No weight decay
 # CURR
-tmux new-session -d -s swd00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_no_wd_configs/config1 ./averaging"
-tmux new-session -d -s swd01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_no_wd_configs/config2 ./averaging"
-tmux new-session -d -s lwd00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_no_wd_configs/config1 ./averaging"
-tmux new-session -d -s lwd01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_fixed_mask_no_wd_configs/config2 ./averaging"
+# tmux new-session -d -s swd00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_no_wd_configs/config1 ./averaging"
+# tmux new-session -d -s swd01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_fixed_mask_no_wd_configs/config2 ./averaging"
+# tmux new-session -d -s lwd00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_no_wd_configs/config1 ./averaging"
+# tmux new-session -d -s lwd01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/large_fixed_mask_no_wd_configs/config2 ./averaging"
+
+# Shared I/O layers
+tmux new-session -d -s hsio00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/small_shared_io_layers_configs/config1 ./averaging"
+tmux new-session -d -s hsio01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/small_shared_io_layers_configs/config2 ./averaging"
+tmux new-session -d -s hsio02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/small_shared_io_layers_configs/config3 ./averaging"
+
+# tmux new-session -d -s hlio00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_shared_io_layers_configs/config1 ./averaging"
+# tmux new-session -d -s hlio01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_shared_io_layers_configs/config2 ./averaging"
+# tmux new-session -d -s hlio02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_shared_io_layers_configs/config3 ./averaging"
 
 # weak1 model
 # tmux new-session -d -s a00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/weak1_200epochs_configs/config1 ./averaging"
