@@ -1,7 +1,7 @@
 batch_size: 1024
 checkpoint: null
 ensemble_method: averaging
-ensemble_size: 2
+ensemble_size: 16
 epochs: 1000
 hidden_bitwidth: 3
 hidden_fanin: 4
