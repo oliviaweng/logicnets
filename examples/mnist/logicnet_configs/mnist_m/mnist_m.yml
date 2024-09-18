@@ -1,0 +1,20 @@
+hidden_layers:
+  - 1024
+  - 1024
+  - 1024
+  - 1024
+  - 1024
+  - 128
+input_bitwidth: 1
+hidden_bitwidth: 1
+output_bitwidth: 4
+input_fanin: 10
+hidden_fanin: 10
+output_fanin: 10
+input_dropout: 0.01
+weight_decay: 0.001
+batch_size: 1024
+epochs: 1000
+learning_rate: 0.001
+seed: 2
+checkpoint: null
