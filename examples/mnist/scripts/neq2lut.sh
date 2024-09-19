@@ -1,8 +1,8 @@
 #!/bin/bash
 
-CONFIG=./jscs_synth_test/hparams.yml
-LOGDIR=./jscs_synth_test/verilog
-CKPT=./jscs_synth_test/best_accuracy.pth
+CONFIG=./mnist_single_models/mnist_s/hparams.yml
+LOGDIR=./mnist_s_synth/verilog
+CKPT=./mnist_single_models/mnist_s/best_accuracy.pth
 
 python3 neq2lut.py \
     --config $CONFIG \

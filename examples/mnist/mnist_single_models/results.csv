@@ -1,0 +1,9 @@
+trial,accuracy,loss,model_size
+mnist_l1.1,97.78,0.089,mnist_l
+mnist_m1.1,97.57,0.1,mnist_m
+mnist_m,96.57,0.127,mnist_m
+mnist_l,96.48,0.151,mnist_l
+mnist_s,95.83,0.152,mnist_s
+mnist_m1.2,94.07,0.211,mnist_m
+mnist_s1.1,93.97,0.213,mnist_s1.1
+mnist_xs,93.04,0.236,mnist_xs

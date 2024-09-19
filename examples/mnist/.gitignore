@@ -1,0 +1,4 @@
+**/mnist_single_models/**/*.pth
+**/averaging/**/*.pth
+**/bagging/**/*.pth
+**/adaboost/**/*.pth

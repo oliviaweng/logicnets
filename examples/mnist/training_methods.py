@@ -1,7 +1,7 @@
 import os
 import torch
 import numpy as np
-import tqdm, trange
+from tqdm import tqdm, trange
 from functools import reduce
 
 import torch.nn as nn
