@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import heapdict
+import numpy as np
 from functools import partial, reduce
 
 import torch
@@ -132,7 +134,19 @@ class SparseLinear(nn.Linear):
 
 # TODO: Perhaps make this two classes, separating the LUT and NEQ code.
 class SparseLinearNeq(nn.Module):
-    def __init__(self, in_features: int, out_features: int, input_quant, output_quant, sparse_linear_kws={}, apply_input_quant=True, apply_output_quant=True) -> None:
+    def __init__(
+        self, 
+        in_features: int, 
+        out_features: int, 
+        input_quant, 
+        output_quant, 
+        sparse_linear_kws={}, 
+        apply_input_quant=True, 
+        apply_output_quant=True,
+        output_pre_transform=None,
+        input_post_transform=None,
+
+    ) -> None:
         super(SparseLinearNeq, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
@@ -143,6 +157,8 @@ class SparseLinearNeq(nn.Module):
         self.neuron_truth_tables = None
         self.apply_input_quant = apply_input_quant
         self.apply_output_quant = apply_output_quant
+        self.output_pre_transform = output_pre_transform
+        self.input_post_transform = input_post_transform
 
     def lut_cost(self):
         """
@@ -279,7 +295,11 @@ class SparseLinearNeq(nn.Module):
         else:
             if self.apply_input_quant:
                 x = self.input_quant(x)
+            if self.input_post_transform:
+                x = self.input_post_transform(x)
             x = self.fc(x)
+            if self.output_pre_transform:
+                x = self.output_pre_transform(x)
             if self.apply_output_quant:
                 x = self.output_quant(x)
         return x
@@ -343,19 +363,95 @@ class DenseMask2D(nn.Module):
         return self.mask
 
 class RandomFixedSparsityMask2D(nn.Module):
-    def __init__(self, in_features: int, out_features: int, fan_in: int) -> None:
+    def __init__(
+        self, 
+        in_features: int, 
+        out_features: int, 
+        fan_in: int, 
+        uniform_input_connectivity : bool = False,
+        diagonal_mask: bool = False,
+    ) -> None:
         super(RandomFixedSparsityMask2D, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.fan_in = fan_in
         self.mask = Parameter(torch.Tensor(out_features, in_features), requires_grad=False)
+        self.uniform_input_connectivity = uniform_input_connectivity
+        self.diagonal_mask = diagonal_mask
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
         init.constant_(self.mask, 0.0)
-        for i in range(self.out_features):
-            x = torch.randperm(self.in_features)[:self.fan_in]
-            self.mask[i][x] = 1
+        if self.uniform_input_connectivity:
+            self.gen_uniform_input_mask()
+        elif self.diagonal_mask:
+            assert self.fan_in == 1, "Diagonal mask only supported for fan-in 1"
+            for i in range(self.out_features):
+                self.mask[i][i] = 1
+        else:
+            for i in range(self.out_features):
+                x = torch.randperm(self.in_features)[:self.fan_in]
+                self.mask[i][x] = 1
+    
+    def gen_uniform_input_mask(self) -> None:
+        """
+        Generate a random fixed sparsity mask, ensuring there's uniform
+        representation of the input features
+        """
+        # Create the sparsity mask with all zeros (to be updated)
+        # Also create a list to track which indices to turn into NZWs
+        nzw_indices = torch.tensor([])
+        total_nzws = self.fan_in * self.out_features
+        rem_nzws = total_nzws
+        baseline_usage = int(rem_nzws/self.in_features)
+
+        for i in range(baseline_usage):
+            nzw_indices = torch.concat([nzw_indices, torch.randperm(self.in_features)])
+        
+        rem_nzws = rem_nzws - nzw_indices.shape[0]
+        input_i_usage_l = []
+        input_i_usage_q = heapdict.heapdict()
+        for i in range(self.in_features):
+            input_i_usage_q[i] = baseline_usage
+            input_i_usage_l.append(baseline_usage)
+        # print(input_i_usage_l)
+        # print(list(input_i_usage_q.items()))
+        # print()
+        while rem_nzws > 0:
+            # print(input_i_usage_l)
+            # print(list(input_i_usage_q.items()))
+            if torch.all(torch.tensor(input_i_usage_l) == input_i_usage_l[0]):
+                print("All indices used equally -> make a random choice")
+                index = np.random.randint(0, self.in_features)
+                nzw_indices = torch.concat([nzw_indices, torch.tensor([int(index)]) ])
+                rem_nzws = rem_nzws - 1
+                input_i_usage_q[index] = input_i_usage_q[index]+1
+                input_i_usage_l[index] += 1
+            else:
+                index, count = input_i_usage_q.popitem()
+                indices_w_same_usage = []
+                for i, u in enumerate(input_i_usage_l):
+                    if u == count:
+                        indices_w_same_usage.append(i)
+                if len(indices_w_same_usage) > 1:
+                    # print("Multiple indices (but not all) used equally -> make a random choice")
+                    new_index = np.random.choice(indices_w_same_usage, 1)[0]
+                    input_i_usage_q[index] = count
+                    nzw_indices = torch.concat([nzw_indices, torch.tensor([new_index])])
+                    rem_nzws = rem_nzws - 1
+                    input_i_usage_q[new_index] = input_i_usage_q[new_index]+1
+                    input_i_usage_l[new_index] += 1
+                else:
+                    nzw_indices = torch.concat([nzw_indices, torch.tensor([index])])
+                    rem_nzws = rem_nzws - 1
+                    input_i_usage_q[index] = count+1
+                    input_i_usage_l[index] += 1
+        s_pointer = 0
+        for ri in range(self.out_features):
+            for _ in range(self.fan_in):
+                ci = int(nzw_indices[s_pointer])
+                self.mask[ri][ci] = 1
+                s_pointer += 1
 
     def forward(self):
         return self.mask

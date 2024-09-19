@@ -131,7 +131,7 @@ def main(args):
     torch.save(
         checkpoint, 
         os.path.join(
-            experiment_dir, f"lut_model_loss={lut_loss:.3f}_emd={lut_avg_emd}.pth"
+            experiment_dir, f"lut_model_loss={lut_loss:.3f}_emd={lut_avg_emd:.3f}.pth"
     ))
 
     # Generate verilog

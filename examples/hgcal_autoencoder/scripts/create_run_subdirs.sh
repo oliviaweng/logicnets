@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 
-CONFIG_DIR=./ensemble_configs/averaging/small_fixed_mask_no_wd
+CONFIG_DIR=./ensemble_configs/averaging/large_shared_io_layers
 
 for i in {1..3}; do 
 new_dir=${CONFIG_DIR}_configs/config${i}

@@ -64,17 +64,32 @@ def main(args):
     config["input_length"] = len(x)
     config["output_length"] = len(y)
 
-    # Ensemble settings
+    # Ensemble default settings
     quantize_avg = False
     if "quantize_avg" in config:
         quantize_avg = config["quantize_avg"]
     if "post_transform_output" not in config:
-        config["post_transform_output"] = True # Default
+        config["post_transform_output"] = True 
     if "same_output_scale" not in config:
-        config["same_output_scale"] = False # Default
+        config["same_output_scale"] = False
+    if "same_output_scale_sum" not in config:
+        config["same_output_scale_sum"] = False
     if "same_input_scale" not in config:
-        config["same_input_scale"] = False # Default
-    
+        config["same_input_scale"] = False
+    if "input_post_trans_sbs" not in config:
+        config["input_post_trans_sbs"] = False
+    if "input_post_trans_ssb" not in config:
+        config["input_post_trans_ssb"] = False
+    if "shared_input_quant" not in config:
+        config["shared_input_quant"] = False 
+    if "shared_input_layer" not in config:
+        config["shared_input_layer"] = False
+    if "shared_output_layer" not in config:
+        config["shared_output_layer"] = False
+    if "uniform_input_connectivity" not in config:
+        config["uniform_input_connectivity"] = False 
+    if "uniform_connectivity" not in config:
+        config["uniform_connectivity"] = False 
 
     if "ensemble_method" in config:
         if config["ensemble_method"] == "averaging":
@@ -154,7 +169,8 @@ def main(args):
     elif args.train:
         evaluate_model = True  # Evaluate the model after training
         if (
-            config["ensemble_method"] in ENSEMBLING_METHODS
+            "ensemble_method" in config
+            and config["ensemble_method"] in ENSEMBLING_METHODS
             and config["ensemble_method"] != "averaging"
         ):
             ensemble_ckpt_path = os.path.join(experiment_dir, "last_ensemble_ckpt.pth")
