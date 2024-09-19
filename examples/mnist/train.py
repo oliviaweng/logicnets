@@ -33,7 +33,7 @@ from torchvision import datasets, transforms
 
 from models import MnistNeqModel
 from training_methods import train, test, train_bagging, train_adaboost
-from ensemble import AveragingMnistNeqModel, BaggingMnistNeqModel, AdaBoostMnistNeqModel
+from ensemble import AveragingMnistNeqModel
 
 ENSEMBLING_METHODS = ["adaboost", "averaging", "bagging"]
 
@@ -119,7 +119,7 @@ def main(args):
         if config["ensemble_method"] == "averaging":
             print("Averaging ensemble method")
             model = AveragingMnistNeqModel(
-                config, config["ensemble_size"], quantize_avg=quantize_avg
+                config, config["ensemble_size"]
             )
         elif config["ensemble_method"] == "bagging":
             print("Bagging ensemble method")
@@ -163,7 +163,7 @@ def main(args):
         # start a new wandb run to track this script
         wandb.init(
             # set the wandb project where this run will be logged
-            project="PolyLUT-ensemble",
+            project="NeuraLUT-ensemble",
             name=args.experiment_name,
             # track hyperparameters and run metadata
             config={

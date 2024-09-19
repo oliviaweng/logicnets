@@ -50,7 +50,7 @@ from logicnets.nn import (
 
 
 class MnistNeqModel(nn.Module):
-    def __init__(self, model_config):
+    def __init__(self, model_config, shared_output_bitwidth=None):
         super(MnistNeqModel, self).__init__()
         self.model_config = model_config
         self.num_neurons = (
@@ -58,33 +58,26 @@ class MnistNeqModel(nn.Module):
             + model_config["hidden_layers"]
             + [model_config["output_length"]]
         )
+        self.shared_output_bitwidth = shared_output_bitwidth
         layer_list = []
         for i in range(1, len(self.num_neurons)):
             in_features = self.num_neurons[i - 1]
             out_features = self.num_neurons[i]
             bn = nn.BatchNorm1d(out_features)
             if i == 1:
-                # bn_in = nn.BatchNorm1d(in_features)
-                # input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
-                # input_quant = QuantBrevitasActivation(
-                #     QuantHardTanh(
-                #         model_config["input_bitwidth"],
-                #         max_val=1.0,
-                #         narrow_range=False,
-                #         quant_type=QuantType.INT,
-                #         scaling_impl_type=ScalingImplType.PARAMETER,
-                #     ),
-                #     pre_transforms=[bn_in, input_bias],
-                # )
-                output_quant = QuantBrevitasActivation(
-                    QuantReLU(
-                        bit_width=model_config["hidden_bitwidth"],
-                        max_val=1.61,
-                        quant_type=QuantType.INT,
-                        scaling_impl_type=ScalingImplType.PARAMETER,
-                    ),
-                    pre_transforms=[bn],
-                )
+                in_features = self.num_neurons[i-1]
+            out_features = self.num_neurons[i]
+            bn = nn.BatchNorm1d(out_features)
+            nn.init.constant_(bn.weight.data, 1)
+            nn.init.constant_(bn.bias.data, 0)
+            if i == 1:
+                do_in = nn.Dropout(p=model_config["input_dropout"])
+                bn_in = nn.BatchNorm1d(in_features)
+                nn.init.constant_(bn_in.weight.data, 1)
+                nn.init.constant_(bn_in.bias.data, 0)
+                input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
+                input_quant = QuantBrevitasActivation(QuantHardTanh(model_config["input_bitwidth"], max_val=1., narrow_range=False, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[do_in, bn_in, input_bias])
+                output_quant = QuantBrevitasActivation(QuantReLU(bit_width=model_config["hidden_bitwidth"], max_val=1.61, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn])
                 imask = FeatureMask(
                     in_features,
                     out_features,
@@ -94,16 +87,20 @@ class MnistNeqModel(nn.Module):
                 layer = SparseLinearNeq(
                     in_features,
                     out_features,
-                    input_quant=None,
+                    input_quant=input_quant,
                     output_quant=output_quant,
                     imask=imask,
                     fan_in=model_config["input_fanin"],
                     width_n=model_config["width_n"],
-                    apply_input_quant=False,
+                    apply_input_quant=True,
                 )
                 layer_list.append(layer)
             elif i == len(self.num_neurons) - 1:
                 output_bias_scale = ScalarBiasScale(bias_init=0.33)
+                if self.shared_output_bitwidth:
+                    output_bitwidth = self.shared_output_bitwidth
+                else:
+                    output_bitwidth = model_config["output_bitwidth"]
                 output_quant = QuantBrevitasActivation(
                     QuantHardTanh(
                         bit_width=model_config["output_bitwidth"],
