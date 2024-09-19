@@ -8,4 +8,6 @@ python3 neq2lut.py \
     --config $CONFIG \
     --log-dir $LOGDIR \
     --checkpoint $CKPT \
-    --add-registers
+    --add-registers \
+    --simulate_pre_synthesis_verilog \
+    

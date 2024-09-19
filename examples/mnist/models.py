@@ -31,10 +31,11 @@ from logicnets.nn import SparseLinearNeq, ScalarBiasScale, RandomFixedSparsityMa
 from logicnets.init import random_restrict_fanin
 
 class MnistNeqModel(nn.Module):
-    def __init__(self, model_config):
+    def __init__(self, model_config, shared_output_bitwidth=None):
         super(MnistNeqModel, self).__init__()
         self.model_config = model_config
         self.num_neurons = [model_config["input_length"]] + model_config["hidden_layers"] + [model_config["output_length"]]
+        self.shared_output_bitwidth = shared_output_bitwidth
         layer_list = []
         for i in range(1, len(self.num_neurons)):
             in_features = self.num_neurons[i-1]
@@ -53,9 +54,22 @@ class MnistNeqModel(nn.Module):
                 mask = RandomFixedSparsityMask2D(in_features, out_features, fan_in=model_config["input_fanin"])
                 layer = SparseLinearNeq(in_features, out_features, input_quant=input_quant, output_quant=output_quant, sparse_linear_kws={'mask': mask})
                 layer_list.append(layer)
-            elif i == len(self.num_neurons)-1:
+            elif i == len(self.num_neurons)-1: # Output layer
                 output_bias_scale = ScalarBiasScale(bias_init=0.33)
-                output_quant = QuantBrevitasActivation(QuantHardTanh(bit_width=model_config["output_bitwidth"], max_val=1.33, narrow_range=False, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn], post_transforms=[output_bias_scale])
+                if self.shared_output_bitwidth:
+                    output_bitwidth = self.shared_output_bitwidth
+                else:
+                    output_bitwidth = model_config["output_bitwidth"]
+                output_quant = QuantBrevitasActivation(
+                    QuantHardTanh(
+                        bit_width=output_bitwidth,
+                        max_val=1.33, 
+                        narrow_range=False, 
+                        quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER
+                    ), 
+                    pre_transforms=[bn], 
+                    post_transforms=[output_bias_scale]
+                )
                 mask = RandomFixedSparsityMask2D(in_features, out_features, fan_in=model_config["output_fanin"])
                 layer = SparseLinearNeq(in_features, out_features, input_quant=layer_list[-1].output_quant, output_quant=output_quant, sparse_linear_kws={'mask': mask}, apply_input_quant=False)
                 layer_list.append(layer)

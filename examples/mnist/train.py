@@ -31,182 +31,10 @@ from torchvision.datasets import MNIST
 from training_methods import train, test
 
 from models import MnistNeqModel
+from ensemble import AveragingMnistNeqModel
 
 ENSEMBLING_METHODS = ["adaboost", "averaging", "bagging"]
 
-# TODO: Replace default configs with YAML files.
-configs = {
-    "mnist-xxs": {
-        "hidden_layers": [1024, 1024, 1024, 128],
-        "input_bitwidth": 1,
-        "hidden_bitwidth": 1,
-        "output_bitwidth": 4,
-        "input_fanin": 8,
-        "hidden_fanin": 8,
-        "output_fanin": 8,
-        "input_dropout": 0.01,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 0,
-        "checkpoint": None,
-    },
-    "mnist-xs": {
-        "hidden_layers": [1024, 1024, 128],
-        "input_bitwidth": 1,
-        "hidden_bitwidth": 1,
-        "output_bitwidth": 4,
-        "input_fanin": 8,
-        "hidden_fanin": 8,
-        "output_fanin": 8,
-        "input_dropout": 0.01,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 0,
-        "checkpoint": None,
-    },
-    "mnist-s": {
-        "hidden_layers": [1024, 1024, 1024, 1024, 1024, 128],
-        "input_bitwidth": 1,
-        "hidden_bitwidth": 1,
-        "output_bitwidth": 4,
-        "input_fanin": 8,
-        "hidden_fanin": 8,
-        "output_fanin": 8,
-        "input_dropout": 0.01,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 5,
-        "checkpoint": None,
-    },
-    "mnist-s-1.1": {
-        "hidden_layers": [1024, 1024, 1024, 1024, 1024, 128],
-        "input_bitwidth": 1,
-        "hidden_bitwidth": 1,
-        "output_bitwidth": 4,
-        "input_fanin": 6,
-        "hidden_fanin": 6,
-        "output_fanin": 6,
-        "input_dropout": 0.1,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 18,
-        "checkpoint": None,
-    },
-    "mnist-m": {
-        "hidden_layers": [1024, 1024, 1024, 1024, 1024, 128],
-        "input_bitwidth": 1,
-        "hidden_bitwidth": 1,
-        "output_bitwidth": 4,
-        "input_fanin": 10,
-        "hidden_fanin": 10,
-        "output_fanin": 10,
-        "input_dropout": 0.01,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 2,
-        "checkpoint": None,
-    },
-    "mnist-m-1.1": {
-        "hidden_layers": [1024, 1024, 1024, 1024, 1024, 128],
-        "input_bitwidth": 2,
-        "hidden_bitwidth": 2,
-        "output_bitwidth": 4,
-        "input_fanin": 5,
-        "hidden_fanin": 5,
-        "output_fanin": 5,
-        "input_dropout": 0.1,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 20,
-        "checkpoint": None,
-    },
-    "mnist-m-1.2": {
-        "hidden_layers": [1024, 1024, 1024, 1024, 1024, 128],
-        "input_bitwidth": 3,
-        "hidden_bitwidth": 3,
-        "output_bitwidth": 4,
-        "input_fanin": 3,
-        "hidden_fanin": 3,
-        "output_fanin": 3,
-        "input_dropout": 0.01,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 0,
-        "checkpoint": None,
-    },
-    "mnist-l": {
-        "hidden_layers": [1024, 1024, 1024, 1024, 1024, 128],
-        "input_bitwidth": 1,
-        "hidden_bitwidth": 1,
-        "output_bitwidth": 4,
-        "input_fanin": 12,
-        "hidden_fanin": 12,
-        "output_fanin": 12,
-        "input_dropout": 0.01,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 0,
-        "checkpoint": None,
-    },
-    "mnist-l-1.1": {
-        "hidden_layers": [1024, 1024, 1024, 1024, 1024, 128],
-        "input_bitwidth": 2,
-        "hidden_bitwidth": 2,
-        "output_bitwidth": 4,
-        "input_fanin": 6,
-        "hidden_fanin": 6,
-        "output_fanin": 6,
-        "input_dropout": 0.1,
-        "weight_decay": 1e-3,
-        "batch_size": 1024,
-        "epochs": 1000,
-        "learning_rate": 1e-3,
-        "seed": 12,
-        "checkpoint": None,
-    },
-}
-
-# A dictionary, so we can set some defaults if necessary
-model_config = {
-    "hidden_layers": None,
-    "input_bitwidth": None,
-    "hidden_bitwidth": None,
-    "output_bitwidth": None,
-    "input_fanin": None,
-    "hidden_fanin": None,
-    "output_fanin": None,
-    "input_dropout": None,
-}
-
-training_config = {
-    "weight_decay": None,
-    "batch_size": None,
-    "epochs": None,
-    "learning_rate": None,
-    "seed": None,
-}
-
-other_options = {
-    "cuda": None,
-    "log_dir": None,
-    "checkpoint": None,
-}
 
 
 def main(args):
@@ -245,8 +73,44 @@ def main(args):
     config["input_length"] = len(x)
     config["output_length"] = 10
 
+    # Ensemble default settings
+    if "shared_input_layer" not in config:
+        config["shared_input_layer"] = False
+    if "shared_output_layer" not in config:
+        config["shared_output_layer"] = False
+
     # Instantiate the model
-    model = MnistNeqModel(config)
+    if "ensemble_method" in config:
+        if config["ensemble_method"] == "averaging":
+            print("Averaging ensemble method")
+            model = AveragingMnistNeqModel(
+                config, config["ensemble_size"],
+            )
+        elif config["ensemble_method"] == "bagging":
+            print("Bagging ensemble method")
+            if "independent" not in config:
+                config["independent"] = False # Default
+            model = BaggingJetNeqModel(
+                config,
+                config["ensemble_size"],
+                quantize_avg=quantize_avg,
+                single_model_mode=args.train,
+            )
+        elif config["ensemble_method"] == "adaboost":
+            print("AdaBoost ensemble method")
+            if "independent" not in config:
+                config["independent"] = False # Default
+            model = AdaBoostJetNeqModel(
+                config,
+                config["ensemble_size"],
+                len(dataset["train"]),
+                quantize_avg=quantize_avg,
+                single_model_mode=args.train,
+            )
+        else:
+            raise ValueError(f"Unknown ensemble method: {config['ensemble_method']}")
+    else:  # Single model learning
+        model = MnistNeqModel(config)
 
     if config["checkpoint"] is not None:
         print(f"Loading pre-trained checkpoint {config['checkpoint']}")
