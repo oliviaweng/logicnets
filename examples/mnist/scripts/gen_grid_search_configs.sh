@@ -16,3 +16,4 @@
 # MNIST model
 
 python3 grid_search.py -c search_configs/mnist_s_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_small
+python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_xs
