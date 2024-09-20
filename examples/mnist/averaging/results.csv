@@ -1,5 +1,8 @@
 trial,accuracy,loss,ensemble_size,model_size
 averaging_small_ensemble_size8,96.79,0.111,8,mnist_s
+averaging_xs_ensemble_size16,96.79,0.13,16,mnist_xs
+averaging_xs_ensemble_size8,96.26,0.134,8,mnist_xs
 averaging_small_ensemble_size4,96.0,0.133,4,mnist_s
 averaging_small_ensemble_size2,95.9,0.163,2,mnist_s
+averaging_xs_ensemble_size4,95.26,0.184,4,mnist_xs
 averaging_xs_ensemble_size2,94.67,0.177,2,mnist_xs
