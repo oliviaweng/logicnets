@@ -28,10 +28,10 @@ from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
 from torchvision.datasets import MNIST
 
-from training_methods import train, test
+from training_methods import test, train, train_bagging, train_adaboost
 
 from models import MnistNeqModel
-from ensemble import AveragingMnistNeqModel
+from ensemble import AveragingMnistNeqModel, AdaBoostMnistNeqModel, BaggingMnistNeqModel
 
 ENSEMBLING_METHODS = ["adaboost", "averaging", "bagging"]
 
@@ -90,21 +90,19 @@ def main(args):
             print("Bagging ensemble method")
             if "independent" not in config:
                 config["independent"] = False # Default
-            model = BaggingJetNeqModel(
+            model = BaggingMnistNeqModel(
                 config,
                 config["ensemble_size"],
-                quantize_avg=quantize_avg,
                 single_model_mode=args.train,
             )
         elif config["ensemble_method"] == "adaboost":
             print("AdaBoost ensemble method")
             if "independent" not in config:
                 config["independent"] = False # Default
-            model = AdaBoostJetNeqModel(
+            model = AdaBoostMnistNeqModel(
                 config,
                 config["ensemble_size"],
                 len(dataset["train"]),
-                quantize_avg=quantize_avg,
                 single_model_mode=args.train,
             )
         else:

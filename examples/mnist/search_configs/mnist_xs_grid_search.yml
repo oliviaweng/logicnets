@@ -1,4 +1,5 @@
-ensemble_method: averaging
+ensemble_method: adaboost
+independent: true
 hidden_layers:
   - 1024
   - 1024
@@ -28,7 +29,7 @@ shared_output_layer: true
 grid_search_params:
   ensemble_size:
   - 2
-  - 4
-  - 8
-  - 16
+  # - 4
+  # - 8
+  # - 16
   - 32

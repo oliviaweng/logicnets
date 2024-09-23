@@ -15,5 +15,12 @@
 
 # MNIST model
 
-python3 grid_search.py -c search_configs/mnist_s_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_small
-python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_xs
+# Averaging
+# python3 grid_search.py -c search_configs/mnist_s_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_small
+# python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_xs
+
+# Bagging
+# python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/bagging/xs --experiment_prefix bagging_xs
+
+# Adaboost
+python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/adaboost/xs --experiment_prefix adaboost_xs
