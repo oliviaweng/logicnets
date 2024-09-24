@@ -48,7 +48,7 @@ class QuantBrevitasActivation(nn.Module):
 
     # TODO: Move to a base class
     # TODO: Move the string templates to verilog.py
-    def get_bin_str(self, x: int):
+    def get_bin_str(self, x: int, debug=False):
         quant_type = self.get_quant_type()
         scale_factor, bits = self.get_scale_factor_bits()
         if quant_type == QuantType.INT:
@@ -56,6 +56,8 @@ class QuantBrevitasActivation(nn.Module):
             narrow_range = tensor_quant.int_quant.narrow_range
             signed = tensor_quant.int_quant.signed
             offset = 2**(bits-1) -int(narrow_range) if signed else 0
+            if debug:
+                print("x", x, "result",f"{int(x+offset):0{int(bits)}b}", "signed", signed, "narrow_range", narrow_range, "offset", offset, "bits", bits)
             return f"{int(x+offset):0{int(bits)}b}"
         elif quant_type == QuantType.BINARY:
             return f"{int(x):0{int(bits)}b}"
