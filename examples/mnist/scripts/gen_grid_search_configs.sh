@@ -18,7 +18,10 @@
 # Averaging
 # python3 grid_search.py -c search_configs/mnist_s_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_small
 # python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_xs
-python3 grid_search.py -c search_configs/mnist_m_grid_search.yml -d ./ensemble_configs/averaging/med --experiment_prefix averaging_med
+# python3 grid_search.py -c search_configs/mnist_m_grid_search.yml -d ./ensemble_configs/averaging/med --experiment_prefix averaging_med
+# python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging/non_shared_xs --experiment_prefix averaging_xs_non_shared
+python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging/shared_input_xs --experiment_prefix averaging_xs_shared_input
+
 
 # Bagging
 # python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/bagging/xs --experiment_prefix bagging_xs

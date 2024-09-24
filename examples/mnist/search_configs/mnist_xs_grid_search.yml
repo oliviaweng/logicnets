@@ -1,5 +1,5 @@
-ensemble_method: adaboost
-independent: true
+ensemble_method: averaging
+# independent: true
 hidden_layers:
   - 1024
   - 1024
@@ -7,8 +7,8 @@ hidden_layers:
 input_bitwidth: 1
 hidden_bitwidth: 1
 output_bitwidth: 4
-shared_output_bitwidth: 5 # output bitwidth of ensemble members, if defined
-shared_output_fanin: 1
+# shared_output_bitwidth: 5 # output bitwidth of ensemble members, if defined
+# shared_output_fanin: 1
 input_fanin: 8
 hidden_fanin: 8
 output_fanin: 8
@@ -23,13 +23,14 @@ checkpoint: null
 shared_input_layer: true
 shared_input_bitwidth: 6
 
-shared_output_layer: true
+shared_output_layer: false
 
 # Params to grid search
 grid_search_params:
   ensemble_size:
   - 2
-  # - 4
-  # - 8
-  # - 16
+  - 4
+  - 8
+  - 16
   - 32
+  - 64
