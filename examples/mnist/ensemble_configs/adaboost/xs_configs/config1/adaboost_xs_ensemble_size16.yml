@@ -1,8 +1,8 @@
 batch_size: 1024
 checkpoint: null
 ensemble_method: adaboost
-ensemble_size: 2
-epochs: 1
+ensemble_size: 16
+epochs: 1000
 hidden_bitwidth: 1
 hidden_fanin: 8
 hidden_layers:
