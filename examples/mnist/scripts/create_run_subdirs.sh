@@ -14,10 +14,10 @@
 #  limitations under the License.
 
 
-CONFIG_DIR=./ensemble_configs/adaboost/xs
+CONFIG_DIR=./ensemble_configs/averaging/med
 
-for i in {1..2}; do 
+for i in {1..3}; do 
 new_dir=${CONFIG_DIR}_configs/config${i}
 mkdir -p $new_dir
-find -wholename "${CONFIG_DIR}/*.yml" -print | head -n1 | xargs mv -t $new_dir
+find -wholename "${CONFIG_DIR}/*.yml" -print | head -n2 | xargs mv -t $new_dir
 done
