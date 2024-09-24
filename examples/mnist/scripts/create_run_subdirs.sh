@@ -14,7 +14,7 @@
 #  limitations under the License.
 
 
-CONFIG_DIR=./ensemble_configs/averaging/med
+CONFIG_DIR=./ensemble_configs/averaging/shared_input_xs
 
 for i in {1..3}; do 
 new_dir=${CONFIG_DIR}_configs/config${i}
