@@ -20,7 +20,7 @@
 # tmux new-session -d -s xs05 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/xs_configs/config5 ./averaging"
 
 # tmux new-session -d -s m00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/med_configs/config1 ./averaging"
-# tmux new-session -d -s m01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/?med_configs/config2 ./averaging"
+# tmux new-session -d -s m01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/med_configs/config2 ./averaging"
 tmux new-session -d -s m02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/med_configs/config3 ./averaging"
 
 # Bagging
