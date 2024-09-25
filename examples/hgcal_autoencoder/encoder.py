@@ -42,6 +42,7 @@ class EncoderNeqModel(nn.Module):
         self.num_neurons = (
             [input_length] + config["hidden_layer"] + [output_length]
         )
+        self.shared_output_bitwidth = shared_output_bitwidth
 
         self.is_verilog_inference = False
         self.latency = 1
