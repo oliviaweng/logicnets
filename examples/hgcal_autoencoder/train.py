@@ -138,8 +138,9 @@ def main(args):
                 shared_input_layer = config["ensemble_hp"]["shared_input_layer"]
                 shared_input_bitwidth = config["ensemble_hp"]["shared_input_bitwidth"]
                 shared_output_layer = config["ensemble_hp"]["shared_output_layer"]
-                shared_output_bitwidth = config["ensemble_hp"]["shared_output_bitwidth"]  
-                shared_output_fanin = config["ensemble_hp"]["shared_output_fanin"]
+                if shared_output_layer:
+                    shared_output_bitwidth = config["ensemble_hp"]["shared_output_bitwidth"]  
+                    shared_output_fanin = config["ensemble_hp"]["shared_output_fanin"]
             model = VotingAutoencoderNeqModel(
                 config, 
                 num_models=ensemble_size, 

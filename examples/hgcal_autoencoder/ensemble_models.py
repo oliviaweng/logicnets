@@ -126,7 +126,7 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
         shared_input_layer=False,
         shared_input_bitwidth=6,
         shared_output_layer=False,
-        shared_output_bitwidth=6,
+        shared_output_bitwidth=None,
         shared_output_fanin=1,
     ):
         super(VotingAutoencoderNeqModel, self).__init__()
@@ -149,7 +149,10 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
             print("All models set with the same sparsity mask")
             self.encoder_ensemble = nn.ModuleList()
             encoder = EncoderNeqModel(
-                config, input_length=input_length, output_length=output_length
+                config, 
+                input_length=input_length, 
+                output_length=output_length,
+                shared_output_bitwidth=shared_output_bitwidth,
             )
             self.encoder_ensemble.append(encoder)
             encoder_param = list(encoder.parameters())[1] # For testing only
@@ -157,7 +160,8 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
                 encoder_copy = EncoderNeqModel(
                     config, 
                     input_length=input_length, 
-                    output_length=output_length
+                    output_length=output_length,
+                    shared_output_bitwidth=shared_output_bitwidth,
                 )
                 encoder_copy.load_state_dict(encoder.state_dict())
                 encoder_copy.reset_parameters() # Reinitialize linear parameters
@@ -173,7 +177,8 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
                 EncoderNeqModel(
                     config, 
                     input_length=input_length, 
-                    output_length=output_length
+                    output_length=output_length,
+                    shared_output_bitwidth=shared_output_bitwidth,
                 ) 
                 for _ in range(num_models)
             ])
