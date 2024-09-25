@@ -142,14 +142,20 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
         self.shared_input_layer = shared_input_layer
         self.shared_input_bitwidth = shared_input_bitwidth
         self.shared_output_layer = shared_output_layer
-        self.shared_output_bitwidth = shared_output_bitwidth
         self.shared_output_fanin = shared_output_fanin
+
+        shared_output_bitwidth = None
+        if self.shared_output_layer:
+            shared_output_bitwidth = model_config["shared_output_bitwidth"]
 
         if fixed_sparsity_mask:
             print("All models set with the same sparsity mask")
             self.encoder_ensemble = nn.ModuleList()
             encoder = EncoderNeqModel(
-                config, input_length=input_length, output_length=output_length
+                config, 
+                input_length=input_length, 
+                output_length=output_length,
+                shared_output_bitwidth=shared_output_bitwidth,
             )
             self.encoder_ensemble.append(encoder)
             encoder_param = list(encoder.parameters())[1] # For testing only
