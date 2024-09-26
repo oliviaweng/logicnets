@@ -22,3 +22,10 @@ Single model 11 test loss: 0.2689162790775299	Model error: 0.8857386708259583	Ac
 Ensemble size 11 test loss: 1.451001524925232	Accuracy = 95.95
 Single model 12 test loss: 0.256695032119751	Model error: 0.8360864520072937	Accuracy = 92.55
 Ensemble size 12 test loss: 1.450954556465149	Accuracy = 95.99
+Single model 13 test loss: 0.2341006100177765	Model error: 0.8638446927070618	Accuracy = 93.14
+Ensemble size 13 test loss: 1.4508056640625	Accuracy = 96.07
+Single model 14 test loss: 0.23750683665275574	Model error: 0.862225353717804	Accuracy = 92.97
+Ensemble size 14 test loss: 1.4506944417953491	Accuracy = 96.14
+Single model 15 test loss: 0.2512716054916382	Model error: 0.8748391270637512	Accuracy = 92.53
+Ensemble size 15 test loss: 1.450683832168579	Accuracy = 96.15
+Single model 16 test loss: 0.2721158266067505	Model error: 0.9061083197593689	Accuracy = 92.26
