@@ -1,0 +1,16 @@
+trial,accuracy,loss,ensemble_size,model_size
+adaboost_xs_ensemble_size16,96.15,1.451,15,mnist_xs
+adaboost_xs_ensemble_size16,96.14,1.451,14,mnist_xs
+adaboost_xs_ensemble_size16,96.07,1.451,13,mnist_xs
+adaboost_xs_ensemble_size16,95.99,1.451,12,mnist_xs
+adaboost_xs_ensemble_size16,95.95,1.451,11,mnist_xs
+adaboost_xs_ensemble_size16,95.92,1.451,10,mnist_xs
+adaboost_xs_ensemble_size16,95.84,1.451,9,mnist_xs
+adaboost_xs_ensemble_size16,95.75,1.451,8,mnist_xs
+adaboost_xs_ensemble_size16,95.66,1.451,7,mnist_xs
+adaboost_xs_ensemble_size16,95.49,1.451,6,mnist_xs
+adaboost_xs_ensemble_size16,95.32,1.452,5,mnist_xs
+adaboost_xs_ensemble_size16,95.15,1.452,4,mnist_xs
+adaboost_xs_ensemble_size16,92.75,1.456,2,mnist_xs
+adaboost_xs_ensemble_size16,92.75,1.454,3,mnist_xs
+adaboost_xs_ensemble_size16,92.75,1.457,1,mnist_xs

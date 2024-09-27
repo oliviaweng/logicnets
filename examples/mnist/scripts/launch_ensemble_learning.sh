@@ -20,18 +20,23 @@
 # tmux new-session -d -s xs05 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/xs_configs/config5 ./averaging"
 
 # tmux new-session -d -s xsn01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/non_shared_xs_configs/config2 ./averaging"
-tmux new-session -d -s xsn00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/non_shared_xs_configs/config1 ./averaging"
-tmux new-session -d -s xsn02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/non_shared_xs_configs/config3 ./averaging"
+# tmux new-session -d -s xsn00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/non_shared_xs_configs/config1 ./averaging"
+# tmux new-session -d -s xsn02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/non_shared_xs_configs/config3 ./averaging"
 
 # tmux new-session -d -s xsi01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/shared_input_xs_configs/config1 ./averaging"
 # tmux new-session -d -s xsi02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/shared_input_xs_configs/config2 ./averaging"
 # tmux new-session -d -s xsi03 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/shared_input_xs_configs/config3 ./averaging"
 # tmux new-session -d -s xsi00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/shared_input_xs_configs/config0 ./averaging"
 
-
 # tmux new-session -d -s m00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/med_configs/config1 ./averaging"
 # tmux new-session -d -s m01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/med_configs/config2 ./averaging"
 # tmux new-session -d -s m02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/med_configs/config3 ./averaging"
+
+tmux new-session -d -s l01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/averaging_l_configs/config1 ./averaging"
+tmux new-session -d -s l03 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/averaging_l_configs/config3 ./averaging"
+
+tmux new-session -d -s l02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/non_shared_l_configs/config1 ./averaging"
+tmux new-session -d -s l03 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/non_shared_l_configs/config3 ./averaging"
 
 # Bagging
 # tmux new-session -d -s mb00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/bagging/xs_configs/config1 ./bagging"
