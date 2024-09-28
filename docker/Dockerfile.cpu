@@ -62,7 +62,7 @@ RUN curl -sSL https://repo.anaconda.com/miniconda/Miniconda3-py38_4.12.0-Linux-x
 
 # Install conda-based prerequisites
 # Install LogicNets prerequisites - fails since 2023-07-07: https://github.com/Xilinx/logicnets/issues/34
-RUN conda install -y pytorch==1.5.1 torchvision==0.6.1 cpuonly -c pytorch && \
+RUN conda install -y pytorch==1.12.1 torchvision==0.13.1 cpuonly -c pytorch && \
     conda clean -ya
 RUN conda install -y pillow && \
     conda clean -ya
@@ -98,5 +98,6 @@ ENV LOCAL_PATH=$HOME/.local/bin
 RUN mkdir -p $LOCAL_PATH
 COPY docker/entry-point.sh $LOCAL_PATH
 ENV PATH=$LOCAL_PATH:$PATH
+WORKDIR /workspace/logicnets/examples/jet_substructure
 ENTRYPOINT ["entry-point.sh"]
 CMD ["bash"]

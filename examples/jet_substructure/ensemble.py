@@ -321,6 +321,7 @@ class AveragingJetNeqModel(nn.Module):
         # print("output_quant_state_space", output_quant.get_bin_state_space())
         _, input_bitwidth = self.ensemble[0].input_quant.get_scale_factor_bits()
         output_bitwidth = calculate_bits(int(self.ensemble[-1].output_quant.get_scale_factor_bits()[1]), len(self.ensemble[1:-1]))
+        output_quant_bitwidth = int(self.ensemble[-1].output_quant.get_scale_factor_bits()[1])
         input_bitwidth, output_bitwidth = int(input_bitwidth), int(output_bitwidth)
         total_input_bits = self.ensemble[0].in_features*input_bitwidth
         total_output_bits = self.ensemble[-1].out_features/len(self.ensemble[1:-1])*output_bitwidth
@@ -336,7 +337,7 @@ class AveragingJetNeqModel(nn.Module):
             y_i = self.pytorch_forward(x[i:i+1,:])[0]
             xv_i = list(map(lambda z: input_quant.get_bin_str(z), x_i))
             # xv_i = list(map(lambda z: to_twos_complement(z,6), x_i))
-            ys_i = list(map(lambda z: to_twos_complement(z+2*len(self.ensemble[1:-1]),output_bitwidth+1)[1:], y_i))
+            ys_i = list(map(lambda z: to_twos_complement(z+(2**(output_quant_bitwidth-1))*len(self.ensemble[1:-1]),output_bitwidth+1)[1:], y_i))
             xvc_i = reduce(lambda a,b: a+b, xv_i[::-1])
             ysc_i = reduce(lambda a,b: a+b, ys_i[::-1])
             # print("x_i =",x_i)
@@ -349,7 +350,7 @@ class AveragingJetNeqModel(nn.Module):
             # print(ys_i)
             # print(ysc_i)
             self.dut["M0"] = int(xvc_i, 2)
-            for j in range(num_layers + 4):
+            for j in range(num_layers + 2 + 1 + math.ceil(math.log2(len(self.ensemble[1:-1])))):
                 #print(self.dut.io.M5)
                 res = self.dut[f"out"]
                 result = f"{res:0{int(total_output_bits)}b}" # verilog output

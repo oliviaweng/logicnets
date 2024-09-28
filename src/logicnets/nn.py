@@ -134,17 +134,27 @@ module {module_name} (input clk,
                   output reg [{averaged_bits-1}:0] out);
 """
 
-    output_string += f"""\
+    cycles = math.ceil(math.log2(num_models))
+    # output_string += "\n".join([f"reg [{averaged_bits-1}:0] out_{i};" for i in range(cycles)])
+    output_string += f"""
+reg [{averaged_bits-1}:0] {",".join([f"out_{i}" for i in range(cycles)])};
 always @ (posedge clk) begin
-    out <= {"+".join([f"i{i}" for i in range(num_models)])};
+    out_0 <= {"+".join([f"i{i}" for i in range(num_models)])};
+"""
+    output_string += "\n".join([f"\tout_{i} <= out_{i-1};" for i in range(1,cycles)])
+    output_string += f"""
+end
+
+always @(*) begin
+    out = out_{cycles-1};
 end
 
 endmodule
 """
     with open(f"{output_dir}/{module_name}.v", "w") as f:
+        print(output_string)
         f.write(output_string)
     
-
 def ensemble_top_to_verilog(
     ensemble: nn.ModuleList,
     module_name: str,
