@@ -47,8 +47,9 @@
 # python3 grid_search.py -c search_configs/voting_large_model_grid_search.yml -d ensemble_configs/averaging/large_fixed_mask_no_wd --experiment_prefix averaging_large_fixed_mask_no_wd
 
 # Averaging w/shared input / output layers
-# python3 grid_search.py -c search_configs/voting_small_shared_io_layers_grid_search.yml -d ensemble_configs/averaging/small_shared_io_layers --experiment_prefix averaging_small_shared_io_layers
-python3 grid_search.py -c search_configs/voting_large_shared_io_layers_grid_search.yml -d ensemble_configs/averaging/large_shared_io_layers --experiment_prefix averaging_large_shared_io_layers
+python3 grid_search.py -c search_configs/voting_small_shared_io_layers_grid_search.yml -d ensemble_configs/averaging/small_shared_io_layers --experiment_prefix averaging_small_shared_io_layers
+# python3 grid_search.py -c search_configs/voting_large_shared_io_layers_grid_search.yml -d ensemble_configs/averaging/large_shared_io_layers --experiment_prefix averaging_large_shared_io_layers
+
 
 # Snapshot Ensemble
 # python3 grid_search.py -c search_configs/sse_large_model_grid_search.yml -d ensemble_configs/sse/large_more_epochs --experiment_prefix sse_large
