@@ -123,6 +123,11 @@ def main(args):
     fixed_decoder = None
     ensemble_method = None
     fixed_sparsity_mask = False
+    shared_input_layer = False
+    shared_input_bitwidth = None
+    shared_output_layer = False
+    shared_output_bitwidth = None
+    shared_output_fanin = None
     if "ensemble_method" in config.keys():
         # Ensemble learning
         ensemble_method = config["ensemble_method"]
@@ -130,10 +135,21 @@ def main(args):
         if ensemble_method == "voting":
             if "ensemble_hp" in config.keys():
                 fixed_sparsity_mask = config["ensemble_hp"]["fixed_sparsity_mask"]
+                shared_input_layer = config["ensemble_hp"]["shared_input_layer"]
+                shared_input_bitwidth = config["ensemble_hp"]["shared_input_bitwidth"]
+                shared_output_layer = config["ensemble_hp"]["shared_output_layer"]
+                if shared_output_layer:
+                    shared_output_bitwidth = config["ensemble_hp"]["shared_output_bitwidth"]  
+                    shared_output_fanin = config["ensemble_hp"]["shared_output_fanin"]
             model = VotingAutoencoderNeqModel(
                 config, 
                 num_models=ensemble_size, 
-                fixed_sparsity_mask=fixed_sparsity_mask
+                fixed_sparsity_mask=fixed_sparsity_mask,
+                shared_input_layer=shared_input_layer,
+                shared_input_bitwidth=shared_input_bitwidth,
+                shared_output_layer=shared_output_layer,
+                shared_output_bitwidth=shared_output_bitwidth,
+                shared_output_fanin=shared_output_fanin,
             )
 
         elif ensemble_method == "snapshot":

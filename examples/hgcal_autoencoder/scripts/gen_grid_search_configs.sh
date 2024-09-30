@@ -46,6 +46,11 @@
 # python3 grid_search.py -c search_configs/voting_small_model_grid_search.yml -d ensemble_configs/averaging/small_fixed_mask_no_wd --experiment_prefix averaging_small_fixed_mask_no_wd
 # python3 grid_search.py -c search_configs/voting_large_model_grid_search.yml -d ensemble_configs/averaging/large_fixed_mask_no_wd --experiment_prefix averaging_large_fixed_mask_no_wd
 
+# Averaging w/shared input / output layers
+python3 grid_search.py -c search_configs/voting_small_shared_io_layers_grid_search.yml -d ensemble_configs/averaging/small_shared_io_layers --experiment_prefix averaging_small_shared_io_layers
+# python3 grid_search.py -c search_configs/voting_large_shared_io_layers_grid_search.yml -d ensemble_configs/averaging/large_shared_io_layers --experiment_prefix averaging_large_shared_io_layers
+
+
 # Snapshot Ensemble
 # python3 grid_search.py -c search_configs/sse_large_model_grid_search.yml -d ensemble_configs/sse/large_more_epochs --experiment_prefix sse_large
 # python3 grid_search.py -c search_configs/sse_medium_model_grid_search.yml -d ensemble_configs/sse/medium_more_epochs --experiment_prefix sse_medium
@@ -79,5 +84,5 @@
 # Jet tagger model
 
 # python3 grid_search.py -c search_configs/jsc_s_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_small
-python3 grid_search.py -c search_configs/jsc_m_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_medium
-python3 grid_search.py -c search_configs/jsc_l_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_large
+# python3 grid_search.py -c search_configs/jsc_m_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_medium
+# python3 grid_search.py -c search_configs/jsc_l_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_large

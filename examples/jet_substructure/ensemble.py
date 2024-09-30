@@ -686,28 +686,11 @@ class AdaBoostJetNeqModel(BaseEnsembleClassifier):
         if self.single_model_mode:
             outputs = self.model(x)
             return outputs
-        if self.shared_input_quant:
-            if self.shared_input_layer:
-                x = self.input_quant_layer(x)
-            else:
-                    x = self.input_quant(x)
-            outputs = sum(
-                [
-                    alpha
-                    * self.adaboost_labels[
-                        torch.argmax(
-                            model(x[:, i * self.input_length : (i + 1) * self.input_length]), dim=1
-                        )
-                    ]
-                    for i, (alpha, model) in enumerate(zip(self.alphas, self.ensemble))
-                ]
-            )
-        else:
-            outputs = sum(
-                [
-                    alpha * self.adaboost_labels[torch.argmax(model(x), dim=1)]
-                    for alpha, model in zip(self.alphas, self.ensemble)
-                ]
-            )
+        outputs = sum(
+            [
+                alpha * self.adaboost_labels[torch.argmax(model(x), dim=1)]
+                for alpha, model in zip(self.alphas, self.ensemble)
+            ]
+        )
         outputs = outputs / sum(self.alphas)
         return outputs

@@ -1,0 +1,17 @@
+trial,accuracy,loss,ensemble_size,model_size
+bagging_xs_ensemble_size16,96.68,0.117,15,mnist_xs
+bagging_xs_ensemble_size16,96.64,0.117,16,mnist_xs
+bagging_xs_ensemble_size16,96.63,0.118,12,mnist_xs
+bagging_xs_ensemble_size16,96.59,0.117,14,mnist_xs
+bagging_xs_ensemble_size16,96.58,0.117,13,mnist_xs
+bagging_xs_ensemble_size16,96.56,0.119,11,mnist_xs
+bagging_xs_ensemble_size16,96.47,0.12,10,mnist_xs
+bagging_xs_ensemble_size16,96.39,0.121,9,mnist_xs
+bagging_xs_ensemble_size16,96.33,0.123,8,mnist_xs
+bagging_xs_ensemble_size16,96.32,0.126,7,mnist_xs
+bagging_xs_ensemble_size16,96.18,0.13,6,mnist_xs
+bagging_xs_ensemble_size16,96.12,0.134,5,mnist_xs
+bagging_xs_ensemble_size16,95.86,0.141,4,mnist_xs
+bagging_xs_ensemble_size16,95.64,0.15,3,mnist_xs
+bagging_xs_ensemble_size16,94.67,0.176,2,mnist_xs
+bagging_xs_ensemble_size16,92.75,0.256,1,mnist_xs

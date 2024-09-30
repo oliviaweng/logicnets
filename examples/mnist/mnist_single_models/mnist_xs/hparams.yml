@@ -1,0 +1,19 @@
+batch_size: 1024
+checkpoint: null
+epochs: 1000
+hidden_bitwidth: 1
+hidden_fanin: 8
+hidden_layers:
+- 1024
+- 1024
+- 128
+input_bitwidth: 1
+input_dropout: 0.01
+input_fanin: 8
+input_length: 784
+learning_rate: 0.001
+output_bitwidth: 4
+output_fanin: 8
+output_length: 10
+seed: 0
+weight_decay: 0.001

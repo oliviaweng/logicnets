@@ -1,0 +1,30 @@
+module logicnet_0 (input [783:0] M0, input clk, input rst, output[39:0] M7);
+wire [783:0] M0w;
+myreg #(.DataWidth(784)) ens0_layer0_reg (.data_in(M0), .clk(clk), .rst(rst), .data_out(M0w));
+wire [1023:0] M1;
+ens0_layer0 ens0_layer0_inst (.M0(M0w), .M1(M1));
+wire [1023:0] M1w;
+myreg #(.DataWidth(1024)) ens0_layer1_reg (.data_in(M1), .clk(clk), .rst(rst), .data_out(M1w));
+wire [1023:0] M2;
+ens0_layer1 ens0_layer1_inst (.M0(M1w), .M1(M2));
+wire [1023:0] M2w;
+myreg #(.DataWidth(1024)) ens0_layer2_reg (.data_in(M2), .clk(clk), .rst(rst), .data_out(M2w));
+wire [1023:0] M3;
+ens0_layer2 ens0_layer2_inst (.M0(M2w), .M1(M3));
+wire [1023:0] M3w;
+myreg #(.DataWidth(1024)) ens0_layer3_reg (.data_in(M3), .clk(clk), .rst(rst), .data_out(M3w));
+wire [1023:0] M4;
+ens0_layer3 ens0_layer3_inst (.M0(M3w), .M1(M4));
+wire [1023:0] M4w;
+myreg #(.DataWidth(1024)) ens0_layer4_reg (.data_in(M4), .clk(clk), .rst(rst), .data_out(M4w));
+wire [1023:0] M5;
+ens0_layer4 ens0_layer4_inst (.M0(M4w), .M1(M5));
+wire [1023:0] M5w;
+myreg #(.DataWidth(1024)) ens0_layer5_reg (.data_in(M5), .clk(clk), .rst(rst), .data_out(M5w));
+wire [127:0] M6;
+ens0_layer5 ens0_layer5_inst (.M0(M5w), .M1(M6));
+wire [127:0] M6w;
+myreg #(.DataWidth(128)) ens0_layer6_reg (.data_in(M6), .clk(clk), .rst(rst), .data_out(M6w));
+ens0_layer6 ens0_layer6_inst (.M0(M6w), .M1(M7));
+
+endmodule
