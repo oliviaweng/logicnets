@@ -22,6 +22,8 @@ import torch.nn as nn
 from torch.nn import init
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
+import math
+import copy
 
 from .init import random_restrict_fanin
 from .util import fetch_mask_indices, generate_permutation_matrix
@@ -43,15 +45,20 @@ def generate_truth_tables(model: nn.Module, verbose: bool = False) -> None:
         if type(module) == SparseLinearNeq:
             if verbose:
                 print(f"Calculating truth tables for {name}")
-            module.calculate_truth_tables()
+            module.calculate_truth_tables(model)
             if verbose:
                 print(f"Truth tables generated for {len(module.neuron_truth_tables)} neurons")
     model.training = training
 
 # TODO: Create a container module which performs this function.
 def lut_inference(model: nn.Module) -> None:
+    for name,module in model.named_modules():
+        if isinstance(module, SparseLinearNeq):
+            print(name, module.apply_input_quant, module.apply_output_quant)
     for name, module in model.named_modules():
         if type(module) == SparseLinearNeq:
+            if name != "ensemble.0":
+                module.apply_input_quant = False
             module.lut_inference()
 
 # TODO: Create a container module which performs this function.
@@ -60,6 +67,247 @@ def neq_inference(model: nn.Module) -> None:
         if type(module) == SparseLinearNeq:
             module.neq_inference()
 
+# Not sure if it's optimal to do this recursively, but it shouldn't matter unless we have some giant ensemble size I hope
+def nested_case_generator(
+    output_bits: int,
+    depth: int,
+    i: int = 0,
+    sum: int = 0
+):
+    output = f"case(i{i})\n"
+    for val in range(2**output_bits):
+        output += f"2'b{val:0{output_bits}b}:\n"
+        if i < depth-1:
+            output += nested_case_generator(output_bits, depth, i+1, sum+val)
+        else:
+            output += f"outr = 2'b{int((sum+val)/depth):0{output_bits}b};\n"
+    output += "endcase\n"
+    return output
+
+def averaging_module_verilog(
+    output_bits: int,
+    num_models: int,
+    output_dir: str,
+    module_name: str = "averaging",
+    lut: bool = True
+):
+    output_string = f"""\
+module {module_name} (input clk,
+                  input [{output_bits-1}:0] {",".join([f"i{i}" for i in range(num_models)])},
+                  output reg [{output_bits-1}:0] out);
+"""
+    if lut:
+        output_string += f"""\
+(*rom_style = "distributed"*) reg [{output_bits-1}:0] outr;
+"""
+    else:
+        output_string += f"""\
+reg [{output_bits-1}:0] outr;
+"""
+
+    output_string += f"""\
+always @ (posedge clk) begin
+    out <= outr;
+end
+
+always @ (*) begin
+"""
+    output_string += nested_case_generator(output_bits, num_models)
+    output_string += f"""\
+end
+endmodule
+"""
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        f.write(output_string)
+
+def averaging_module_verilog_shared_output(
+    output_bits: int,
+    averaged_bits: int,
+    num_models: int,
+    output_dir: str,
+    module_name: str = "averaging",
+    lut: bool = True
+):
+    output_string = f"""\
+module {module_name} (input clk,
+                  input [{output_bits-1}:0] {",".join([f"i{i}" for i in range(num_models)])},
+                  output reg [{averaged_bits-1}:0] out);
+"""
+
+    cycles = math.ceil(math.log2(num_models))
+    # output_string += "\n".join([f"reg [{averaged_bits-1}:0] out_{i};" for i in range(cycles)])
+    output_string += f"""
+reg [{averaged_bits-1}:0] {",".join([f"out_{i}" for i in range(cycles)])};
+always @ (posedge clk) begin
+    out_0 <= {"+".join([f"i{i}" for i in range(num_models)])};
+"""
+    output_string += "\n".join([f"\tout_{i} <= out_{i-1};" for i in range(1,cycles)])
+    output_string += f"""
+end
+
+always @(*) begin
+    out = out_{cycles-1};
+end
+
+endmodule
+"""
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        print(output_string)
+        f.write(output_string)
+    
+def ensemble_top_to_verilog(
+    ensemble: nn.ModuleList,
+    module_name: str,
+    output_dir: str
+):
+    total_input_bits = int(sum([lnet.module_list[0].input_quant.get_scale_factor_bits()[1] *lnet.module_list[0].in_features for lnet in ensemble]))
+    #total_output_bits = int(max([lnet.module_list[-1].output_quant.get_scale_factor_bits()[1]*lnet.module_list[-1].out_features for lnet in ensemble]) + math.ceil(math.log2(len(ensemble))))
+    total_output_bits = int(max([lnet.module_list[-1].output_quant.get_scale_factor_bits()[1]*lnet.module_list[-1].out_features for lnet in ensemble]))
+    output_feat_size = int(ensemble[0].module_list[-1].output_quant.get_scale_factor_bits()[1])
+    layers = len(ensemble[0].module_list)
+    averaging_module_verilog(
+        output_bits = output_feat_size,
+        num_models = len(ensemble),
+        output_dir = output_dir,
+        lut = True
+    )
+    #total_output_bits = 32
+    file_contents = f"""\
+module {module_name} (input [{total_input_bits-1}:0] M0, input clk, input rst, output reg [{total_output_bits-1}:0] out);
+"""
+    
+    for i, lnet in enumerate(ensemble):
+        i_scale_factor, i_bits = lnet.module_list[0].input_quant.get_scale_factor_bits()
+        o_scale_factor, o_bits = lnet.module_list[-1].output_quant.get_scale_factor_bits()
+        input_bits = int(i_bits) * lnet.module_list[0].in_features
+        output_bits = int(o_bits) * lnet.module_list[-1].out_features
+        file_contents += f"""\
+
+//shortreal SFo_{i} = {o_scale_factor};
+wire [{input_bits-1}:0] M0w_{i};
+wire [{output_bits-1}:0] M2_{i};
+assign M0w_{i} = M0[{32*(i+1)-1}:{32*i}];
+{module_name}_{i} {module_name}_{i}_inst (.M0(M0w_{i}), .clk(clk), .rst(rst), .M{layers}(M2_{i}));
+"""
+
+#     file_contents += f"""\
+#
+# always @(posedge clk) begin
+#     M5 <= {"+".join([f"M2_{i}" for i,_ in enumerate(ensemble)])};
+# end
+#     """
+#     file_contents += f"""
+# //wire [{total_output_bits-1}:0] M{layers}_reg;
+# //always @(*) begin
+# //    out = M{layers}_reg;
+# //end
+# """
+    for num,i in enumerate(range(0, total_output_bits, output_feat_size)):
+        hi = i+output_feat_size-1
+        lo = i
+        file_contents += f"""\
+averaging averaging_{num}_inst (
+    .clk(clk),
+    {", ".join([f".i{j}(M2_{j}[{hi}:{lo}])" for j in range(len(ensemble))])}, 
+    .out(M{layers}_reg[{hi}:{lo}])
+);
+"""
+
+    file_contents += """\
+
+endmodule
+"""
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        f.write(file_contents)
+
+def calculate_bits(num_output_bits, num_of_ensembles):
+    max_value_single_number = (2 ** num_output_bits) - 1
+    max_sum = num_of_ensembles * max_value_single_number
+    required_bits = math.ceil(math.log2(max_sum + 1))
+    return required_bits
+
+def ensemble_top_to_verilog_shared_input(
+    ensemble: nn.ModuleList,
+    module_name: str,
+    output_dir: str
+):
+    total_input_bits = int(ensemble[0].in_features * ensemble[0].input_quant.get_scale_factor_bits()[1])
+    output_feat_size = int(ensemble[-2].module_list[-1].output_quant.get_scale_factor_bits()[1])
+    total_output_bits = int(ensemble[-2].module_list[-1].out_features * output_feat_size)
+    layers = len(ensemble[1].module_list)
+    num_ensembles = len(ensemble[1:-1])
+    shared_output_features = int(ensemble[-1].out_features / num_ensembles)
+    shared_output_feat_size = int(ensemble[-1].output_quant.get_scale_factor_bits()[1])
+    shared_output_bits = shared_output_feat_size * shared_output_features
+    module_feat_size = int(calculate_bits(ensemble[-1].output_quant.get_scale_factor_bits()[1], num_ensembles))
+    total_module_bits = int(shared_output_features * module_feat_size)
+    averaging_module_verilog_shared_output(
+        output_bits = shared_output_feat_size,
+        averaged_bits = module_feat_size,
+        num_models = num_ensembles,
+        output_dir = output_dir,
+        lut = True
+    )
+    file_contents = f"""\
+module {module_name} (input [{total_input_bits-1}:0] M0, input clk, input rst, output [{total_module_bits-1}:0] out);
+"""
+    
+    print([type(lnet) for lnet in ensemble])
+    for i, lnet in enumerate(ensemble[1:-1],1):
+        i_scale_factor, i_bits = lnet.module_list[0].input_quant.get_scale_factor_bits()
+        o_scale_factor, o_bits = lnet.module_list[-1].output_quant.get_scale_factor_bits()
+        input_bits = int(i_bits) * lnet.module_list[0].in_features
+        output_bits = int(o_bits) * lnet.module_list[-1].out_features
+        file_contents += f"""\
+
+//shortreal SFo_{i} = {o_scale_factor};
+wire [{input_bits-1}:0] M0w_{i};
+wire [{output_bits-1}:0] M2_{i};
+// assign M0w_{i} = M0[{32*(i+1)-1}:{32*i}];
+{module_name}_{i} {module_name}_{i}_inst (.M0(M0w_{i}), .clk(clk), .rst(rst), .M{layers}(M2_{i}));
+"""
+
+    file_contents += f"""
+logicnet_0 logicnet_0_inst (.M0(M0), .clk(clk), .rst(rst), .M1({{{", ".join([f"M0w_{i}" for i,_ in reversed(list(enumerate(ensemble[1:-1],1)))])}}}));
+"""
+
+    file_contents += "\n".join([f"wire[{shared_output_bits-1}:0] out_{i};" for i,_ in enumerate(ensemble[1:-1],1)])
+
+    file_contents += f"""
+logicnet_{len(ensemble)-1} logicnet_{len(ensemble)-1}_inst (.M0({{{", ".join([f"M2_{i}" for i,_ in reversed(list(enumerate(ensemble[1:-1],1)))])}}}), .clk(clk), .rst(rst), .M1({{{", ".join([f"out_{i}" for i,_ in reversed(list(enumerate(ensemble[1:-1],1)))])}}}));
+"""
+#     file_contents += f"""\
+#
+# always @(posedge clk) begin
+#     M5 <= {"+".join([f"M2_{i}" for i,_ in enumerate(ensemble)])};
+# end
+#     """
+#     file_contents += f"""
+# wire [{total_output_bits-1}:0] M{layers}_reg;
+# always @(*) begin
+#     out = M{layers}_reg;
+# end
+# """
+    for num,(i,j) in enumerate(zip(range(0, shared_output_bits, shared_output_feat_size), range(0, total_module_bits, module_feat_size))):
+        hi_out = i+shared_output_feat_size-1
+        lo_out = i
+        hi_module = j+module_feat_size-1
+        lo_module = j
+        file_contents += f"""\
+averaging averaging_{num}_inst (
+    .clk(clk),
+    {", ".join([f".i{k}(out_{k+1}[{hi_out}:{lo_out}])" for k in range(len(ensemble[1:-1]))])}, 
+    .out(out[{hi_module}:{lo_module}])
+);
+"""
+
+    file_contents += """\
+
+endmodule
+"""
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        f.write(file_contents)
+
 def ensemble_to_verilog_module(
     ensemble: nn.ModuleList, 
     module_name: str, # "logicnet"
@@ -67,7 +315,27 @@ def ensemble_to_verilog_module(
     add_registers: bool = True, 
     generate_bench: bool = True
 ):
+    print([(m.input_quant.get_quant_type(), m.output_quant.get_quant_type()) for m in ensemble[1].module_list])
     for i, lnet in enumerate(ensemble):
+        print(i)
+        if isinstance(lnet, SparseLinearNeq):
+            # lnet_copy = copy.deepcopy(lnet)
+            lnet_copy = lnet
+            print(ensemble[1].module_list[0].input_quant.get_quant_type(),ensemble[1].module_list[-1].output_quant.get_quant_type())
+            if not lnet_copy.output_quant:
+                lnet_copy.output_quant = ensemble[1].module_list[0].input_quant
+            if not lnet_copy.input_quant:
+                lnet_copy.input_quant = ensemble[1].module_list[-1].output_quant
+            print(lnet_copy.input_quant.get_quant_type(), lnet_copy.output_quant.get_quant_type())
+            module_list_to_verilog_module(
+                nn.ModuleList([lnet_copy]), 
+                module_name, 
+                output_dir, 
+                ensemble_member_idx=i,
+                generate_bench=generate_bench,
+                add_registers=add_registers,
+            )
+            continue
         module_list_to_verilog_module(
             lnet.module_list, 
             module_name, 
@@ -76,8 +344,14 @@ def ensemble_to_verilog_module(
             generate_bench=generate_bench,
             add_registers=add_registers,
         )
-        print(f"Top level entity stored at: {output_dir}/logicnet.v ...")
-
+    ensemble_top_to_verilog_shared_input(
+        ensemble=ensemble,
+        module_name=module_name,
+        output_dir=output_dir
+    )
+    ensemble[0].output_quant = None
+    ensemble[-1].input_quant = None
+    print(f"Top level entity stored at: {output_dir}/{module_name}.v ...")
 
 # TODO: Should this go in with the other verilog functions?
 # TODO: Support non-linear topologies
@@ -189,6 +463,9 @@ class SparseLinearNeq(nn.Module):
     # TODO: Move this to another class
     # TODO: Update this code to support custom bitwidths per input/output
     def gen_layer_verilog(self, module_prefix, directory, generate_bench: bool = True):
+        debug = False 
+        if module_prefix == "ens0_layer0":
+            debug = True
         _, input_bitwidth = self.input_quant.get_scale_factor_bits()
         _, output_bitwidth = self.output_quant.get_scale_factor_bits()
         input_bitwidth, output_bitwidth = int(input_bitwidth), int(output_bitwidth)
@@ -258,13 +535,17 @@ class SparseLinearNeq(nn.Module):
 
     def lut_inference(self):
         self.is_lut_inference = True
-        self.input_quant.bin_output()
-        self.output_quant.bin_output()
+        if self.input_quant:
+            self.input_quant.bin_output()
+        if self.output_quant:
+            self.output_quant.bin_output()
 
     def neq_inference(self):
         self.is_lut_inference = False
-        self.input_quant.float_output()
-        self.output_quant.float_output()
+        if self.input_quant:
+            self.input_quant.float_output()
+        if self.output_quant:
+            self.output_quant.float_output()
 
     # TODO: This function might be a useful utility outside of this class..
     def table_lookup(self, connected_input: Tensor, input_perm_matrix: Tensor, bin_output_states: Tensor) -> Tensor:
@@ -278,7 +559,7 @@ class SparseLinearNeq(nn.Module):
         indices = torch.argmax(eq.type(torch.int64),dim=1)
         return bin_output_states[indices]
 
-    def lut_forward(self, x: Tensor) -> Tensor:
+    def lut_forward(self, x: Tensor, debug=False) -> Tensor:
         if self.apply_input_quant:
             x = self.input_quant(x) # Use this to fetch the bin output of the input, if the input isn't already in binary format
         y = torch.zeros((x.shape[0],self.out_features))
@@ -286,12 +567,26 @@ class SparseLinearNeq(nn.Module):
         for i in range(self.out_features):
             indices, input_perm_matrix, float_output_states, bin_output_states = self.neuron_truth_tables[i]
             connected_input = x[:,indices]
+            # print(connected_input[0,:])
+            # print(x.shape, connected_input.shape, indices, input_perm_matrix, bin_output_states)
+            # print(self.neuron_truth_tables[i].shape)
             y[:,i] = self.table_lookup(connected_input, input_perm_matrix, bin_output_states)
+            if debug:
+                print("i:",i)
+                print("input_perm_matrix:",input_perm_matrix)
+                print("bin_output_states:",bin_output_states)
+                if self.output_quant:
+                    print("bin_output_states:",list(map(lambda z: self.output_quant.get_bin_str(z), bin_output_states)))
+                print("connected_input:",connected_input)
+                if self.input_quant:
+                    print("connected_input:",self.input_quant.get_bin_str(connected_input[0][0]))
+                print("y:",y[:,i])
         return y
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor, debug=False) -> Tensor:
         if self.is_lut_inference:
-            x = self.lut_forward(x)
+            x = self.lut_forward(x, debug)
+            # print(x.shape)
         else:
             if self.apply_input_quant:
                 x = self.input_quant(x)
@@ -305,17 +600,30 @@ class SparseLinearNeq(nn.Module):
         return x
 
     # Consider using masked_select instead of fetching the indices
-    def calculate_truth_tables(self):
+    def calculate_truth_tables(self, model: nn.Module):
+        # print("in_features", self.in_features, "out_features", self.out_features)
         with torch.no_grad():
             mask = self.fc.mask()
             # Precalculate all of the input value permutations
             input_state_space = list() # TODO: is a list the right data-structure here?
             bin_state_space = list()
+            if self.input_quant is None:
+                input_quants = [model.ensemble[i].module_list[-1].output_quant for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
+                in_features = [model.ensemble[i].module_list[-1].out_features for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
+                assert(in_features.count(in_features[0]) == len(in_features))
+                in_features = in_features[0]
+
             for m in range(self.in_features):
-                neuron_state_space = self.input_quant.get_state_space() # TODO: this call should include the index of the element of interest
-                bin_space = self.input_quant.get_bin_state_space() # TODO: this call should include the index of the element of interest
+                if self.input_quant is not None:
+                    neuron_state_space = self.input_quant.get_state_space() # TODO: this call should include the index of the element of interest
+                    bin_space = self.input_quant.get_bin_state_space() # TODO: this call should include the index of the element of interest
+                else:
+                    neuron_state_space = input_quants[m//in_features].get_state_space() # TODO: this call should include the index of the element of interest
+                    bin_space = input_quants[m//in_features].get_bin_state_space() # TODO: this call should include the index of the element of interest
                 input_state_space.append(neuron_state_space)
                 bin_state_space.append(bin_space)
+            
+            print(input_state_space[0].shape, len(input_state_space))
 
             neuron_truth_tables = list()
             for n in range(self.out_features):
@@ -333,15 +641,44 @@ class SparseLinearNeq(nn.Module):
                 padded_perm_matrix = torch.zeros((num_permutations, self.in_features))
                 padded_perm_matrix[:,indices] = input_permutation_matrix
 
+                # print(input_permutation_matrix.shape)
+                # print(self.forward(padded_perm_matrix)[:,n])
+                
+                output_quants = [self.output_quant]
+                shared_input = False
+                if self.output_quant == None:
+                    # print(type(model))
+                    # print([type(model.ensemble[i]) for i in range(len(model.ensemble))])
+                    output_quants = [model.ensemble[i].module_list[0].input_quant for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
+                    shared_input = True
+                
+                # print(len(output_quants))
+
                 # TODO: Update this block to just run inference on the fc layer, once BN has been moved to output_quant
                 apply_input_quant, apply_output_quant = self.apply_input_quant, self.apply_output_quant
                 self.apply_input_quant, self.apply_output_quant = False, False
-                is_bin_output = self.output_quant.is_bin_output
-                self.output_quant.float_output()
-                output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate float for the current input
-                self.output_quant.bin_output()
-                bin_output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate bin for the current input
-                self.output_quant.is_bin_output = is_bin_output
+                is_bin_outputs = [output_quant.is_bin_output for output_quant in output_quants]
+                for output_quant in output_quants:
+                    output_quant.float_output()
+                # print(padded_perm_matrix.shape)
+                # print("forwarded", self.forward(padded_perm_matrix).shape)
+                # print(output_quant.get_scale_factor_bits())
+                ranges = [(16*i,16*(i+1)) for i in range(len(output_quants))]
+                # print(ranges)
+                if len(output_quants) == 1:
+                    output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate float for the current input
+                else:
+                    # print(ranges)
+                    # print([self.forward(padded_perm_matrix)[:,a:b].shape for a,b in ranges])
+                    output_states = torch.cat([output_quant(self.forward(padded_perm_matrix)[:,16*i:16*(i+1)]) for i,output_quant in enumerate(output_quants)], dim=1)[:,n]
+                for output_quant in output_quants:            
+                    output_quant.bin_output()
+                if len(output_quants) == 1:
+                    bin_output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate bin for the current input
+                else:
+                    bin_output_states = torch.cat([output_quant(self.forward(padded_perm_matrix)[:,16*i:16*(i+1)]) for i,output_quant in enumerate(output_quants)], dim=1)[:,n]
+                for output_quant, is_bin_output in zip(output_quants, is_bin_outputs):
+                    output_quant.is_bin_output = is_bin_output
                 self.apply_input_quant, self.apply_output_quant = apply_input_quant, apply_output_quant
 
                 # Append the connectivity, input permutations and output permutations to the neuron truth tables 
@@ -406,7 +743,7 @@ class RandomFixedSparsityMask2D(nn.Module):
         baseline_usage = int(rem_nzws/self.in_features)
 
         for i in range(baseline_usage):
-            nzw_indices = torch.concat([nzw_indices, torch.randperm(self.in_features)])
+            nzw_indices = torch.cat([nzw_indices, torch.randperm(self.in_features)])
         
         rem_nzws = rem_nzws - nzw_indices.shape[0]
         input_i_usage_l = []

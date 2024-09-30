@@ -11,10 +11,44 @@ from logicnets.nn import (
     DenseMask2D, 
     RandomFixedSparsityMask2D,
     SparseLinearNeq,
+    calculate_bits,
 )
+import math
+from pyverilator import PyVerilator
+from os.path import realpath
+from functools import reduce
 
 from models import JetSubstructureNeqModel
 
+def to_twos_complement(val, bits):
+    # print(val)
+    retval =bin(int(val) & 2**bits-1)[2:] 
+    # print(retval)
+    return retval.zfill(bits)
+    # return bin(int(val) & 2**bits-1)[2:]
+
+def from_twos_complement(binary_str):
+    # Determine the length of the binary string
+    n = len(binary_str)
+    
+    # Convert the binary string to an integer
+    int_value = int(binary_str, 2)
+    
+    # Check if the most significant bit (MSB) is 1 (indicating a negative number)
+    if binary_str[0] == '1':  # negative value in 2's complement
+        int_value -= 2 ** n
+    
+    return int_value
+
+def bits_to_ints(binary_str, bits):
+    return [from_twos_complement(binary_str[i:i+bits]) for i in range(0,len(binary_str),bits)][::-1]
+
+def hex_to_bin(hex_value):
+    length = int(hex_value.split("'")[0])
+    hex_value = hex_value.split("h")[1]
+    # print(hex_value, length)
+    binary_value = bin(int(hex_value, 16))[2:]
+    return binary_value.zfill(length)
 
 class AveragingJetNeqModel(nn.Module):
     """
@@ -36,6 +70,7 @@ class AveragingJetNeqModel(nn.Module):
         self.shared_output_layer = model_config["shared_output_layer"]
         self.input_length = model_config["input_length"]
         self.output_length = model_config["output_length"]
+        self.debug_verilog = False
 
         shared_output_bitwidth = None
         if self.shared_output_layer:
@@ -167,6 +202,8 @@ class AveragingJetNeqModel(nn.Module):
     def pytorch_forward(self, x):
         if self.shared_input_quant and self.shared_input_layer:
             x = self.ensemble[0](x) # input_quant_layer
+            if self.debug_verilog:
+                print(x)
             if self.shared_output_layer:
                 outputs = self.ensemble[1](x[:, 0 : self.input_length])
                 for i in range(1, self.num_models):
@@ -195,10 +232,19 @@ class AveragingJetNeqModel(nn.Module):
             outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
 
         if self.shared_output_layer:
+            if self.debug_verilog:
+                print(outputs)
+                # print(outputs[0])
+                # print(outputs[0,:5])
+                # print(list(map(lambda z: self.ensemble[1].module_list[-1].output_quant.get_bin_str(z, True), outputs[0,:5])))
+                # print(list(map(lambda z: self.ensemble[2].module_list[-1].output_quant.get_bin_str(z, True), outputs[0,5:])))
             outputs = self.ensemble[-1](outputs)
             # Sum every out_length elements to get the final output
             outputs = outputs.view(-1, self.num_models, self.output_length)
             outputs = outputs.sum(dim=1)
+            if self.debug_verilog:
+                print(outputs)
+                print(list(map(lambda z: self.ensemble[-1].output_quant.get_bin_str(z), outputs[0,:])))
         elif self.same_output_scale_sum:
             outputs = outputs.sum(dim=0)
         else:
@@ -209,8 +255,142 @@ class AveragingJetNeqModel(nn.Module):
 
     # TODO: Implement verilog_forward() and verilog_inference()
     def verilog_forward(self, x):
-        outputs = [model.verilog_forward(x) for model in self.ensemble]
-        return sum(outputs)  # / self.num_models # Do division in pretransform
+        # Get integer output from the first layer
+        input_quants = [model.module_list[0].input_quant for model in self.ensemble]
+        output_quants = [model.module_list[-1].output_quant for model in self.ensemble]
+        input_bitwidths = [int(model.module_list[0].input_quant.get_scale_factor_bits()[1]) for model in self.ensemble]
+        output_bitwidths = [int(model.module_list[-1].output_quant.get_scale_factor_bits()[1]) for model in self.ensemble]
+        total_input_bits = [model.module_list[0].in_features*input_bitwidth for input_bitwidth,model in zip(input_bitwidths,self.ensemble)]
+        total_output_bits = [model.module_list[-1].out_features*output_bitwidth for output_bitwidth,model in zip(output_bitwidths,self.ensemble)]
+        # assumes all models have same # of layers
+        num_layers = len(self.ensemble[0].module_list)
+        for input_quant in input_quants:
+            input_quant.bin_output()
+        self.ensemble[0].module_list[0].apply_input_quant = False
+        y = torch.zeros(x.shape[0], self.ensemble[0].module_list[-1].out_features)
+        xs = [input_quant(x) for input_quant in input_quants]
+        # for x in xs:
+        #     print("asdf")
+        #     print(x.shape)
+        # print(x, x.shape)
+        self.dut.io.rst = 0
+        self.dut.io.clk = 0
+        for i in range(x.shape[0]):
+            x_is = [x[i,:] for x in xs]
+            # y_is = [model.pytorch_forward(x[i:i+1,:])[0] for x,model in zip(xs, self.ensemble)]
+            xv_is = [list(map(lambda z: input_quant.get_bin_str(z), x_i)) for x_i,input_quant in zip(x_is,input_quants)]
+            # ys_i = list(map(lambda z: output_quants[0].get_bin_str(z), y_i))
+            # print("xv_i:", xv_i, "ys_i:",ys_i)
+            #print("xv_is:", xv_is)
+            xvc_i = reduce(lambda a,b: b+a, [reduce(lambda a,b: a+b, xv_i[::-1]) for xv_i in xv_is])
+            #print("xvc_i:", xvc_i)
+            #print(len(xvc_i))
+            # ysc_i = reduce(lambda a,b: a+b, ys_i[::-1])
+            self.dut["M0"] = int(xvc_i, 2)
+            for j in range(len(self.ensemble[0].module_list) +  2):
+                #print(self.dut.io.M5)
+                res = self.dut[f"out"]
+                result = f"{res:0{int(total_output_bits[0])}b}"
+                self.dut.io.clk = 1
+                self.dut.io.clk = 0
+                #print("res, result: ", res, result)
+            # expected = f"{int(ysc_i,2):0{int(total_output_bits)}b}"
+            result = f"{res:0{int(total_output_bits[0])}b}"
+            # print("expected:", expected, "result:", result)
+            # assert(expected == result)
+            res_split = [result[i:i+output_bitwidths[0]] for i in range(0, len(result), output_bitwidths[0])][::-1]
+            yv_i = torch.Tensor(list(map(lambda z: int(z, 2), res_split)))
+            y[i,:] = yv_i
+            # Dump the I/O pairs
+            if self.logfile is not None:
+                with open(self.logfile, "a") as f:
+                    f.write(f"{int(xvc_i,2):0{int(sum(total_input_bits))}b}, {result}\n")
+        return y
+
+    def verilog_forward(self, x):
+        # for name,module in self.named_modules():
+        #     if isinstance(module, SparseLinearNeq):
+        #         print(name, module.apply_input_quant, module.apply_output_quant)
+        # self.debug_verilog = True
+        # Get integer output from the first layer
+        input_quant = self.ensemble[0].input_quant
+        output_quant = self.ensemble[-1].output_quant
+        # print("input_quant_type", input_quant.get_quant_type())
+        # print("input_quant_state_space", input_quant.get_bin_state_space())
+        # print("output_quant_type", output_quant.get_quant_type())
+        # print("output_quant_state_space", output_quant.get_bin_state_space())
+        _, input_bitwidth = self.ensemble[0].input_quant.get_scale_factor_bits()
+        output_bitwidth = calculate_bits(int(self.ensemble[-1].output_quant.get_scale_factor_bits()[1]), len(self.ensemble[1:-1]))
+        output_quant_bitwidth = int(self.ensemble[-1].output_quant.get_scale_factor_bits()[1])
+        input_bitwidth, output_bitwidth = int(input_bitwidth), int(output_bitwidth)
+        total_input_bits = self.ensemble[0].in_features*input_bitwidth
+        total_output_bits = self.ensemble[-1].out_features/len(self.ensemble[1:-1])*output_bitwidth
+        num_layers = len(self.ensemble[1].module_list)
+        input_quant.bin_output()
+        self.ensemble[0].apply_input_quant = False
+        y = torch.zeros(x.shape[0], int(self.ensemble[-1].out_features/len(self.ensemble[1:-1])))
+        x = input_quant(x)
+        self.dut.io.rst = 0
+        self.dut.io.clk = 0
+        for i in range(x.shape[0]):
+            x_i = x[i,:]
+            y_i = self.pytorch_forward(x[i:i+1,:])[0]
+            xv_i = list(map(lambda z: input_quant.get_bin_str(z), x_i))
+            # xv_i = list(map(lambda z: to_twos_complement(z,6), x_i))
+            ys_i = list(map(lambda z: to_twos_complement(z+(2**(output_quant_bitwidth-1))*len(self.ensemble[1:-1]),output_bitwidth+1)[1:], y_i))
+            xvc_i = reduce(lambda a,b: a+b, xv_i[::-1])
+            ysc_i = reduce(lambda a,b: a+b, ys_i[::-1])
+            # print("x_i =",x_i)
+            # print("e0(xi) =", self.ensemble[0].lut_forward(x[i:i+1,:],debug=True))
+            # print("xv_i =",xv_i)
+            # print("xvc_i =",xvc_i,bits_to_ints(xvc_i,6))
+            # print("ys_i bin_str =", list(map(lambda z: output_quant.get_bin_str(z), y_i)))
+            # print("ys_i bin_str =", list(map(lambda z: to_twos_complement(int(output_quant.get_bin_str(z),2),4), y_i)))
+            # print(y_i)
+            # print(ys_i)
+            # print(ysc_i)
+            self.dut["M0"] = int(xvc_i, 2)
+            for j in range(num_layers + 2 + 1 + math.ceil(math.log2(len(self.ensemble[1:-1])))):
+                #print(self.dut.io.M5)
+                res = self.dut[f"out"]
+                result = f"{res:0{int(total_output_bits)}b}" # verilog output
+                self.dut.io.clk = 1
+                self.dut.io.clk = 0
+                # print(res, result)
+                # print(self.dut.internals)
+                # print(self.dut.internals.logicnet_1_inst)
+                # print(self.dut.internals.logicnet_2_inst)
+                # print(self.dut.internals.logicnet_0_inst)
+                m0 = hex_to_bin(str(self.dut.internals.logicnet_0_inst.M0w))
+                input1 = hex_to_bin(str(self.dut.internals.logicnet_1_inst.M0w))
+                input2 = hex_to_bin(str(self.dut.internals.logicnet_2_inst.M0w))
+                output1 = hex_to_bin(str(self.dut.internals.M2_1))
+                output2 = hex_to_bin(str(self.dut.internals.M2_2))
+                # print("M0 =", m0, bits_to_ints(m0,6))
+                # print("M0w_1 =", input1, bits_to_ints(input1,2))
+                # print("M0w_2 =", input2, bits_to_ints(input2,2))
+                # print("M2_1 =", output1, bits_to_ints(output1,4))
+                # print("M2_2 =", output2, bits_to_ints(output2,4))
+                # print(f"{self.dut['out_1']:0{int(total_output_bits)}b}",f"{self.dut[f'out_2']:0{int(total_output_bits)}b}")
+            expected = f"{int(ysc_i,2):0{int(total_output_bits)}b}"
+            result = f"{res:0{int(total_output_bits)}b}"
+            # print(expected)
+            # print(result)
+            assert(expected == result)
+            res_split = [result[i:i+output_bitwidth] for i in range(0, len(result), output_bitwidth)][::-1]
+            # print(result, res_split)
+            yv_i = torch.Tensor(list(map(lambda z: int(z, 2), res_split)))
+            y[i,:] = yv_i
+            # Dump the I/O pairs
+            if self.logfile is not None:
+                with open(self.logfile, "a") as f:
+                    f.write(f"{int(xvc_i,2):0{int(total_input_bits)}b}{int(ysc_i,2):0{int(total_output_bits)}b}\n")
+        return y
+
+    
+    # def verilog_forward(self, x):
+    #     outputs = [model.verilog_forward(x) for model in self.ensemble]
+    #     return sum(outputs)  # / self.num_models # Do division in pretransform
 
     def verilog_inference(
         self,
@@ -219,9 +399,29 @@ class AveragingJetNeqModel(nn.Module):
         logfile=None,
         add_registers: bool = False,
     ):
-        pass
+        self.verilog_dir = realpath(verilog_dir)
+        self.top_module_filename = top_module_filename
+        self.dut = PyVerilator.build(f"{self.verilog_dir}/{self.top_module_filename}", verilog_path=[self.verilog_dir], build_dir=f"{self.verilog_dir}/verilator")
+
+        # self.dut.start_vcd_trace('gtkwave.vcd')
+
+        # start gtkwave to view the waveforms as they are made
+        # self.dut.start_gtkwave()
+
+        # add all the io and internal signals to gtkwave
+        # self.dut.send_signals_to_gtkwave(self.dut.io)
+        # self.dut.send_signals_to_gtkwave(self.dut.internals)
+
+
+        self.is_verilog_inference = True
+        self.logfile = logfile
+        # if add_registers:
+        #     self.latency = len(self.num_neurons)
 
     def pytorch_inference(self):
+        for name,module in self.named_modules():
+            if isinstance(module, SparseLinearNeq):
+                print(name, module.apply_input_quant, module.apply_output_quant)
         self.is_verilog_inference = False
 
 
@@ -326,8 +526,61 @@ class BaseEnsembleClassifier(nn.Module):
 
     # TODO: Implement verilog_forward() and verilog_inference()
     def verilog_forward(self, x):
-        outputs = [model.verilog_forward(x) for model in self.ensemble]
-        return sum(outputs) / self.num_models
+        # Get integer output from the first layer
+        input_quants = [model.module_list[0].input_quant for model in self.ensemble]
+        output_quants = [model.module_list[-1].output_quant for model in self.ensemble]
+        input_bitwidths = [int(model.module_list[0].input_quant.get_scale_factor_bits()[1]) for model in self.ensemble]
+        output_bitwidths = [int(model.module_list[-1].output_quant.get_scale_factor_bits()[1]) for model in self.ensemble]
+        total_input_bits = [model.module_list[0].in_features*input_bitwidth for input_bitwidth,model in zip(input_bitwidths,self.ensemble)]
+        total_output_bits = [model.module_list[-1].out_features*output_bitwidth for output_bitwidth,model in zip(output_bitwidths,self.ensemble)]
+        # assumes all models have same # of layers
+        num_layers = len(self.ensemble[0].module_list)
+        for input_quant in input_quants:
+            input_quant.bin_output()
+        self.ensemble[0].module_list[0].apply_input_quant = False
+        y = torch.zeros(x.shape[0], self.ensemble[0].module_list[-1].out_features)
+        xs = [input_quant(x) for input_quant in input_quants]
+        # for x in xs:
+        #     print("asdf")
+        #     print(x.shape)
+        # print(x, x.shape)
+        self.dut.io.rst = 0
+        self.dut.io.clk = 0
+        for i in range(x.shape[0]):
+            x_is = [x[i,:] for x in xs]
+            # y_is = [model.pytorch_forward(x[i:i+1,:])[0] for x,model in zip(xs, self.ensemble)]
+            xv_is = [list(map(lambda z: input_quant.get_bin_str(z), x_i)) for x_i,input_quant in zip(x_is,input_quants)]
+            # ys_i = list(map(lambda z: output_quants[0].get_bin_str(z), y_i))
+            # print("xv_i:", xv_i, "ys_i:",ys_i)
+            #print("xv_is:", xv_is)
+            xvc_i = reduce(lambda a,b: b+a, [reduce(lambda a,b: a+b, xv_i[::-1]) for xv_i in xv_is])
+            #print("xvc_i:", xvc_i)
+            #print(len(xvc_i))
+            # ysc_i = reduce(lambda a,b: a+b, ys_i[::-1])
+            self.dut["M0"] = int(xvc_i, 2)
+            for j in range(len(self.ensemble[0].module_list) +  2):
+                #print(self.dut.io.M5)
+                res = self.dut[f"out"]
+                result = f"{res:0{int(total_output_bits[0])}b}"
+                self.dut.io.clk = 1
+                self.dut.io.clk = 0
+                #print("res, result: ", res, result)
+            # expected = f"{int(ysc_i,2):0{int(total_output_bits)}b}"
+            result = f"{res:0{int(total_output_bits[0])}b}"
+            # print("expected:", expected, "result:", result)
+            # assert(expected == result)
+            res_split = [result[i:i+output_bitwidths[0]] for i in range(0, len(result), output_bitwidths[0])][::-1]
+            yv_i = torch.Tensor(list(map(lambda z: int(z, 2), res_split)))
+            y[i,:] = yv_i
+            # Dump the I/O pairs
+            if self.logfile is not None:
+                with open(self.logfile, "a") as f:
+                    f.write(f"{int(xvc_i,2):0{int(sum(total_input_bits))}b}, {result}\n")
+        return y
+    
+    # def verilog_forward(self, x):
+    #     outputs = [model.verilog_forward(x) for model in self.ensemble]
+    #     return sum(outputs)  # / self.num_models # Do division in pretransform
 
     def verilog_inference(
         self,
@@ -336,7 +589,13 @@ class BaseEnsembleClassifier(nn.Module):
         logfile=None,
         add_registers: bool = False,
     ):
-        pass
+        self.verilog_dir = realpath(verilog_dir)
+        self.top_module_filename = top_module_filename
+        self.dut = PyVerilator.build(f"{self.verilog_dir}/{self.top_module_filename}", verilog_path=[self.verilog_dir], build_dir=f"{self.verilog_dir}/verilator")
+        self.is_verilog_inference = True
+        self.logfile = logfile
+        # if add_registers:
+        #     self.latency = len(self.num_neurons)
 
     def pytorch_inference(self):
         self.is_verilog_inference = False
