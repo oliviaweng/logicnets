@@ -1,4 +1,11 @@
 trial,accuracy,loss,ensemble_size,model_size
+non_shared_l_ensemble_size32,98.57,0.048,32,mnist_l_non_shared
+averaging_l_ensemble_size8,98.55,0.08,8,mnist_l
+non_shared_l_ensemble_size16,98.52,0.051,16,mnist_l_non_shared
+averaging_l_ensemble_size4,98.48,0.082,4,mnist_l
+non_shared_l_ensemble_size4,98.36,0.085,4,mnist_l_non_shared
+averaging_l_ensemble_size2,98.3,0.08,2,mnist_l
+non_shared_l_ensemble_size2,98.28,0.082,2,mnist_l_non_shared
 averaging_xs_non_shared_ensemble_size64,98.25,0.059,64,mnist_xs_non_shared
 averaging_xs_non_shared_ensemble_size32,97.92,0.073,32,mnist_xs_non_shared
 averaging_med_ensemble_size16,97.62,0.108,16,mnist_m
