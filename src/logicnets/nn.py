@@ -22,6 +22,7 @@ import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 import itertools
 import numpy as np
+import heapdict
 
 from .init import random_restrict_fanin
 from .util import fetch_mask_indices, generate_permutation_matrix
@@ -105,6 +106,16 @@ class SparseLinear(nn.Linear):
 
     def forward(self, input: Tensor) -> Tensor:
         return (input * self.weight).sum(dim=-1) + self.bias
+
+
+class SparseLinear_mask(nn.Linear):
+    def __init__(self, in_features: int, out_features: int, mask: nn.Module, bias: bool = True) -> None:
+        super(SparseLinear_mask, self).__init__(in_features=in_features, out_features=out_features, bias=bias)
+        self.mask = mask
+
+    def forward(self, input: Tensor) -> Tensor:
+        return F.linear(input, self.weight*self.mask(), self.bias)
+
 
 # TODO: Perhaps make this two classes, separating the LUT and NEQ code.
 class SparseLinearNeq(nn.Module):
@@ -311,6 +322,226 @@ class SparseLinearNeq(nn.Module):
         self.neuron_truth_tables = neuron_truth_tables
 
 
+class SparseLinearNeq_mask(nn.Module):
+    """
+    Original LogicNets SparseLinearNeq
+    """
+    def __init__(
+        self, 
+        in_features: int, 
+        out_features: int, 
+        input_quant, 
+        output_quant, 
+        sparse_linear_kws={}, 
+        apply_input_quant=True, 
+        apply_output_quant=True,
+        output_pre_transform=None,
+        input_post_transform=None,
+
+    ) -> None:
+        super(SparseLinearNeq_mask, self).__init__()
+        self.in_features = in_features
+        self.out_features = out_features
+        self.input_quant = input_quant
+        self.fc = SparseLinear_mask(in_features, out_features, **sparse_linear_kws)
+        self.output_quant = output_quant
+        self.is_lut_inference = False
+        self.neuron_truth_tables = None
+        self.apply_input_quant = apply_input_quant
+        self.apply_output_quant = apply_output_quant
+        self.output_pre_transform = output_pre_transform
+        self.input_post_transform = input_post_transform
+
+    def lut_cost(self):
+        """
+        Approximate how many 6:1 LUTs are needed to implement this layer using 
+        LUTCost() as defined in LogicNets paper FPL'20:
+            LUTCost(X, Y) = (Y / 3) * (2^(X - 4) - (-1)^X)
+        where:
+        * X: input fanin bits
+        * Y: output bits 
+        LUTCost() estimates how many LUTs are needed to implement 1 neuron, so 
+        we then multiply LUTCost() by the number of neurons to get the total 
+        number of LUTs needed.
+        NOTE: This function (over)estimates how many 6:1 LUTs are needed to implement
+        this layer b/c it assumes every neuron is connected to the next layer 
+        since we do not have the next layer's sparsity information.
+        """
+        # Compute LUTCost of 1 neuron
+        _, input_bitwidth = self.input_quant.get_scale_factor_bits()
+        _, output_bitwidth = self.output_quant.get_scale_factor_bits()
+        input_bitwidth, output_bitwidth = int(input_bitwidth), int(output_bitwidth)
+        x = input_bitwidth * self.fc.mask.fan_in # neuron input fanin
+        y = output_bitwidth 
+        neuron_lut_cost = (y / 3) * ((2 ** (x - 4)) - ((-1) ** x))
+        # Compute total LUTCost
+        return self.out_features * neuron_lut_cost
+
+    # TODO: Move the verilog string templates to elsewhere
+    # TODO: Move this to another class
+    # TODO: Update this code to support custom bitwidths per input/output
+    def gen_layer_verilog(self, module_prefix, directory, generate_bench: bool = True):
+        _, input_bitwidth = self.input_quant.get_scale_factor_bits()
+        _, output_bitwidth = self.output_quant.get_scale_factor_bits()
+        input_bitwidth, output_bitwidth = int(input_bitwidth), int(output_bitwidth)
+        total_input_bits = self.in_features*input_bitwidth
+        total_output_bits = self.out_features*output_bitwidth
+        layer_contents = f"module {module_prefix} (input [{total_input_bits-1}:0] M0, output [{total_output_bits-1}:0] M1);\n\n"
+        output_offset = 0
+        for index in range(self.out_features):
+            module_name = f"{module_prefix}_N{index}"
+            indices, _, _, _ = self.neuron_truth_tables[index]
+            neuron_verilog = self.gen_neuron_verilog(index, module_name) # Generate the contents of the neuron verilog
+            with open(f"{directory}/{module_name}.v", "w") as f:
+                f.write(neuron_verilog)
+            if generate_bench:
+                neuron_bench = self.gen_neuron_bench(index, module_name) # Generate the contents of the neuron verilog
+                with open(f"{directory}/{module_name}.bench", "w") as f:
+                    f.write(neuron_bench)
+            connection_string = generate_neuron_connection_verilog(indices, input_bitwidth) # Generate the string which connects the synapses to this neuron
+            wire_name = f"{module_name}_wire"
+            connection_line = f"wire [{len(indices)*input_bitwidth-1}:0] {wire_name} = {{{connection_string}}};\n"
+            inst_line = f"{module_name} {module_name}_inst (.M0({wire_name}), .M1(M1[{output_offset+output_bitwidth-1}:{output_offset}]));\n\n"
+            layer_contents += connection_line + inst_line
+            output_offset += output_bitwidth
+        layer_contents += "endmodule"
+        with open(f"{directory}/{module_prefix}.v", "w") as f:
+            f.write(layer_contents)
+        return total_input_bits, total_output_bits
+
+    # TODO: Move the verilog string templates to elsewhere
+    # TODO: Move this to another class
+    def gen_neuron_verilog(self, index, module_name):
+        indices, input_perm_matrix, float_output_states, bin_output_states = self.neuron_truth_tables[index]
+        _, input_bitwidth = self.input_quant.get_scale_factor_bits()
+        _, output_bitwidth = self.output_quant.get_scale_factor_bits()
+        cat_input_bitwidth = len(indices)*input_bitwidth
+        lut_string = ""
+        num_entries = input_perm_matrix.shape[0]
+        for i in range(num_entries):
+            entry_str = ""
+            for idx in range(len(indices)):
+                val = input_perm_matrix[i,idx]
+                entry_str += self.input_quant.get_bin_str(val)
+            res_str = self.output_quant.get_bin_str(bin_output_states[i])
+            lut_string += f"\t\t\t{int(cat_input_bitwidth)}'b{entry_str}: M1r = {int(output_bitwidth)}'b{res_str};\n"
+        return generate_lut_verilog(module_name, int(cat_input_bitwidth), int(output_bitwidth), lut_string)
+
+    # TODO: Move the string templates to bench.py
+    # TODO: Move this to another class
+    def gen_neuron_bench(self, index, module_name):
+        indices, input_perm_matrix, float_output_states, bin_output_states = self.neuron_truth_tables[index]
+        _, input_bitwidth = self.input_quant.get_scale_factor_bits()
+        _, output_bitwidth = self.output_quant.get_scale_factor_bits()
+        cat_input_bitwidth = len(indices)*input_bitwidth
+        lut_string = ""
+        num_entries = input_perm_matrix.shape[0]
+        # Sort the input_perm_matrix to match the bench format
+        input_state_space_bin_str = list(map(lambda y: list(map(lambda z: self.input_quant.get_bin_str(z), y)), input_perm_matrix))
+        sorted_bin_output_states = sort_to_bench(input_state_space_bin_str, bin_output_states)
+        # Generate the LUT for each output
+        for i in range(int(output_bitwidth)):
+            lut_string += f"M1[{i}]       = LUT 0x"
+            output_bin_str = reduce(lambda b,c: b+c, map(lambda a: self.output_quant.get_bin_str(a)[int(output_bitwidth)-1-i], sorted_bin_output_states))
+            lut_hex_string = f"{int(output_bin_str,2):0{int(num_entries/4)}x} "
+            lut_string += lut_hex_string
+            lut_string += generate_lut_input_string(int(cat_input_bitwidth))
+        return generate_lut_bench(int(cat_input_bitwidth), int(output_bitwidth), lut_string)
+
+    def lut_inference(self):
+        self.is_lut_inference = True
+        self.input_quant.bin_output()
+        self.output_quant.bin_output()
+
+    def neq_inference(self):
+        self.is_lut_inference = False
+        self.input_quant.float_output()
+        self.output_quant.float_output()
+
+    # TODO: This function might be a useful utility outside of this class..
+    def table_lookup(self, connected_input: Tensor, input_perm_matrix: Tensor, bin_output_states: Tensor) -> Tensor:
+        fan_in_size = connected_input.shape[1]
+        ci_bcast = connected_input.unsqueeze(2) # Reshape to B x Fan-in x 1
+        pm_bcast = input_perm_matrix.t().unsqueeze(0) # Reshape to 1 x Fan-in x InputStates
+        eq = (ci_bcast == pm_bcast).sum(dim=1) == fan_in_size # Create a boolean matrix which matches input vectors to possible input states
+        matches = eq.sum(dim=1) # Count the number of perfect matches per input vector
+        if not (matches == torch.ones_like(matches,dtype=matches.dtype)).all():
+            raise Exception(f"One or more vectors in the input is not in the possible input state space")
+        indices = torch.argmax(eq.type(torch.int64),dim=1)
+        return bin_output_states[indices]
+
+    def lut_forward(self, x: Tensor) -> Tensor:
+        if self.apply_input_quant:
+            x = self.input_quant(x) # Use this to fetch the bin output of the input, if the input isn't already in binary format
+        y = torch.zeros((x.shape[0],self.out_features))
+        # Perform table lookup for each neuron output
+        for i in range(self.out_features):
+            indices, input_perm_matrix, float_output_states, bin_output_states = self.neuron_truth_tables[i]
+            connected_input = x[:,indices]
+            y[:,i] = self.table_lookup(connected_input, input_perm_matrix, bin_output_states)
+        return y
+
+    def forward(self, x: Tensor) -> Tensor:
+        if self.is_lut_inference:
+            x = self.lut_forward(x)
+        else:
+            if self.apply_input_quant:
+                x = self.input_quant(x)
+            if self.input_post_transform:
+                x = self.input_post_transform(x)
+            x = self.fc(x)
+            if self.output_pre_transform:
+                x = self.output_pre_transform(x)
+            if self.apply_output_quant:
+                x = self.output_quant(x)
+        return x
+
+    # Consider using masked_select instead of fetching the indices
+    def calculate_truth_tables(self):
+        with torch.no_grad():
+            mask = self.fc.mask()
+            # Precalculate all of the input value permutations
+            input_state_space = list() # TODO: is a list the right data-structure here?
+            bin_state_space = list()
+            for m in range(self.in_features):
+                neuron_state_space = self.input_quant.get_state_space() # TODO: this call should include the index of the element of interest
+                bin_space = self.input_quant.get_bin_state_space() # TODO: this call should include the index of the element of interest
+                input_state_space.append(neuron_state_space)
+                bin_state_space.append(bin_space)
+
+            neuron_truth_tables = list()
+            for n in range(self.out_features):
+                # Determine the fan-in as number of synapse connections
+                input_mask = mask[n,:]
+                fan_in = torch.sum(input_mask)
+                indices = fetch_mask_indices(input_mask)
+                # Retrieve the possible state space of the current neuron
+                connected_state_space = [input_state_space[i] for i in indices]
+                bin_connected_state_space = [bin_state_space[i] for i in indices]
+                # Generate a matrix containing all possible input states
+                input_permutation_matrix = generate_permutation_matrix(connected_state_space)
+                bin_input_permutation_matrix = generate_permutation_matrix(bin_connected_state_space)
+                num_permutations = input_permutation_matrix.shape[0]
+                padded_perm_matrix = torch.zeros((num_permutations, self.in_features))
+                padded_perm_matrix[:,indices] = input_permutation_matrix
+
+                # TODO: Update this block to just run inference on the fc layer, once BN has been moved to output_quant
+                apply_input_quant, apply_output_quant = self.apply_input_quant, self.apply_output_quant
+                self.apply_input_quant, self.apply_output_quant = False, False
+                is_bin_output = self.output_quant.is_bin_output
+                self.output_quant.float_output()
+                output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate float for the current input
+                self.output_quant.bin_output()
+                bin_output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate bin for the current input
+                self.output_quant.is_bin_output = is_bin_output
+                self.apply_input_quant, self.apply_output_quant = apply_input_quant, apply_output_quant
+
+                # Append the connectivity, input permutations and output permutations to the neuron truth tables 
+                neuron_truth_tables.append((indices, bin_input_permutation_matrix, output_states, bin_output_states)) # Change this to be the binary output states
+        self.neuron_truth_tables = neuron_truth_tables
+
+
+
 def InputTerms(fan_in, degree):
     return list(
         itertools.chain(
@@ -360,19 +591,95 @@ class DenseMask2D(nn.Module):
         return self.mask
 
 class RandomFixedSparsityMask2D(nn.Module):
-    def __init__(self, in_features: int, out_features: int, fan_in: int) -> None:
+    def __init__(
+        self, 
+        in_features: int, 
+        out_features: int, 
+        fan_in: int, 
+        uniform_input_connectivity : bool = False,
+        diagonal_mask: bool = False,
+    ) -> None:
         super(RandomFixedSparsityMask2D, self).__init__()
         self.in_features = in_features
         self.out_features = out_features
         self.fan_in = fan_in
         self.mask = Parameter(torch.Tensor(out_features, in_features), requires_grad=False)
+        self.uniform_input_connectivity = uniform_input_connectivity
+        self.diagonal_mask = diagonal_mask
         self.reset_parameters()
 
     def reset_parameters(self) -> None:
         init.constant_(self.mask, 0.0)
-        for i in range(self.out_features):
-            x = torch.randperm(self.in_features)[:self.fan_in]
-            self.mask[i][x] = 1
+        if self.uniform_input_connectivity:
+            self.gen_uniform_input_mask()
+        elif self.diagonal_mask:
+            assert self.fan_in == 1, "Diagonal mask only supported for fan-in 1"
+            for i in range(self.out_features):
+                self.mask[i][i] = 1
+        else:
+            for i in range(self.out_features):
+                x = torch.randperm(self.in_features)[:self.fan_in]
+                self.mask[i][x] = 1
+    
+    def gen_uniform_input_mask(self) -> None:
+        """
+        Generate a random fixed sparsity mask, ensuring there's uniform
+        representation of the input features
+        """
+        # Create the sparsity mask with all zeros (to be updated)
+        # Also create a list to track which indices to turn into NZWs
+        nzw_indices = torch.tensor([])
+        total_nzws = self.fan_in * self.out_features
+        rem_nzws = total_nzws
+        baseline_usage = int(rem_nzws/self.in_features)
+
+        for i in range(baseline_usage):
+            nzw_indices = torch.concat([nzw_indices, torch.randperm(self.in_features)])
+        
+        rem_nzws = rem_nzws - nzw_indices.shape[0]
+        input_i_usage_l = []
+        input_i_usage_q = heapdict.heapdict()
+        for i in range(self.in_features):
+            input_i_usage_q[i] = baseline_usage
+            input_i_usage_l.append(baseline_usage)
+        # print(input_i_usage_l)
+        # print(list(input_i_usage_q.items()))
+        # print()
+        while rem_nzws > 0:
+            # print(input_i_usage_l)
+            # print(list(input_i_usage_q.items()))
+            if torch.all(torch.tensor(input_i_usage_l) == input_i_usage_l[0]):
+                print("All indices used equally -> make a random choice")
+                index = np.random.randint(0, self.in_features)
+                nzw_indices = torch.concat([nzw_indices, torch.tensor([int(index)]) ])
+                rem_nzws = rem_nzws - 1
+                input_i_usage_q[index] = input_i_usage_q[index]+1
+                input_i_usage_l[index] += 1
+            else:
+                index, count = input_i_usage_q.popitem()
+                indices_w_same_usage = []
+                for i, u in enumerate(input_i_usage_l):
+                    if u == count:
+                        indices_w_same_usage.append(i)
+                if len(indices_w_same_usage) > 1:
+                    # print("Multiple indices (but not all) used equally -> make a random choice")
+                    new_index = np.random.choice(indices_w_same_usage, 1)[0]
+                    input_i_usage_q[index] = count
+                    nzw_indices = torch.concat([nzw_indices, torch.tensor([new_index])])
+                    rem_nzws = rem_nzws - 1
+                    input_i_usage_q[new_index] = input_i_usage_q[new_index]+1
+                    input_i_usage_l[new_index] += 1
+                else:
+                    nzw_indices = torch.concat([nzw_indices, torch.tensor([index])])
+                    rem_nzws = rem_nzws - 1
+                    input_i_usage_q[index] = count+1
+                    input_i_usage_l[index] += 1
+        s_pointer = 0
+        for ri in range(self.out_features):
+            for _ in range(self.fan_in):
+                ci = int(nzw_indices[s_pointer])
+                self.mask[ri][ci] = 1
+                s_pointer += 1
 
     def forward(self):
         return self.mask

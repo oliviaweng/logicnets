@@ -83,6 +83,10 @@ def main(args):
         config["uniform_input_connectivity"] = False # Default
     if "uniform_connectivity" not in config:
         config["uniform_connectivity"] = False # Default
+    if "shared_input_layer" not in config:
+        config["shared_input_layer"] = False
+    if "shared_output_layer" not in config:
+        config["shared_output_layer"] = False
 
     if "ensemble_method" in config:
         if config["ensemble_method"] == "averaging":

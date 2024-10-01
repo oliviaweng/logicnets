@@ -1,11 +1,14 @@
 # Fixed params
-ensemble_method: adaboost
+ensemble_method: bagging
+independent: true
 hidden_layers:
 - 64
 - 32
 input_bitwidth: 3
 hidden_bitwidth: 3
 output_bitwidth: 3
+# shared_output_bitwidth: 4 # output bitwidth of ensemble members, if defined
+# shared_output_fanin: 1
 input_fanin: 4
 degree: 2 # 6
 hidden_fanin: 4
@@ -17,6 +20,11 @@ learning_rate: 0.001
 seed: 1697
 checkpoint: null
 
+shared_input_layer: false
+shared_input_bitwidth: 6
+
+shared_output_layer: false
+
 # Params to grid search
 grid_search_params:
   ensemble_size:
@@ -24,5 +32,5 @@ grid_search_params:
   # - 2
   # - 4
   # - 8
-  # - 16
-  - 32
+  - 16
+  # - 32
