@@ -24,12 +24,15 @@ from torchvision import transforms
 
 from logicnets.nn import    generate_truth_tables, \
                             lut_inference, \
-                            module_list_to_verilog_module
+                            module_list_to_verilog_module, \
+                            ensemble_to_verilog_module
 from logicnets.synthesis import synthesize_and_get_resource_counts
 from logicnets.util import proc_postsynth_file
 
 from models import MnistNeqModel, MnistLutModel, MnistVerilogModel
-from train import configs, model_config, test
+from ensemble import AveragingMnistNeqModel, AveragingMnistLUTModel
+# from train import configs, model_config, test
+from training_methods import test
 
 other_options = {
     "cuda": None,
@@ -43,8 +46,8 @@ other_options = {
 
 if __name__ == "__main__":
     parser = ArgumentParser(description="Synthesize convert a PyTorch trained model into verilog")
-    parser.add_argument('--arch', type=str, choices=configs.keys(), default="mnist-s",
-        help="Specific the neural network model to use (default: %(default)s)")
+    # parser.add_argument('--arch', type=str, choices=configs.keys(), default="mnist-s",
+        # help="Specific the neural network model to use (default: %(default)s)")
     parser.add_argument('--batch-size', type=int, default=None, metavar='N',
         help="Batch size for evaluation (default: %(default)s)")
     parser.add_argument('--input-bitwidth', type=int, default=None,
@@ -121,6 +124,40 @@ if __name__ == "__main__":
     config['output_length'] = 10
     model = MnistNeqModel(config)
 
+    if "ensemble_method" in config:
+        if config["ensemble_method"] == "averaging":
+            print("Averaging ensemble method")
+            model =  AveragingMnistNeqModel(config, config["ensemble_size"])
+            lut_model = AveragingMnistLUTModel(
+                config, config["ensemble_size"]
+            )
+        # elif config["ensemble_method"] == "bagging":
+        #     print("Bagging ensemble method")
+        #     if "independent" not in config:
+        #         config["independent"] = False # Default
+        #     lut_model = BaggingJetNeqModel(
+        #         config,
+        #         config["ensemble_size"],
+        #         quantize_avg=quantize_avg,
+        #         single_model_mode=args.train,
+        #     )
+        # elif config["ensemble_method"] == "adaboost":
+        #     print("AdaBoost ensemble method")
+        #     if "independent" not in config:
+        #         config["independent"] = False # Default
+        #     lut_model = AdaBoostJetNeqModel(
+        #         config,
+        #         config["ensemble_size"],
+        #         len(dataset["train"]),
+        #         quantize_avg=quantize_avg,
+        #         single_model_mode=args.train,
+        #     )
+        else:
+            raise ValueError(f"Unknown ensemble method: {config['ensemble_method']}")
+    else:  # Single model learning
+        model = MnistNeqModel(config)
+        # lut_model = JetSubstructureLutModel(config)
+
     # Load the model weights
     checkpoint = torch.load(args.checkpoint, map_location='cpu')
     model.load_state_dict(checkpoint['model_dict'])
@@ -132,7 +169,7 @@ if __name__ == "__main__":
     print("Baseline accuracy: %f" % (baseline_accuracy))
 
     # Instantiate LUT-based model
-    lut_model = MnistLutModel(config)
+    # lut_model = MnistLutModel(config)
     lut_model.load_state_dict(checkpoint['model_dict'])
 
     # Generate the truth tables in the LUT module
@@ -153,13 +190,22 @@ if __name__ == "__main__":
     torch.save(modelSave, args.log_dir + "/lut_based_model.pth")
 
     print("Generating verilog in %s..." % (args.log_dir))
-    module_list_to_verilog_module(
-        lut_model.module_list, 
-        "logicnet", 
-        args.log_dir,
-        add_registers=args.add_registers,
-        generate_bench=args.generate_bench,
-    )
+    if "ensemble_method" in config:
+        ensemble_to_verilog_module(
+            lut_model.ensemble,
+            "logicnet", 
+            args.log_dir, 
+            add_registers=args.add_registers,
+            generate_bench=args.generate_bench,
+        )
+    else: # single model
+        module_list_to_verilog_module(
+            lut_model.module_list, 
+            "logicnet", 
+            args.log_dir, 
+            add_registers=args.add_registers,
+            generate_bench=args.generate_bench,
+        )
     print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
 
     if args.dump_io:
