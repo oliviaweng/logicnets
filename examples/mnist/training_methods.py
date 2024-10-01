@@ -19,7 +19,7 @@ def test(model, dataset_loader, cuda):
         model.eval()
         correct = 0
         accLoss = 0.0
-        for _, (data, target) in enumerate(dataset_loader):
+        for _, (data, target) in tqdm(enumerate(dataset_loader)):
             if cuda:
                 data, target = data.cuda(), target.cuda()
             output = model(data)

@@ -22,6 +22,7 @@ import torch.nn as nn
 from torch.nn import init
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
+from tqdm import tqdm
 import math
 import copy
 
@@ -120,6 +121,56 @@ endmodule
     with open(f"{output_dir}/{module_name}.v", "w") as f:
         f.write(output_string)
 
+def averaging_module_adder_tree(
+    output_bits: int,
+    averaged_bits: int,
+    num_models: int,
+    output_dir: str,
+    module_name: str = "averaging",
+    lut: bool = True
+):
+    output_string = f"""\
+module {module_name} (input clk,
+                  input [{output_bits-1}:0] {",".join([f"i{i}" for i in range(num_models)])},
+                  output reg [{averaged_bits-1}:0] out);
+"""
+
+    cycles = math.ceil(math.log2(num_models))
+    # output_string += "\n".join([f"reg [{averaged_bits-1}:0] out_{i};" for i in range(cycles)])
+    block_code = f"""
+always @ (posedge clk) begin
+"""
+
+    previous_signals = [f"i{i}" for i in range(num_models)]
+    intermediate_signals = []
+    for stage in range(cycles):
+        curr_signals = []
+        wire_num = 0
+        it = iter(previous_signals)
+        for a,b in zip(it,it):
+            this_signal = f"out_{stage}_{wire_num}"
+            block_code += f"\t{this_signal} <= {a} + {b};\n"
+            curr_signals.append(this_signal)
+            wire_num += 1
+        previous_signals = curr_signals
+        intermediate_signals += curr_signals
+        
+    output_string += f"""
+reg [{averaged_bits-1}:0] {",".join(intermediate_signals[:-1])};
+"""
+    block_code = block_code.replace(curr_signals.pop(), "out")
+    output_string += block_code
+
+    output_string += f"""
+end
+
+endmodule
+"""
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        print(output_string)
+        f.write(output_string)
+
+
 def averaging_module_verilog_shared_output(
     output_bits: int,
     averaged_bits: int,
@@ -136,21 +187,31 @@ module {module_name} (input clk,
 
     cycles = math.ceil(math.log2(num_models))
     # output_string += "\n".join([f"reg [{averaged_bits-1}:0] out_{i};" for i in range(cycles)])
+    first_out_reg = "out" if cycles == 1 else "out_0"
     output_string += f"""
 reg [{averaged_bits-1}:0] {",".join([f"out_{i}" for i in range(cycles)])};
 always @ (posedge clk) begin
     out_0 <= {"+".join([f"i{i}" for i in range(num_models)])};
 """
-    output_string += "\n".join([f"\tout_{i} <= out_{i-1};" for i in range(1,cycles)])
+    output_string += "\n".join([f"\t{'out' if i == cycles-1 else f'out_{i}'} <= out_{i-1};" for i in range(1,cycles)])
     output_string += f"""
 end
 
-always @(*) begin
-    out = out_{cycles-1};
-end
+// always @(*) begin
+//     out = out_{cycles-1};
+// end
 
 endmodule
 """
+    output_string = f"""
+module {module_name} (input clk,
+                  input [{output_bits-1}:0] {",".join([f"i{i}" for i in range(num_models)])},
+                  output reg [{averaged_bits-1}:0] out);
+always @ (posedge clk) begin
+    out <= {"+".join([f"i{i}" for i in range(num_models)])};
+end
+endmodule
+    """
     with open(f"{output_dir}/{module_name}.v", "w") as f:
         print(output_string)
         f.write(output_string)
@@ -316,7 +377,7 @@ def ensemble_to_verilog_module(
     generate_bench: bool = True
 ):
     print([(m.input_quant.get_quant_type(), m.output_quant.get_quant_type()) for m in ensemble[1].module_list])
-    for i, lnet in enumerate(ensemble):
+    for i, lnet in tqdm(enumerate(ensemble)):
         print(i)
         if isinstance(lnet, SparseLinearNeq):
             # lnet_copy = copy.deepcopy(lnet)
@@ -670,13 +731,15 @@ class SparseLinearNeq(nn.Module):
                 else:
                     # print(ranges)
                     # print([self.forward(padded_perm_matrix)[:,a:b].shape for a,b in ranges])
-                    output_states = torch.cat([output_quant(self.forward(padded_perm_matrix)[:,16*i:16*(i+1)]) for i,output_quant in enumerate(output_quants)], dim=1)[:,n]
+                    input_feats = self.in_features
+                    output_states = torch.cat([output_quant(self.forward(padded_perm_matrix)[:,input_feats*i:input_feats*(i+1)]) for i,output_quant in enumerate(output_quants)], dim=1)[:,n]
                 for output_quant in output_quants:            
                     output_quant.bin_output()
                 if len(output_quants) == 1:
                     bin_output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate bin for the current input
                 else:
-                    bin_output_states = torch.cat([output_quant(self.forward(padded_perm_matrix)[:,16*i:16*(i+1)]) for i,output_quant in enumerate(output_quants)], dim=1)[:,n]
+                    input_feats = self.in_features
+                    bin_output_states = torch.cat([output_quant(self.forward(padded_perm_matrix)[:,input_feats*i:input_feats*(i+1)]) for i,output_quant in enumerate(output_quants)], dim=1)[:,n]
                 for output_quant, is_bin_output in zip(output_quants, is_bin_outputs):
                     output_quant.is_bin_output = is_bin_output
                 self.apply_input_quant, self.apply_output_quant = apply_input_quant, apply_output_quant
