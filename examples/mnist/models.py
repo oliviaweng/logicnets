@@ -103,7 +103,7 @@ class MnistNeqModel(nn.Module):
                     output_bitwidth = model_config["output_bitwidth"]
                 output_quant = QuantBrevitasActivation(
                     QuantHardTanh(
-                        bit_width=model_config["output_bitwidth"],
+                        bit_width=output_bitwidth,
                         max_val=1.33,
                         narrow_range=False,
                         quant_type=QuantType.INT,

@@ -8,18 +8,15 @@ from pyverilator import PyVerilator
 
 from brevitas.core.quant import QuantType
 from brevitas.nn import QuantHardTanh
-from tqdm import tqdm
-import math
 from brevitas.core.scaling import ScalingImplType
 from logicnets.quant import QuantBrevitasActivation
 from logicnets.nn import (
     ScalarBiasScale, 
     RandomFixedSparsityMask2D,
     SparseLinearNeq_mask,
-    calculate_bits,
-    SparseLinearNeq
 )
-from models import MnistNeqModel
+
+from models import JetSubstructureNeqModel
 
 def to_twos_complement(val, bits):
     # print(val)
@@ -34,13 +31,13 @@ def hex_to_bin(hex_value):
     binary_value = bin(int(hex_value, 16))[2:]
     return binary_value.zfill(length)
 
-class AveragingMnistNeqModel(nn.Module):
+class AveragingJetNeqModel(nn.Module):
     """
     With the averaging ensemble method, we train N models and average their
     outputs in the end.
     """
     def __init__(self, model_config, num_models):
-        super(AveragingMnistNeqModel, self).__init__()
+        super(AveragingJetNeqModel, self).__init__()
         self.model_config = model_config
         self.num_models = num_models
         self.shared_input_layer = model_config["shared_input_layer"]
@@ -53,7 +50,7 @@ class AveragingMnistNeqModel(nn.Module):
         
         self.ensemble = nn.ModuleList(
             [
-                MnistNeqModel(
+                JetSubstructureNeqModel(
                     model_config,
                     shared_output_bitwidth=shared_output_bitwidth,
                 ) 
@@ -155,7 +152,6 @@ class AveragingMnistNeqModel(nn.Module):
                 )
         else:
             outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
-        outputs = outputs.cuda()
         if self.shared_output_layer:
             outputs = self.ensemble[-1](outputs)
             # Sum every out_length elements to get the final output
@@ -192,7 +188,7 @@ class AveragingMnistNeqModel(nn.Module):
         self.dut.io.clk = 0
         for i in tqdm(range(x.shape[0])):
             x_i = x[i,:]
-            y_i = self.pytorch_forward(x[i:i+1,:].float())[0]
+            y_i = self.pytorch_forward(x[i:i+1,:])[0]
             xv_i = list(map(lambda z: input_quant.get_bin_str(z), x_i))
             # xv_i = list(map(lambda z: to_twos_complement(z,6), x_i))
             ys_i = list(map(lambda z: to_twos_complement(z+(2**(output_quant_bitwidth-1))*len(self.ensemble[1:-1]),output_bitwidth+1)[1:], y_i))
@@ -220,11 +216,11 @@ class AveragingMnistNeqModel(nn.Module):
                 # print(self.dut.internals.logicnet_1_inst)
                 # print(self.dut.internals.logicnet_2_inst)
                 # print(self.dut.internals.logicnet_0_inst)
-                # m0 = hex_to_bin(str(self.dut.internals.logicnet_0_inst.M0w))
-                # input1 = hex_to_bin(str(self.dut.internals.logicnet_1_inst.M0w))
-                # input2 = hex_to_bin(str(self.dut.internals.logicnet_2_inst.M0w))
-                # output1 = hex_to_bin(str(self.dut.internals.M2_1))
-                # output2 = hex_to_bin(str(self.dut.internals.M2_2))
+                m0 = hex_to_bin(str(self.dut.internals.logicnet_0_inst.M0w))
+                input1 = hex_to_bin(str(self.dut.internals.logicnet_1_inst.M0w))
+                input2 = hex_to_bin(str(self.dut.internals.logicnet_2_inst.M0w))
+                output1 = hex_to_bin(str(self.dut.internals.M2_1))
+                output2 = hex_to_bin(str(self.dut.internals.M2_2))
                 # print("M0 =", m0, bits_to_ints(m0,6))
                 # print("M0w_1 =", input1, bits_to_ints(input1,2))
                 # print("M0w_2 =", input2, bits_to_ints(input2,2))
@@ -264,5 +260,5 @@ class AveragingMnistNeqModel(nn.Module):
     def pytorch_inference(self):
         self.is_verilog_inference = False
 
-class AveragingMnistLUTModel(AveragingMnistNeqModel):
+class AveragingJetLUTModel(AveragingJetNeqModel):
     pass

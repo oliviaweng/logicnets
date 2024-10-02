@@ -27,37 +27,102 @@ from brevitas.nn import QuantHardTanh, QuantReLU
 from pyverilator import PyVerilator
 
 from logicnets.quant import QuantBrevitasActivation
-from logicnets.nn import SparseLinearNeq, ScalarBiasScale, RandomFixedSparsityMask2D
+from logicnets.nn import SparseLinearNeq, ScalarBiasScale, FeatureMask
 from logicnets.init import random_restrict_fanin
 
 class JetSubstructureNeqModel(nn.Module):
-    def __init__(self, model_config):
+    def __init__(self, model_config, shared_output_bitwidth=None):
         super(JetSubstructureNeqModel, self).__init__()
         self.model_config = model_config
         self.num_neurons = [model_config["input_length"]] + model_config["hidden_layers"] + [model_config["output_length"]]
+        self.shared_output_bitwidth = shared_output_bitwidth
         layer_list = []
         for i in range(1, len(self.num_neurons)):
             in_features = self.num_neurons[i-1]
             out_features = self.num_neurons[i]
             bn = nn.BatchNorm1d(out_features)
-            if i == 1:
+            if i == 1: # First layer
                 bn_in = nn.BatchNorm1d(in_features)
                 input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
-                input_quant = QuantBrevitasActivation(QuantHardTanh(model_config["input_bitwidth"], max_val=1., narrow_range=False, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn_in, input_bias])
+                input_quant = QuantBrevitasActivation(
+                    QuantHardTanh(
+                        model_config["input_bitwidth"], 
+                        max_val=1., 
+                        narrow_range=False, 
+                        quant_type=QuantType.INT, 
+                        scaling_impl_type=ScalingImplType.PARAMETER
+                    ), 
+                    pre_transforms=[bn_in, input_bias]
+                )
                 output_quant = QuantBrevitasActivation(QuantReLU(bit_width=model_config["hidden_bitwidth"], max_val=1.61, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn])
-                mask = RandomFixedSparsityMask2D(in_features, out_features, fan_in=model_config["input_fanin"])
-                layer = SparseLinearNeq(in_features, out_features, input_quant=input_quant, output_quant=output_quant, sparse_linear_kws={'mask': mask})
+                imask = FeatureMask(
+                    in_features,
+                    out_features,
+                    fan_in=model_config["hidden_fanin"],
+                    gpu=model_config["gpu"],
+                )          
+                layer = SparseLinearNeq(in_features, out_features, input_quant=input_quant, output_quant=output_quant, imask=imask, fan_in=model_config["hidden_fanin"], width_n=model_config["width_n"])
                 layer_list.append(layer)
-            elif i == len(self.num_neurons)-1:
+            elif i == len(self.num_neurons) - 1: # Output layer
                 output_bias_scale = ScalarBiasScale(bias_init=0.33)
-                output_quant = QuantBrevitasActivation(QuantHardTanh(bit_width=model_config["output_bitwidth"], max_val=1.33, narrow_range=False, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn], post_transforms=[output_bias_scale])
-                mask = RandomFixedSparsityMask2D(in_features, out_features, fan_in=model_config["output_fanin"])
-                layer = SparseLinearNeq(in_features, out_features, input_quant=layer_list[-1].output_quant, output_quant=output_quant, sparse_linear_kws={'mask': mask}, apply_input_quant=False)
+                if self.shared_output_bitwidth:
+                    output_bitwidth = self.shared_output_bitwidth
+                else:
+                    output_bitwidth = model_config["output_bitwidth"]
+                output_quant = QuantBrevitasActivation(
+                    QuantHardTanh(
+                        bit_width=output_bitwidth, 
+                        max_val=1.33, 
+                        narrow_range=False, 
+                        quant_type=QuantType.INT, 
+                        scaling_impl_type=ScalingImplType.PARAMETER
+                    ), 
+                    pre_transforms=[bn], 
+                    post_transforms=[output_bias_scale],
+                )
+                imask = FeatureMask(
+                    in_features,
+                    out_features,
+                    fan_in=model_config["hidden_fanin"],
+                    gpu=model_config["gpu"],
+                )
+                layer = SparseLinearNeq(
+                    in_features, 
+                    out_features, 
+                    input_quant=layer_list[-1].output_quant, 
+                    output_quant=output_quant, 
+                    imask=imask,
+                    fan_in=model_config["hidden_fanin"],
+                    width_n=model_config["width_n"],
+                    apply_input_quant=False
+                )
                 layer_list.append(layer)
             else:
-                output_quant = QuantBrevitasActivation(QuantReLU(bit_width=model_config["hidden_bitwidth"], max_val=1.61, quant_type=QuantType.INT, scaling_impl_type=ScalingImplType.PARAMETER), pre_transforms=[bn])
-                mask = RandomFixedSparsityMask2D(in_features, out_features, fan_in=model_config["hidden_fanin"])
-                layer = SparseLinearNeq(in_features, out_features, input_quant=layer_list[-1].output_quant, output_quant=output_quant, sparse_linear_kws={'mask': mask}, apply_input_quant=False)
+                output_quant = QuantBrevitasActivation(
+                    QuantReLU(
+                        bit_width=model_config["hidden_bitwidth"], 
+                        max_val=1.61, 
+                        quant_type=QuantType.INT, 
+                        scaling_impl_type=ScalingImplType.PARAMETER
+                    ), 
+                    pre_transforms=[bn]
+                )
+                imask = FeatureMask(
+                    in_features,
+                    out_features,
+                    fan_in=model_config["hidden_fanin"],
+                    gpu=model_config["gpu"],
+                )
+                layer = SparseLinearNeq(
+                    in_features, 
+                    out_features, 
+                    input_quant=layer_list[-1].output_quant,
+                    output_quant=output_quant,
+                    imask=imask,
+                    fan_in=model_config["hidden_fanin"],
+                    width_n=model_config["width_n"],
+                    apply_input_quant=False
+                )
                 layer_list.append(layer)
         self.module_list = nn.ModuleList(layer_list)
         self.is_verilog_inference = False
@@ -137,4 +202,3 @@ class JetSubstructureLutModel(JetSubstructureNeqModel):
 
 class JetSubstructureVerilogModel(JetSubstructureNeqModel):
     pass
-
