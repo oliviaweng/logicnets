@@ -32,6 +32,7 @@ class EncoderNeqModel(nn.Module):
         config,
         input_length=64,
         output_length=16,
+        shared_output_bitwidth=None,
     ):
         super(EncoderNeqModel, self).__init__()
         self.encoded_dim = 16
@@ -41,6 +42,7 @@ class EncoderNeqModel(nn.Module):
         self.num_neurons = (
             [input_length] + config["hidden_layer"] + [output_length]
         )
+        self.shared_output_bitwidth = shared_output_bitwidth
 
         self.is_verilog_inference = False
         self.latency = 1
@@ -145,6 +147,10 @@ class EncoderNeqModel(nn.Module):
                 )
                 layers.append(sparse_lin_neq_layer)
         # Output layer
+        if self.shared_output_bitwidth:
+            output_bitwidth = self.shared_output_bitwidth
+        else:
+            output_bitwidth = config["output_bitwidth"]
         terms = InputTerms(
             fan_in=config["neuron_fanin"][-1], 
             degree=config["degree"],
@@ -165,7 +171,7 @@ class EncoderNeqModel(nn.Module):
         bn = nn.BatchNorm1d(self.output_length)
         output_quant = QuantBrevitasActivation(
             qnn.QuantHardTanh(
-                bit_width=config["output_bitwidth"], 
+                bit_width=output_bitwidth, 
                 quant_type=QuantType.INT,
                 scaling_impl_type=ScalingImplType.PARAMETER,
                 max_val=1,

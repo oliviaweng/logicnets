@@ -2,9 +2,15 @@ import torch
 import torch.nn as nn
 
 from brevitas.core.quant import QuantType
-from brevitas.nn import QuantIdentity
+from brevitas.nn import QuantIdentity, QuantHardTanh
+from brevitas.core.scaling import ScalingImplType
 from logicnets.quant import QuantBrevitasActivation
-
+from logicnets.nn import (
+    ScalarBiasScale, 
+    ScalarScaleBias,
+    RandomFixedSparsityMask2D,
+    SparseLinearNeq_mask,
+)
 
 from models import MnistNeqModel
 
@@ -20,18 +26,75 @@ class AveragingMnistNeqModel(nn.Module):
         self.model_config = model_config
         self.num_models = num_models
         self.quantize_avg = quantize_avg
+        self.same_input_scale = model_config["same_input_scale"]
+        self.input_post_trans_sbs = model_config["input_post_trans_sbs"] # ScalarBiasScale
+        self.input_post_trans_ssb = model_config["input_post_trans_ssb"] # ScalarScaleBias
         self.same_output_scale = model_config["same_output_scale"]
+
+        self.shared_input_layer = model_config["shared_input_layer"]
+        self.shared_output_layer = model_config["shared_output_layer"]
+        self.input_length = model_config["input_length"]
+        self.output_length = model_config["output_length"]
+        shared_output_bitwidth = None
+        if self.shared_output_layer:
+            shared_output_bitwidth = model_config["shared_output_bitwidth"]
+
         self.ensemble = nn.ModuleList(
-            [MnistNeqModel(model_config) for _ in range(num_models)]
+            [
+                MnistNeqModel(
+                    model_config,
+                    shared_output_bitwidth=shared_output_bitwidth,
+                ) 
+                for _ in range(num_models)
+            ]
         )
         self.is_verilog_inference = False
-        if quantize_avg: # For packing averaging into a LUT
-            self.avg_quant = QuantBrevitasActivation(
-                QuantIdentity(
-                    bit_width=model_config["output_bitwidth"],
+        if self.same_input_scale:
+            # Share input quantizer among ensemble members
+            if self.input_post_trans_ssb:
+                self.ensemble[0].module_list[0].input_post_transform = ScalarScaleBias(scale=True)
+            elif self.input_post_trans_sbs:
+                print("Setting input_post_transform to ScalarBiasScale")
+                self.ensemble[0].module_list[0].input_post_transform = ScalarBiasScale(scale=True)
+            for model in self.ensemble[1:]:
+                # Set all ensemble member's input quantizer to be the same as the
+                # first model's input quantizer
+                if self.input_post_trans_ssb:
+                    model.module_list[0].input_post_transform = ScalarScaleBias(scale=True)
+                elif self.input_post_trans_sbs:
+                    model.module_list[0].input_post_transform = ScalarBiasScale(scale=True)
+                model.module_list[0].input_quant = self.ensemble[0].module_list[0].input_quant
+                # print("AFTER: input quantizer for each ensemble member:")
+                # for model in self.ensemble:
+                #     print(f"\t{hex(id(model.module_list[0].input_quant))}")
+        elif self.shared_input_layer:
+            bn_in = nn.BatchNorm1d(self.input_length)
+            input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
+            self.input_quant = QuantBrevitasActivation(
+                QuantHardTanh(
+                    bit_width=model_config["shared_input_bitwidth"],
+                    max_val=1.0,
+                    narrow_range=False,
                     quant_type=QuantType.INT,
-                )
+                    scaling_impl_type=ScalingImplType.PARAMETER,
+                ),
+                pre_transforms=[bn_in, input_bias],
             )
+            mask = RandomFixedSparsityMask2D(
+                self.input_length,
+                self.input_length * num_models,
+                fan_in=1,
+                uniform_input_connectivity=True,
+            )
+            self.input_quant_layer = SparseLinearNeq_mask(
+                self.input_length,
+                self.input_length * num_models,
+                input_quant=self.input_quant,
+                output_quant=None, 
+                apply_output_quant=False,
+                sparse_linear_kws={"mask": mask},
+            )
+            self.ensemble.insert(0, self.input_quant_layer)
         if self.same_output_scale:
             # FOR DEBUGGING: Print output quantizer for each ensemble member
             print("BEFORE: Output quantizer for each ensemble member:")
@@ -45,6 +108,36 @@ class AveragingMnistNeqModel(nn.Module):
             print("AFTER: Output quantizer for each ensemble member:")
             for model in self.ensemble:
                 print(f"\t{hex(id(model.module_list[-1].output_quant))}")
+        elif self.shared_output_layer: 
+            feature_size = self.output_length * num_models
+            bn = nn.BatchNorm1d(feature_size)
+            output_quant = QuantBrevitasActivation(
+                QuantHardTanh(
+                    bit_width=model_config["output_bitwidth"], 
+                    max_val=1.33, 
+                    narrow_range=False, 
+                    quant_type=QuantType.INT, 
+                    scaling_impl_type=ScalingImplType.PARAMETER
+                ), 
+                pre_transforms=[bn], 
+                post_transforms=[],
+            )
+            mask = RandomFixedSparsityMask2D(
+                feature_size,
+                feature_size,
+                fan_in=model_config["shared_output_fanin"],
+                diagonal_mask=True,
+            )
+            self.output_quant_layer = SparseLinearNeq_mask(
+                feature_size,
+                feature_size,
+                input_quant=None,
+                output_quant=output_quant, 
+                apply_input_quant=False,
+                apply_output_quant=True,
+                sparse_linear_kws={"mask": mask},
+            )
+            self.ensemble.append(self.output_quant_layer)
             
     def forward(self, x):
         if self.is_verilog_inference:
@@ -52,10 +145,41 @@ class AveragingMnistNeqModel(nn.Module):
         return self.pytorch_forward(x)
 
     def pytorch_forward(self, x):
-        outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
-        outputs = outputs.mean(dim=0)
-        if self.quantize_avg: # For packing averaging into a LUT
-            outputs = self.avg_quant(outputs)
+        if self.shared_input_layer:
+            x = self.ensemble[0](x) # input_quant_layer
+            if self.shared_output_layer:
+                outputs = self.ensemble[1](
+                    x[:, 0 : self.input_length]
+                )
+                for i in range(1, self.num_models):
+                    outputs = torch.cat(
+                        (
+                            outputs,
+                            self.ensemble[i + 1](
+                                x[:, i * self.input_length : (i + 1) * self.input_length]
+                            ),
+                        ),
+                        dim=1,
+                    )
+            else:
+                outputs = torch.stack(
+                    [
+                        self.ensemble[i + 1](
+                            x[:, i * self.input_length : (i + 1) * self.input_length]
+                        )
+                        for i in range(0, self.num_models)
+                    ],
+                    dim=0,
+                )
+        else:
+            outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
+        if self.shared_output_layer:
+            outputs = self.ensemble[-1](outputs)
+            # Sum every out_length elements to get the final output
+            outputs = outputs.view(-1, self.num_models, self.output_length)
+            outputs = outputs.sum(dim=1) 
+        else:
+            outputs = outputs.mean(dim=0)
         return outputs
 
     # TODO: Implement verilog_forward() and verilog_inference()

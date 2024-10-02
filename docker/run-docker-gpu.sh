@@ -34,7 +34,8 @@ docker build \
     --build-arg UID=$DOCKER_UID \
     .
 
-DOCKER_EXEC="docker run --rm --shm-size 32G -i -t --init --gpus all --device /dev/nvidia0:/dev/nvidia0 --device /dev/nvidia-modeset:/dev/nvidia-modeset --device /dev/nvidia-uvm:/dev/nvidia-uvm --device /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools --device /dev/nvidiactl:/dev/nvinvidiactl "
+DOCKER_EXEC="docker run --rm --shm-size 32G -i -t --init --gpus all --device /dev/nvidia0:/dev/nvidia0 --device /dev/nvidia1:/dev/nvidia1 --device /dev/nvidia2:/dev/nvidia2 --device /dev/nvidia3:/dev/nvidia3 --device /dev/nvidia-modeset:/dev/nvidia-modeset --device /dev/nvidia-uvm:/dev/nvidia-uvm --device /dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools --device /dev/nvidiactl:/dev/nvinvidiactl "
+# DOCKER_EXEC="docker run --rm --shm-size 32G -i -t --init --gpus all "
 
 echo "Mounting LogicNets to ${LOGICNETS_MOUNT_POINT} inside the docker container"
 DOCKER_EXEC+="-v ${LOGICNETS_PATH}:${LOGICNETS_MOUNT_POINT} "

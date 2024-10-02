@@ -96,6 +96,10 @@ def train(model, dataloaders, config, cuda=False, log_dir="./mnist", sampler=Non
     # Push the model to the GPU, if necessary
     if cuda:
         model.cuda()
+
+    # Setup tensorboard
+    writer = SummaryWriter(log_dir)
+
     # Main training loop
     maxAcc = 0.0
     num_epochs = config["epochs"]
@@ -128,6 +132,12 @@ def train(model, dataloaders, config, cuda=False, log_dir="./mnist", sampler=Non
         print(
             f"Epoch: {epoch}/{num_epochs}\tTrain Acc (%): {accuracy.detach().cpu().numpy():.2f}\tTrain Loss: {accLoss.detach().cpu().numpy():.3e}\t Time (in sec): {epoch_time}"
         )
+        writer.add_scalar(
+            "avg_train_loss", accLoss.detach().cpu().numpy(), (epoch + 1) * steps
+        )
+        writer.add_scalar(
+            "avg_train_accuracy", accuracy.detach().cpu().numpy(), (epoch + 1) * steps
+        )
         val_accuracy, val_loss = test(model, val_loader, cuda)
         test_accuracy, test_loss = test(model, test_loader, cuda)
         modelSave = {
@@ -141,16 +151,23 @@ def train(model, dataloaders, config, cuda=False, log_dir="./mnist", sampler=Non
         if maxAcc < test_accuracy:
             torch.save(modelSave, os.path.join(log_dir, "best_accuracy.pth"))
             maxAcc = test_accuracy
-        wandb.log(
-            {
-                "Train Acc (%)": accuracy.detach().cpu().numpy(),
-                "Train Loss(%)": accLoss.detach().cpu().numpy(),
-                "Test Acc (%)": test_accuracy,
-                "Valid Acc(%)": val_accuracy,
-                "Test Loss": test_loss,
-                "Val Loss": val_loss,
-            }
+        writer.add_scalar("val_accuracy", val_accuracy, (epoch + 1) * steps)
+        writer.add_scalar("val_loss", val_loss, (epoch + 1) * steps)
+        writer.add_scalar("test_accuracy", test_accuracy, (epoch + 1) * steps)
+        writer.add_scalar("test_loss", test_loss, (epoch + 1) * steps)
+        print(
+            f"Epoch: {epoch}/{num_epochs}\tValid Acc (%): {val_accuracy:.2f}\tTest Acc: {test_accuracy:.2f}"
         )
+        # wandb.log(
+        #     {
+        #         "Train Acc (%)": accuracy.detach().cpu().numpy(),
+        #         "Train Loss(%)": accLoss.detach().cpu().numpy(),
+        #         "Test Acc (%)": test_accuracy,
+        #         "Valid Acc(%)": val_accuracy,
+        #         "Test Loss": test_loss,
+        #         "Val Loss": val_loss,
+        #     }
+        # )
 
 
 def train_bagging(model, dataloaders, config, cuda=False, log_dir="./mnist"):

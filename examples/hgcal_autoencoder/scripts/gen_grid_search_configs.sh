@@ -30,7 +30,7 @@
 
 # Ensemble grid search
 # Averaging polylut
-python3 grid_search.py -c search_configs/voting_small_polylut_grid_search.yml -d ensemble_configs/averaging/small_polylut_seed3 --experiment_prefix averaging_small_poly2
+python3 grid_search.py -c search_configs/polylut_large_model_grid_search.yml -d ensemble_configs/averaging/large_polylut_shared_io --experiment_prefix large_polylut_shared_io
 
 # Averaging
 # python3 grid_search.py -c search_configs/voting_small_model_grid_search.yml -d ensemble_configs/averaging/small --experiment_prefix averaging_small

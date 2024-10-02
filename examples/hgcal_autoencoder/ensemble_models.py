@@ -24,8 +24,18 @@ import torch
 import torch.nn as nn
 import numpy as np
 
+from brevitas.core.quant import QuantType
+from brevitas.nn import QuantHardTanh
+from brevitas.core.scaling import ScalingImplType
+
 from encoder import EncoderNeqModel
 from decoder import Decoder
+from logicnets.quant import QuantBrevitasActivation
+from logicnets.nn import (
+    RandomFixedSparsityMask2D,
+    SparseLinearNeq_mask,
+    ScalarBiasScale,
+)
 
 from dataset import ARRANGE, ARRANGE_MASK
 
@@ -113,6 +123,11 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
         output_length=16,
         num_models=4,
         fixed_sparsity_mask=False,
+        shared_input_layer=False,
+        shared_input_bitwidth=6,
+        shared_output_layer=False,
+        shared_output_bitwidth=None,
+        shared_output_fanin=1,
     ):
         super(VotingAutoencoderNeqModel, self).__init__()
         self.shape = (1, 8, 8)  # PyTorch defaults to (C, H, W)
@@ -120,6 +135,14 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
         # TODO: Fix num neurons?
         self.num_neurons = [input_length] + config["hidden_layer"] + [output_length]
         self.num_models = num_models
+        self.input_length = input_length
+        self.output_length = output_length
+        self.shared_input_layer = shared_input_layer
+        self.shared_input_bitwidth = shared_input_bitwidth
+        self.shared_output_layer = shared_output_layer
+        self.shared_output_bitwidth = shared_output_bitwidth
+        self.shared_output_fanin = shared_output_fanin
+
         if fixed_sparsity_mask:
             print("All models set with the same sparsity mask")
             self.encoder_ensemble = nn.ModuleList()
@@ -132,7 +155,8 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
                 encoder_copy = EncoderNeqModel(
                     config, 
                     input_length=input_length, 
-                    output_length=output_length
+                    output_length=output_length,
+                    shared_output_bitwidth=shared_output_bitwidth,
                 )
                 encoder_copy.load_state_dict(encoder.state_dict())
                 encoder_copy.reset_parameters() # Reinitialize linear parameters
@@ -148,10 +172,70 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
                 EncoderNeqModel(
                     config, 
                     input_length=input_length, 
-                    output_length=output_length
+                    output_length=output_length,
+                    shared_output_bitwidth=shared_output_bitwidth,
                 ) 
                 for _ in range(num_models)
             ])
+        if self.shared_input_layer:
+            # Create a shared input quantizer that feeds into each ensemble
+            # member, who each have their own input quantizer
+            bn_in = nn.BatchNorm1d(self.input_length)
+            self.input_quant = QuantBrevitasActivation(
+                QuantHardTanh(
+                    bit_width=self.shared_input_bitwidth,
+                    max_val=1.0,
+                    narrow_range=False,
+                    quant_type=QuantType.INT,
+                    scaling_impl_type=ScalingImplType.PARAMETER,
+                ),
+                pre_transforms=[nn.Flatten(), bn_in],
+            )
+            mask = RandomFixedSparsityMask2D(
+                self.input_length,
+                self.input_length * num_models,
+                fan_in=1,
+                uniform_input_connectivity=True,
+            )
+            self.input_quant_layer = SparseLinearNeq_mask(
+                self.input_length,
+                self.input_length * num_models,
+                input_quant=self.input_quant,
+                output_quant=None, 
+                apply_output_quant=False,
+                sparse_linear_kws={"mask": mask},
+            )
+            self.encoder_ensemble.insert(0, self.input_quant_layer)
+        if self.shared_output_layer:
+            feature_size = self.output_length * num_models
+            bn = nn.BatchNorm1d(feature_size)
+            output_quant = QuantBrevitasActivation(
+                QuantHardTanh(
+                    bit_width=config["output_bitwidth"], 
+                    max_val=1.33, 
+                    narrow_range=False, 
+                    quant_type=QuantType.INT, 
+                    scaling_impl_type=ScalingImplType.PARAMETER
+                ), 
+                pre_transforms=[bn], 
+                post_transforms=[],
+            )
+            mask = RandomFixedSparsityMask2D(
+                feature_size,
+                feature_size,
+                fan_in=self.shared_output_fanin,
+                diagonal_mask=True,
+            )
+            self.output_quant_layer = SparseLinearNeq_mask(
+                feature_size,
+                feature_size,
+                input_quant=None,
+                output_quant=output_quant, 
+                apply_input_quant=False,
+                apply_output_quant=True,
+                sparse_linear_kws={"mask": mask},
+            )
+            self.encoder_ensemble.append(self.output_quant_layer)
         self.decoder = Decoder(128)
         self.is_verilog_inference = False
 
@@ -195,9 +279,42 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
         return self.pytorch_forward(x)
         
     def pytorch_forward(self, x):
-        outputs = [encoder(x) for encoder in self.encoder_ensemble]
-        avg_outputs = sum(outputs) / self.num_models
-        return self.decoder(avg_outputs)
+        if self.shared_input_layer:
+            x = self.encoder_ensemble[0](x) # input_quant_layer
+            if self.shared_output_layer:
+                outputs = self.encoder_ensemble[1](
+                    x[:, 0 : self.input_length]
+                )
+                for i in range(1, self.num_models):
+                    outputs = torch.cat(
+                        (
+                            outputs,
+                            self.encoder_ensemble[i + 1](
+                                x[:, i * self.input_length : (i + 1) * self.input_length]
+                            ),
+                        ),
+                        dim=1,
+                    )
+            else:
+                outputs = torch.stack(
+                    [
+                        self.encoder_ensemble[i + 1](
+                            x[:, i * self.input_length : (i + 1) * self.input_length]
+                        )
+                        for i in range(0, self.num_models)
+                    ],
+                    dim=0,
+                )
+        else:
+            outputs = [encoder(x) for encoder in self.encoder_ensemble]
+        if self.shared_output_layer:
+            outputs = self.encoder_ensemble[-1](outputs)
+            # Sum every out_length elements to get the final output
+            outputs = outputs.view(-1, self.num_models, self.output_length)
+            outputs = outputs.sum(dim=1) / self.num_models # Need to divide for the decoder to work... or could include that in the decoder
+        else:
+            outputs = sum(outputs) / self.num_models
+        return self.decoder(outputs)
     
     # TODO: Implement verilog_forward() and verilog_inference()
     def verilog_forward(self, x):

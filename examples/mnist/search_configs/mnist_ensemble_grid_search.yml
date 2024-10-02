@@ -1,5 +1,6 @@
 # Fixed params
 ensemble_method: averaging
+# independent: true
 hidden_layers: 
 - 256
 - 100
@@ -9,8 +10,10 @@ hidden_layers:
 input_bitwidth: 2
 hidden_bitwidth: 2
 output_bitwidth: 2
+shared_output_bitwidth: 3 # output bitwidth of ensemble members, if defined
+shared_output_fanin: 1
 input_fanin: 6
-degree: 2
+degree: 3 # 4
 hidden_fanin: 6
 output_fanin: 6
 weight_decay: 0
@@ -20,11 +23,16 @@ learning_rate: 0.004
 seed: 984237
 same_output_scale: false
 
+shared_input_layer: true
+shared_input_bitwidth: 6
+
+shared_output_layer: true
+
 # Params to grid search
 grid_search_params:
   ensemble_size:
-  # - 2
-  # - 4
+  - 2
+  - 4
   - 8
-  # - 16
+  - 16
   # - 32

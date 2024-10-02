@@ -52,7 +52,7 @@ from logicnets.nn import (
 
 
 class MnistNeqModel(nn.Module):
-    def __init__(self, model_config):
+    def __init__(self, model_config, shared_output_bitwidth=None):
         super(MnistNeqModel, self).__init__()
         self.model_config = model_config
         self.num_neurons = (
@@ -60,6 +60,7 @@ class MnistNeqModel(nn.Module):
             + model_config["hidden_layers"]
             + [model_config["output_length"]]
         )
+        self.shared_output_bitwidth = shared_output_bitwidth
         layer_list = []
         for i in range(1, len(self.num_neurons)):
             in_features = self.num_neurons[i - 1]
@@ -118,9 +119,13 @@ class MnistNeqModel(nn.Module):
                 layer_list.append(layer)
             elif i == len(self.num_neurons) - 1:
                 output_bias_scale = ScalarBiasScale(bias_init=0.33)
+                if self.shared_output_bitwidth:
+                    output_bitwidth = self.shared_output_bitwidth
+                else:
+                    output_bitwidth = model_config["output_bitwidth"]
                 output_quant = QuantBrevitasActivation(
                     QuantHardTanh(
-                        bit_width=model_config["output_bitwidth"],
+                        bit_width=output_bitwidth,
                         max_val=1.33,
                         narrow_range=False,
                         quant_type=QuantType.INT,
