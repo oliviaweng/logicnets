@@ -137,8 +137,6 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
         self.num_models = num_models
         self.input_length = input_length
         self.output_length = output_length
-        self.shared_input_layer = input_length
-        self.shared_output_layer = output_length
         self.shared_input_layer = shared_input_layer
         self.shared_input_bitwidth = shared_input_bitwidth
         self.shared_output_layer = shared_output_layer
