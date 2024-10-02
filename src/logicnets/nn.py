@@ -58,7 +58,7 @@ def generate_truth_tables(model: nn.Module, verbose: bool = False) -> None:
 def lut_inference(model: nn.Module) -> None:
     for name, module in model.named_modules():
         if type(module) == SparseLinearNeq or type(module) == SparseLinearNeq_mask:
-            if name != "ensemble.0":
+            if name != "ensemble.0" and name != "encoder_ensemble.0":
                 module.apply_input_quant = False
             module.lut_inference()
 
@@ -260,7 +260,12 @@ class SparseLinearNeq(nn.Module):
         indices = torch.argmax(eq.type(torch.int64),dim=1)
         return bin_output_states[indices]
 
+<<<<<<< HEAD
     def lut_forward(self, x: Tensor) -> Tensor:
+=======
+    def lut_forward(self, x: Tensor, debug=False) -> Tensor:
+
+>>>>>>> 979bc514 (updates for autoencoder lut generation)
         if self.apply_input_quant:
             x = self.input_quant(x) # Use this to fetch the bin output of the input, if the input isn't already in binary format
         y = torch.zeros((x.shape[0],self.out_features))
@@ -618,7 +623,8 @@ class SparseLinearNeq_mask(nn.Module):
                 # print(padded_perm_matrix.shape)
                 # print("forwarded", self.forward(padded_perm_matrix).shape)
                 # print(output_quant.get_scale_factor_bits())
-                ranges = [(16*i,16*(i+1)) for i in range(len(output_quants))]
+                input_feats = self.in_features
+                ranges = [(input_feats*i,input_feats*(i+1)) for i in range(len(output_quants))]
                 # print(ranges)
                 if len(output_quants) == 1:
                     output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate float for the current input

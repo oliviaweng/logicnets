@@ -328,6 +328,10 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
     def pytorch_inference(self):
         self.is_verilog_inference = False
 
+
+class VotingAutoencoderLUTModel(VotingAutoencoderNeqModel): # TODO: Rename to Averaging
+    pass
+
 # TODO: Make BaseEnsemble class?
 class SnapshotAutoencoderNeqModel(nn.Module):
     """
