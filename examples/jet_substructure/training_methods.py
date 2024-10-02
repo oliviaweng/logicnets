@@ -25,7 +25,7 @@ def test(model, dataset_loader, cuda):
         golden_ref = None
         correct = 0
         accLoss = 0.0
-        for batch_idx, (data, target) in enumerate(dataset_loader):
+        for batch_idx, (data, target) in tqdm(enumerate(dataset_loader)):
             if cuda:
                 data, target = data.cuda(), target.cuda()
             output = model(data)

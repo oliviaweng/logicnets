@@ -290,7 +290,8 @@ def calculate_bits(num_output_bits, num_of_ensembles):
 def ensemble_top_to_verilog_shared_input(
     ensemble: nn.ModuleList,
     module_name: str,
-    output_dir: str
+    output_dir: str,
+    adder_tree: bool = False,
 ):
     total_input_bits = int(ensemble[0].in_features * ensemble[0].input_quant.get_scale_factor_bits()[1])
     output_feat_size = int(ensemble[-2].module_list[-1].output_quant.get_scale_factor_bits()[1])
@@ -302,13 +303,30 @@ def ensemble_top_to_verilog_shared_input(
     shared_output_bits = shared_output_feat_size * shared_output_features
     module_feat_size = int(calculate_bits(ensemble[-1].output_quant.get_scale_factor_bits()[1], num_ensembles))
     total_module_bits = int(shared_output_features * module_feat_size)
-    averaging_module_verilog_shared_output(
-        output_bits = shared_output_feat_size,
-        averaged_bits = module_feat_size,
-        num_models = num_ensembles,
-        output_dir = output_dir,
-        lut = True
-    )
+    if adder_tree:
+        averaging_module_adder_tree(
+            output_bits = shared_output_feat_size,
+            averaged_bits = module_feat_size,
+            num_models = num_ensembles,
+            output_dir = output_dir,
+            lut = True
+        )
+    else:
+        averaging_module_verilog_shared_output(
+            output_bits = shared_output_feat_size,
+            averaged_bits = module_feat_size,
+            num_models = num_ensembles,
+            output_dir = output_dir,
+            lut = True
+        )
+        averaging_module_adder_tree(
+            output_bits = shared_output_feat_size,
+            averaged_bits = module_feat_size,
+            num_models = num_ensembles,
+            output_dir = output_dir,
+            module_name = "adder_tree",
+            lut = True
+        )
     file_contents = f"""\
 module {module_name} (input [{total_input_bits-1}:0] M0, input clk, input rst, output [{total_module_bits-1}:0] out);
 """
@@ -368,13 +386,17 @@ endmodule
 """
     with open(f"{output_dir}/{module_name}.v", "w") as f:
         f.write(file_contents)
+    if not adder_tree:
+        with open(f"{output_dir}/{module_name}_adder_tree.v", "w") as f:
+            f.write(file_contents.replace("averaging","adder_tree").replace("module logicnet", "module logicnet_adder_tree"))
 
 def ensemble_to_verilog_module(
     ensemble: nn.ModuleList, 
     module_name: str, # "logicnet"
     output_dir: str, 
     add_registers: bool = True, 
-    generate_bench: bool = True
+    generate_bench: bool = True,
+    adder_tree: bool = False
 ):
     print([(m.input_quant.get_quant_type(), m.output_quant.get_quant_type()) for m in ensemble[1].module_list])
     for i, lnet in tqdm(enumerate(ensemble)):
@@ -408,7 +430,8 @@ def ensemble_to_verilog_module(
     ensemble_top_to_verilog_shared_input(
         ensemble=ensemble,
         module_name=module_name,
-        output_dir=output_dir
+        output_dir=output_dir,
+        adder_tree=adder_tree,
     )
     ensemble[0].output_quant = None
     ensemble[-1].input_quant = None
