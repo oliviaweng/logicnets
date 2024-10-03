@@ -14,12 +14,12 @@
 #  limitations under the License.
 
 
-CONFIG_DIR=./ensemble_configs/averaging/small_shared_io_layers_ensemble32_seed_test
+CONFIG_DIR=./ensemble_configs/input_quants/small
 
-for i in {1..3}; do 
+for i in {1..4}; do 
 new_dir=${CONFIG_DIR}_configs/config${i}
 mkdir -p $new_dir
-find -wholename "${CONFIG_DIR}/*.yml" -print | head -n1 | xargs mv -t $new_dir
+find -wholename "${CONFIG_DIR}/*.yml" -print | head -n3 | xargs mv -t $new_dir
 done
 
 # manually move first 6 files to ./subfolder1

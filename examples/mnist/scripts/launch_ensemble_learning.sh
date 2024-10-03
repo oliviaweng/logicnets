@@ -40,8 +40,8 @@
 
 # Bagging
 # tmux new-session -d -s mb00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/bagging/xs_configs/config1 ./bagging"
-tmux new-session -d -s mb00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/l_configs ./bagging"
+# tmux new-session -d -s mb00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/l_configs ./bagging"
 
 # Adaboost
 # tmux new-session -d -s mada00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/xs_configs/config1 ./adaboost"
-tmux new-session -d -s mada00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/l_configs ./adaboost"
+# tmux new-session -d -s mada00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/l_configs ./adaboost"

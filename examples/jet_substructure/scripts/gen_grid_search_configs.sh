@@ -62,6 +62,15 @@
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_shared_input_output_layers --experiment_prefix medium_shared_input_output_layers
 # python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_shared_input_output_layers --experiment_prefix large_shared_input_output_layers
 
+# Input quantizer
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_16_6
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_16_2
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_16_8
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_8_2
+# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_6_2
+
+
+
 # Bagging
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/bagging/small_independent_configs --experiment_prefix bagging_small_independent
 # python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/bagging/medium_independent_configs  --experiment_prefix bagging_medium_independent

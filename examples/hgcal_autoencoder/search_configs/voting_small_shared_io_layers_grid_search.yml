@@ -25,7 +25,7 @@ ensemble_hp:
   fixed_sparsity_mask: false
   shared_input_layer: true
   shared_input_bitwidth: 6
-  shared_output_layer: false
+  shared_output_layer: true
   shared_output_bitwidth: 7 # output bitwidth of ensemble members, if defined
   shared_output_fanin: 1
 epochs: 200
@@ -50,15 +50,16 @@ wd: 0
 # Params to grid search
 grid_search_params:
   ensemble_size:
+  - 1
   # - 2
   # - 4
   # - 8
   # - 16
-  - 32
+  # - 32
   seed:
   - 1
-  # - 2
-  # - 3
+  - 2
+  - 3
   # - 4
   # - 5
   # - 6

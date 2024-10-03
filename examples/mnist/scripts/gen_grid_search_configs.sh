@@ -31,5 +31,5 @@
 
 # Adaboost
 # python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/adaboost/xs --experiment_prefix adaboost_xs
-python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/adaboost/l_configs --experiment_prefix adaboost_l
+# python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/adaboost/l_configs --experiment_prefix adaboost_l
 
