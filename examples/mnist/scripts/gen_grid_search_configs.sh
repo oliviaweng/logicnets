@@ -22,11 +22,14 @@
 # python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging/non_shared_xs --experiment_prefix averaging_xs_non_shared
 # python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging/shared_input_xs --experiment_prefix averaging_xs_shared_input
 # python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/averaging/averaging_l --experiment_prefix averaging_l
-python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/averaging/non_shared_l --experiment_prefix non_shared_l
+# python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/averaging/non_shared_l --experiment_prefix non_shared_l
 
 
 # Bagging
 # python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/bagging/xs --experiment_prefix bagging_xs
+# python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/bagging/l_configs --experiment_prefix bagging_l
 
 # Adaboost
 # python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/adaboost/xs --experiment_prefix adaboost_xs
+python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/adaboost/l_configs --experiment_prefix adaboost_l
+

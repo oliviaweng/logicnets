@@ -1,6 +1,6 @@
 # Mnist L 1.1
-ensemble_method: averaging
-# independent: true
+ensemble_method: bagging
+independent: true
 hidden_layers:
   - 1024
   - 1024
@@ -32,8 +32,8 @@ shared_output_layer: false
 # Params to grid search
 grid_search_params:
   ensemble_size:
-  - 2
-  - 4
-  - 8
+  # - 2
+  # - 4
+  # - 8
   - 16
-  - 32
+  # - 32
