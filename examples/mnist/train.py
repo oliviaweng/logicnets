@@ -224,35 +224,3 @@ if __name__ == "__main__":
     args = parser.parse_args()
     main(args)
 
-    # parser.add_argument('--arch', type=str, choices=configs.keys(), default="mnist-s",
-    #     help="Specific the neural network model to use (default: %(default)s)")
-    # parser.add_argument('--weight-decay', type=float, default=None, metavar='D',
-    #     help="Weight decay (default: %(default)s)")
-    # parser.add_argument('--batch-size', type=int, default=None, metavar='N',
-    #     help="Batch size for training (default: %(default)s)")
-    # parser.add_argument('--epochs', type=int, default=None, metavar='N',
-    #     help="Number of epochs to train (default: %(default)s)")
-    # parser.add_argument('--learning-rate', type=float, default=None, metavar='LR',
-    #     help="Initial learning rate (default: %(default)s)")
-    # parser.add_argument('--seed', type=int, default=None,
-    #     help="Seed to use for RNG (default: %(default)s)")
-    # parser.add_argument('--input-bitwidth', type=int, default=None,
-    #     help="Bitwidth to use at the input (default: %(default)s)")
-    # parser.add_argument('--hidden-bitwidth', type=int, default=None,
-    #     help="Bitwidth to use for activations in hidden layers (default: %(default)s)")
-    # parser.add_argument('--output-bitwidth', type=int, default=None,
-    #     help="Bitwidth to use at the output (default: %(default)s)")
-    # parser.add_argument('--input-fanin', type=int, default=None,
-    #     help="Fanin to use at the input (default: %(default)s)")
-    # parser.add_argument('--hidden-fanin', type=int, default=None,
-    #     help="Fanin to use for the hidden layers (default: %(default)s)")
-    # parser.add_argument('--output-fanin', type=int, default=None,
-    #     help="Fanin to use at the output (default: %(default)s)")
-    # parser.add_argument('--hidden-layers', nargs='+', type=int, default=None,
-    #     help="A list of hidden layer neuron sizes (default: %(default)s)")
-    # parser.add_argument('--input-dropout', type=float, default=None,
-    #     help="The amount of dropout to apply at the model input (default: %(default)s)")
-    # parser.add_argument('--log-dir', type=str, default='./log',
-    #     help="A location to store the log output of the training run and the output model (default: %(default)s)")
-    # parser.add_argument('--checkpoint', type=str, default=None,
-    #     help="Retrain the model from a previous checkpoint (default: %(default)s)")
