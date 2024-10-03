@@ -9,5 +9,5 @@ python3 neq2lut.py \
     --log-dir $LOGDIR \
     --checkpoint $CKPT \
     --add-registers \
-    --simulate_pre_synthesis_verilog \
+    --simulate-pre-synthesis-verilog
     
