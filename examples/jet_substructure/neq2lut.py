@@ -261,7 +261,12 @@ if __name__ == "__main__":
 
     if args.simulate_pre_synthesis_verilog:
         print("Running inference simulation of Verilog-based model...")
-        lut_model.verilog_inference(args.log_dir, "logicnet.v", logfile=io_filename, add_registers=args.add_registers)
+        lut_model.verilog_inference(
+            args.log_dir, 
+            "logicnet.v", 
+            logfile=io_filename, 
+            add_registers=args.add_registers
+        )
         verilog_accuracy, verilog_avg_roc_auc = test(lut_model, test_loader, cuda=False)
         print("Verilog-Based Model accuracy: %f" % (verilog_accuracy))
         print("Verilog-Based AVG ROC AUC: %f" % (verilog_avg_roc_auc))

@@ -10,3 +10,4 @@ python3 neq2lut.py \
     --checkpoint $CKPT \
     --add-registers \
     --simulate-pre-synthesis-verilog
+    

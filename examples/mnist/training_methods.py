@@ -9,6 +9,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 from torch.utils.tensorboard import SummaryWriter
 
+from models import MnistNeqModel
+
 
 def test(model, dataset_loader, cuda):
     # Configure criterion
@@ -150,3 +152,182 @@ def train(model, datasets, config, cuda=False, log_dir="./mnist", sampler=None):
         print(
             f"Epoch: {epoch}/{num_epochs}\tValid Acc (%): {val_accuracy:.2f}\tTest Acc: {test_accuracy:.2f}"
         )
+
+# TODO: Fix this function
+def train_bagging(model, datasets, config, cuda=False, log_dir="./jsc"):
+    """
+    Train an ensemble of models using bagging (bootstrap aggregating), where
+    each member model has its own training dataset generated from the original
+    training set by sampling with replacement.
+
+    By default, we are continuously training each model in the ensemble by starting
+    from the best weights of the previous model. This is a form of warm-restarting
+    the training process for each model in the ensemble. Based on:
+        Zhu et al. Binary Ensemble Neural Network: More bits per Network or More
+        Networks per Bit? CVPR'19
+    """
+    test_loader = DataLoader(
+        datasets["test"], batch_size=config["batch_size"], shuffle=False
+    )
+    # Draw training samples based on equal weights
+    num_train_samples = len(datasets["train"])
+    for i in range(model.num_models):
+        model.single_model_mode = True
+        if config["independent"] and i > 0: 
+            # Start w/fresh model each time
+            print("Independent training mode")
+            model.model = MnistNeqModel(config)
+            if cuda:
+                model.cuda()
+        # Create bagging sampler
+        subset_indices = np.random.choice(num_train_samples, size=num_train_samples)
+        sampler = torch.utils.data.sampler.SubsetRandomSampler(subset_indices)
+        # Train model
+        train(model, datasets, config, cuda=cuda, log_dir=log_dir, sampler=sampler)
+        # Evaluate best single model on validation data
+        best_checkpoint = torch.load(os.path.join(log_dir, "best_accuracy.pth"))
+        model.load_state_dict(best_checkpoint["model_dict"])
+        print("Evaluate best single model performance")
+        test_accuracy, test_loss = test(model, test_loader, cuda=cuda)
+        # Log single model performance
+        os.makedirs(log_dir, exist_ok=True)
+        ensemble_perf_log = os.path.join(log_dir, f"ensemble_perf.txt")
+        with open(ensemble_perf_log, "a") as f:
+            f.write(
+                f"Single model {i + 1} test loss: {test_loss}\tAccuracy = {test_accuracy}\n"
+            )
+        # Save model to ensemble
+        snapshot = MnistNeqModel(config)
+        if cuda:
+            snapshot.cuda()
+        snapshot.load_state_dict(model.model.state_dict())
+        model.ensemble.append(snapshot)
+        # Evaluate ensemble on validation data and save ensemble checkpoint
+        ensemble_test_loss, ensemble_test_acc = evaluate_ensemble(
+            model, datasets, config, cuda=cuda, log_dir=log_dir
+        )
+        ensemble_ckpt = {
+            "model_dict": model.state_dict(),
+            "test_loss": ensemble_test_loss,
+            "test_acc": ensemble_test_acc,
+        }
+        torch.save(ensemble_ckpt, os.path.join(log_dir, "last_ensemble_ckpt.pth"))
+        print(f"Saved Bagging model # {len(model.ensemble)}")
+
+
+def evaluate_ensemble(model, datasets, config, cuda=False, log_dir="./mnist_ensemble"):
+    """
+    Evaluate ensemble performance on test dataset
+    """
+    print("Evaluate ensemble performance")
+    model.single_model_mode = False
+    test_loader = DataLoader(
+        datasets["test"], batch_size=config["batch_size"], shuffle=False
+    )
+    test_accuracy, test_loss = test(model, test_loader, cuda)
+    # Log ensemble performance
+    os.makedirs(log_dir, exist_ok=True)
+    ensemble_perf_log = os.path.join(log_dir, f"ensemble_perf.txt")
+    with open(ensemble_perf_log, "a") as f:
+        f.write(
+            f"Ensemble size {len(model.ensemble)} test loss: {test_loss}\tAccuracy = {test_accuracy}\n"
+        )
+    model.single_model_mode = True
+    return test_loss, test_accuracy
+
+
+def train_adaboost(model, datasets, config, cuda=False, log_dir="./jsc"):
+    """
+    Train an ensemble of models using AdaBoost, where each model is trained
+    sequentially with the training data weighted by the performance of the
+    previous model. The weights are updated based on the performance of the
+    current model.
+    """
+    test_loader = DataLoader(
+        datasets["test"], batch_size=config["batch_size"], shuffle=False
+    )
+    for i in range(model.num_models):
+        model.single_model_mode = True
+        if config["independent"] and i > 0: 
+            # Start w/fresh model each time
+            print("Independent training mode")
+            model.model = MnistNeqModel(config)
+            if cuda:
+                model.cuda()
+        # Draw training samples based on sample weights
+        sampler = torch.utils.data.sampler.WeightedRandomSampler(
+            model.weights,
+            model.num_train_samples,
+            replacement=True,
+        )
+        # Train model
+        train(model, datasets, config, cuda=cuda, log_dir=log_dir, sampler=sampler)
+        # Evaluate best single model on validation data
+        best_checkpoint = torch.load(os.path.join(log_dir, "best_accuracy.pth"))
+        model.load_state_dict(best_checkpoint["model_dict"])
+        print("Evaluate best single model performance")
+        test_accuracy, test_loss = test(model, test_loader, cuda=cuda)
+        # Log single model performance
+        os.makedirs(log_dir, exist_ok=True)
+        ensemble_perf_log = os.path.join(log_dir, f"ensemble_perf.txt")
+        # Compute model error epsilon
+        model_error, incorrect_train_idx = compute_adaboost_model_error(
+            model, datasets, config, cuda
+        )
+        with open(ensemble_perf_log, "a") as f:
+            f.write(
+                f"Single model {i + 1} test loss: {test_loss}\tModel error: {model_error}\tAccuracy = {test_accuracy}\n"
+            )
+        if model_error >= 1 - (1 / model.num_classes):
+            model.num_models = len(model.ensemble)
+            print(
+                f"Exiting AdaBoost training early bc model error is worse than random guessing. model_error = {model_error}"
+            )
+            break
+        alpha = model.update_alphas(model_error, cuda=cuda)
+        model.update_sample_weights(alpha, incorrect_train_idx)
+        # Save model to ensemble
+        snapshot = MnistNeqModel(config)
+        if cuda:
+            snapshot.cuda()
+        snapshot.load_state_dict(model.model.state_dict())
+        model.ensemble.append(snapshot)
+        # Evaluate ensemble on validation data and save ensemble checkpoint
+        ensemble_test_loss, ensemble_test_acc = evaluate_ensemble(
+            model, datasets, config, cuda=cuda, log_dir=log_dir
+        )
+        ensemble_ckpt = {
+            "model_dict": model.state_dict(),
+            "test_loss": ensemble_test_loss,
+            "test_acc": ensemble_test_acc,
+            "alphas": model.alphas,
+            "weights": model.weights,
+        }
+        torch.save(ensemble_ckpt, os.path.join(log_dir, "last_ensemble_ckpt.pth"))
+        print(f"Saved AdaBoost model # {len(model.ensemble)}")
+
+
+def compute_adaboost_model_error(model, datasets, config, cuda=False):
+    """ "
+    Evaluate the model on the training data and compute the weighted error
+    epsilon by first getting the indices of the incorrectly classified samples
+    and then computing a weighted average using the model's weights.
+    """
+    model.eval()
+    train_loader = DataLoader(
+        datasets["train"], batch_size=config["batch_size"], shuffle=False
+    )
+    with torch.no_grad():
+        model.eval()
+        incorrect_train_indices = []
+        for batch_idx, (data, target) in enumerate(train_loader):
+            if cuda:
+                data, target = data.cuda(), target.cuda()
+            output = model(data)
+            pred = output.detach().max(1, keepdim=True)[1]
+            target_label = target.detach().unsqueeze(1)
+            curr_incorrect_idx = pred.ne(target_label).long()
+            incorrect_train_indices += curr_incorrect_idx
+    incorrect_train_indices = torch.Tensor(incorrect_train_indices)
+    epsilon = model.weights @ incorrect_train_indices / torch.sum(model.weights)
+    return epsilon, incorrect_train_indices

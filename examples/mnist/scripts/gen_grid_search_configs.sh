@@ -13,69 +13,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# Jet tagger model
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./logicnet_configs/uniform_input_small --experiment_prefix uniform_input_small
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./logicnet_configs/uniform_input_medium --experiment_prefix uniform_input_medium
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./logicnet_configs/uniform_input_large --experiment_prefix uniform_input_large
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_small --experiment_prefix uniform_input_small
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_medium --experiment_prefix uniform_input_medium
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/uniform_input_large --experiment_prefix uniform_input_large
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./logicnet_configs/uniform_all_small --experiment_prefix uniform_all_small
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./logicnet_configs/uniform_all_medium --experiment_prefix uniform_all_medium
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./logicnet_configs/uniform_all_large --experiment_prefix uniform_all_large
+# MNIST model
 
 # Averaging
-# python3 grid_search.py -c search_configs/jsc_s_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_small
-# python3 grid_search.py -c search_configs/jsc_m_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_medium
-# python3 grid_search.py -c search_configs/jsc_l_averaging_grid_search.yml -d ../jet_substructure/ensemble_configs/averaging --experiment_prefix averaging_large
+# python3 grid_search.py -c search_configs/mnist_s_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_small
+# python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging --experiment_prefix averaging_xs
+# python3 grid_search.py -c search_configs/mnist_m_grid_search.yml -d ./ensemble_configs/averaging/med --experiment_prefix averaging_med
+# python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging/non_shared_xs --experiment_prefix averaging_xs_non_shared
+# python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/averaging/shared_input_xs --experiment_prefix averaging_xs_shared_input
+# python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/averaging/averaging_l --experiment_prefix averaging_l
+# python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/averaging/non_shared_l --experiment_prefix non_shared_l
 
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_same_output_scale --experiment_prefix small_same_output_scale
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_same_output_scale --experiment_prefix medium_same_output_scale
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_same_output_scale --experiment_prefix large_same_output_scale
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_same_output_scale_post_trans --experiment_prefix small_same_output_scale_post_trans
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_same_output_scale_post_trans --experiment_prefix medium_same_output_scale_post_trans
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_same_output_scale_post_trans --experiment_prefix large_same_output_scale_post_trans
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_same_input_scale --experiment_prefix small_same_input_scale
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_same_input_scale --experiment_prefix medium_same_input_scale
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_same_input_scale --experiment_prefix large_same_input_scale
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_input_post_trans_sbs --experiment_prefix small_input_post_trans_sbs
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_input_post_trans_sbs --experiment_prefix medium_input_post_trans_sbs
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_input_post_trans_sbs --experiment_prefix large_input_post_trans_sbs
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_input_quant --experiment_prefix shared_input_quant
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_input_layer --experiment_prefix shared_input_layer
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/shared_sparse_input_layer --experiment_prefix shared_sparse_input_layer
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_shared_sparse_input_layer_and_output_mean --experiment_prefix small_shared_sparse_input_layer_and_output_mean
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_shared_sparse_input_layer --experiment_prefix small_shared_sparse_input_layer
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_shared_sparse_input_layer --experiment_prefix medium_shared_sparse_input_layer
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_shared_sparse_input_layer --experiment_prefix large_shared_sparse_input_layer
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/averaging/small_shared_input_output_layers --experiment_prefix small_shared_input_output_layers
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/averaging/medium_shared_input_output_layers --experiment_prefix medium_shared_input_output_layers
-python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/averaging/large_shared_input_output_layers --experiment_prefix large_shared_input_output_layers
 
 # Bagging
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/bagging/small_independent_configs --experiment_prefix bagging_small_independent
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/bagging/medium_independent_configs  --experiment_prefix bagging_medium_independent
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/bagging/large_independent_configs  --experiment_prefix bagging_large_independent
+# python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/bagging/xs --experiment_prefix bagging_xs
+# python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/bagging/l_configs --experiment_prefix bagging_l
 
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/bagging/small_shared_sparse_input_layer --experiment_prefix small_shared_sparse_input_layer
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/bagging/medium_shared_sparse_input_layer --experiment_prefix medium_shared_sparse_input_layer
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/bagging/large_shared_sparse_input_layer --experiment_prefix large_shared_sparse_input_layer
+# Adaboost
+# python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/adaboost/xs --experiment_prefix adaboost_xs
+python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/adaboost/l_configs --experiment_prefix adaboost_l
 
-# AdaBoost
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/small_independent_configs --experiment_prefix adaboost_small_independent
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/medium_independent_configs  --experiment_prefix adaboost_medium_independent
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/large_independent_configs  --experiment_prefix adaboost_large_independent
-
-# python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/small_shared_sparse_input_layer --experiment_prefix small_shared_sparse_input_layer
-# python3 grid_search.py -c search_configs/jsc_m_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/medium_shared_sparse_input_layer --experiment_prefix medium_shared_sparse_input_layer
-# python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/adaboost/large_shared_sparse_input_layer --experiment_prefix large_shared_sparse_input_layer
