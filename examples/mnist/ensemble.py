@@ -31,6 +31,8 @@ class AveragingMnistNeqModel(nn.Module):
         self.num_models = num_models
         self.shared_input_layer = model_config["shared_input_layer"]
         self.shared_output_layer = model_config["shared_output_layer"]
+        self.same_input_scale = model_config["same_input_scale"]
+        self.same_output_scale = model_config["same_output_scale"]
         self.input_length = model_config["input_length"]
         self.output_length = model_config["output_length"]
         shared_output_bitwidth = None
@@ -76,6 +78,14 @@ class AveragingMnistNeqModel(nn.Module):
                 sparse_linear_kws={"mask": mask},
             )
             self.ensemble.insert(0, self.input_quant_layer)
+        elif self.same_input_scale:
+            for model in self.ensemble[1:]:
+                # Set all ensemble member's input quantizer to be the same as the
+                # first model's input quantizer
+                model.module_list[0].input_quant = self.ensemble[0].module_list[0].input_quant
+                print("AFTER: input quantizer for each ensemble member:")
+                for model in self.ensemble:
+                    print(f"\t{hex(id(model.module_list[0].input_quant))}")
         if self.shared_output_layer:
             feature_size = self.output_length * num_models
             bn = nn.BatchNorm1d(feature_size)
@@ -106,7 +116,12 @@ class AveragingMnistNeqModel(nn.Module):
                 sparse_linear_kws={"mask": mask},
             )
             self.ensemble.append(self.output_quant_layer)
-
+        elif self.same_output_scale:
+            for model in self.ensemble[1:]:
+                model.module_list[-1].output_quant = self.ensemble[0].module_list[-1].output_quant
+            print("AFTER: Output quantizer for each ensemble member:")
+            for model in self.ensemble:
+                print(f"\t{hex(id(model.module_list[-1].output_quant))}")
     def forward(self, x):
         if self.is_verilog_inference:
             return self.verilog_forward(x)

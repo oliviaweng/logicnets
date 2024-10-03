@@ -128,6 +128,8 @@ def main(args):
     shared_output_layer = False
     shared_output_bitwidth = None
     shared_output_fanin = None
+    same_input_scale = False
+    same_output_scale = False
     if "ensemble_method" in config.keys():
         # Ensemble learning
         ensemble_method = config["ensemble_method"]
@@ -138,6 +140,8 @@ def main(args):
                 shared_input_layer = config["ensemble_hp"]["shared_input_layer"]
                 shared_input_bitwidth = config["ensemble_hp"]["shared_input_bitwidth"]
                 shared_output_layer = config["ensemble_hp"]["shared_output_layer"]
+                same_input_scale = config["ensemble_hp"]["same_input_scale"]
+                same_output_scale = config["ensemble_hp"]["same_output_scale"]
                 if shared_output_layer:
                     shared_output_bitwidth = config["ensemble_hp"]["shared_output_bitwidth"]  
                     shared_output_fanin = config["ensemble_hp"]["shared_output_fanin"]
@@ -150,6 +154,8 @@ def main(args):
                 shared_output_layer=shared_output_layer,
                 shared_output_bitwidth=shared_output_bitwidth,
                 shared_output_fanin=shared_output_fanin,
+                same_input_scale=same_input_scale,
+                same_output_scale=same_output_scale,
             )
 
         elif ensemble_method == "snapshot":

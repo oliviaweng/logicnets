@@ -64,9 +64,7 @@ class AveragingJetNeqModel(nn.Module):
             for model in self.ensemble[1:]:
                 # Set all ensemble member's input quantizer to be the same as the
                 # first model's input quantizer
-                if self.input_post_trans_ssb:
-                    model.module_list[0].input_post_transform = ScalarScaleBias(scale=True)
-                elif self.input_post_trans_sbs:
+                if self.input_post_trans_sbs:
                     model.module_list[0].input_post_transform = ScalarBiasScale(scale=True)
                 model.module_list[0].input_quant = self.ensemble[0].module_list[0].input_quant
                 # print("AFTER: input quantizer for each ensemble member:")

@@ -54,7 +54,12 @@
 # python3 grid_search.py -c search_configs/voting_small_shared_io_layers_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_8_6
 # python3 grid_search.py -c search_configs/voting_small_shared_io_layers_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_8_4
 # python3 grid_search.py -c search_configs/voting_small_shared_io_layers_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_6_4
-python3 grid_search.py -c search_configs/voting_small_shared_io_layers_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_6_6
+# python3 grid_search.py -c search_configs/voting_small_shared_io_layers_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_6_6
+
+
+# Same io scale
+python3 grid_search.py -c search_configs/voting_small_shared_io_layers_grid_search.yml -d ./ensemble_configs/same_io_scale/small --experiment_prefix small_same_io_scale
+python3 grid_search.py -c search_configs/voting_large_shared_io_layers_grid_search.yml -d ./ensemble_configs/same_io_scale/large --experiment_prefix large_same_io_scale
 
 
 # Snapshot Ensemble

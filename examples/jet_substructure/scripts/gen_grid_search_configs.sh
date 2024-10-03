@@ -69,6 +69,9 @@
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_8_2
 # python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/input_quants/small --experiment_prefix small_inpq_6_2
 
+# Same input/output scale
+python3 grid_search.py -c search_configs/jsc_s_ensemble_grid_search.yml -d ./ensemble_configs/same_io_scale/small --experiment_prefix small_same_io_scale
+python3 grid_search.py -c search_configs/jsc_l_ensemble_grid_search.yml -d ./ensemble_configs/same_io_scale/large --experiment_prefix large_same_io_scale
 
 
 # Bagging

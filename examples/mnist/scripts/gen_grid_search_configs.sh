@@ -24,6 +24,9 @@
 # python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/averaging/averaging_l --experiment_prefix averaging_l
 # python3 grid_search.py -c search_configs/mnist_l_grid_search.yml -d ./ensemble_configs/averaging/non_shared_l --experiment_prefix non_shared_l
 
+# Same IO scale
+python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/same_io_scale --experiment_prefix small_same_io_scale
+
 
 # Bagging
 # python3 grid_search.py -c search_configs/mnist_xs_grid_search.yml -d ./ensemble_configs/bagging/xs --experiment_prefix bagging_xs

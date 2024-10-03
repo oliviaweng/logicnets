@@ -9,8 +9,8 @@ hidden_layers:
 input_bitwidth: 2
 hidden_bitwidth: 2
 output_bitwidth: 2 
-shared_output_bitwidth: 4 # output bitwidth of ensemble members, if defined
-shared_output_fanin: 1
+# shared_output_bitwidth: 4 # output bitwidth of ensemble members, if defined
+# shared_output_fanin: 1
 input_fanin: 3
 hidden_fanin: 3
 output_fanin: 3
@@ -18,20 +18,21 @@ weight_decay: 0.001
 batch_size: 1024
 epochs: 1000
 learning_rate: 0.001
-# seed: 2
+seed: 2
 checkpoint: null
 quantize_avg: false
-same_input_scale: false
 input_post_trans_sbs: false
 
-shared_input_quant: true
-shared_input_layer: true
-shared_input_bitwidth: 6 # 6
-
-shared_output_layer: true
-post_transform_output: true
-same_output_scale: false
+same_input_scale: true
+same_output_scale: true
 same_output_scale_sum: false
+post_transform_output: false
+
+shared_input_quant: false
+shared_input_layer: false
+# shared_input_bitwidth: 6 # 6
+
+shared_output_layer: false
 
 uniform_input_connectivity: false
 uniform_connectivity: false
@@ -39,15 +40,15 @@ uniform_connectivity: false
 # Params to grid search
 grid_search_params:
   ensemble_size:
-  - 1
-  # - 2
-  # - 4
-  # - 8
+  # - 1
+  - 2
+  - 4
+  - 8
   # - 16
   # - 32
   # - 64
   # - 128
-  seed:
-  - 1
-  - 2
-  - 3
+  # seed:
+  # - 1
+  # - 2
+  # - 3

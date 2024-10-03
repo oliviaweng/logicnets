@@ -18,10 +18,12 @@
 # tmux new-session -d -s ulavg02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/uniform_input_large_configs/config3 ./averaging"
 
 # Input quantizer
-tmux new-session -d -s inpq00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/input_quants/small_configs/config1 ./input_quants"
-tmux new-session -d -s inpq01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/input_quants/small_configs/config2 ./input_quants"
-tmux new-session -d -s inpq02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/input_quants/small_configs/config3 ./input_quants"
+# tmux new-session -d -s inpq00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/input_quants/small_configs/config1 ./input_quants"
+# tmux new-session -d -s inpq01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/input_quants/small_configs/config2 ./input_quants"
+# tmux new-session -d -s inpq02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/input_quants/small_configs/config3 ./input_quants"
 
+# Same io scale
+tmux new-session -d -s scal00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/same_io_scale ./averaging"
 
 # Uniform connectivity
 # tmux new-session -d -s u00 "./scripts/run_gen_ensemble_exp.sh 0 ./logicnet_configs/uniform_all ./jsc_single_models/"
