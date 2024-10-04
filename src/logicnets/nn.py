@@ -260,12 +260,7 @@ class SparseLinearNeq(nn.Module):
         indices = torch.argmax(eq.type(torch.int64),dim=1)
         return bin_output_states[indices]
 
-<<<<<<< HEAD
     def lut_forward(self, x: Tensor) -> Tensor:
-=======
-    def lut_forward(self, x: Tensor, debug=False) -> Tensor:
-
->>>>>>> 979bc514 (updates for autoencoder lut generation)
         if self.apply_input_quant:
             x = self.input_quant(x) # Use this to fetch the bin output of the input, if the input isn't already in binary format
         y = torch.zeros((x.shape[0],self.out_features))
@@ -275,6 +270,21 @@ class SparseLinearNeq(nn.Module):
             connected_input = x[:,indices]
             y[:,i] = self.table_lookup(connected_input, input_perm_matrix, bin_output_states)
         return y
+            # print(connected_input[0,:])
+            # print(x.shape, connected_input.shape, indices, input_perm_matrix, bin_output_states)
+            # print(self.neuron_truth_tables[i].shape)
+            y[:,i] = self.table_lookup(connected_input.to('cuda:0'), input_perm_matrix.to('cuda:0'), bin_output_states.to('cuda:0'))
+            if debug:
+                print("i:",i)
+                print("input_perm_matrix:",input_perm_matrix)
+                print("bin_output_states:",bin_output_states)
+                if self.output_quant:
+                    print("bin_output_states:",list(map(lambda z: self.output_quant.get_bin_str(z), bin_output_states)))
+                print("connected_input:",connected_input)
+                if self.input_quant:
+                    print("connected_input:",self.input_quant.get_bin_str(connected_input[0][0]))
+                print("y:",y[:,i])
+        return y.to('cuda:0')
 
     def forward(self, x: Tensor) -> Tensor:
         if self.is_lut_inference:

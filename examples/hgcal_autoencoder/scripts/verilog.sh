@@ -24,16 +24,15 @@ CONFIG=./ckpts/$model/hparams.yml
 CKPT=./ckpts/$model/best_loss.pth
 
 
-CUDA_VISIBLE_DEVICES="" python3 neq2lut.py \
+CUDA_VISIBLE_DEVICES=0 python verilog_sim.py \
    --data_dir $DATA_DIR \
    --data_file $DATA_FILE \
    --save_dir $SAVE_DIR \
    --experiment_name $EXP_NAME \
    --checkpoint $CKPT \
    --hparams_config $CONFIG \
+   --add_registers \
+   --clock_period $CLOCK \
+   --compute_emd \
    --simulate_pre_synthesis_verilog \
-   # --simulate_post_synthesis_verilog \
-   # --compute_emd \
-   # --add_registers \
-   # --gpu \
-   # --gpu # Don't run on gpu
+   --gpu # Don't run on gpu
