@@ -20,8 +20,11 @@ learning_rate: 0.001
 seed: 0
 checkpoint: null
 
-shared_input_layer: true
-shared_input_bitwidth: 6
+same_input_scale: true
+same_output_scale: true
+
+shared_input_layer: false
+# shared_input_bitwidth: 6
 
 shared_output_layer: false
 
@@ -31,6 +34,6 @@ grid_search_params:
   - 2
   - 4
   - 8
-  - 16
-  - 32
-  - 64
+  # - 16
+  # - 32
+  # - 64

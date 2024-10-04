@@ -128,6 +128,8 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
         shared_output_layer=False,
         shared_output_bitwidth=None,
         shared_output_fanin=1,
+        same_input_scale=False,
+        same_output_scale=False,
     ):
         super(VotingAutoencoderNeqModel, self).__init__()
         self.shape = (1, 8, 8)  # PyTorch defaults to (C, H, W)
@@ -142,6 +144,8 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
         self.shared_output_layer = shared_output_layer
         self.shared_output_bitwidth = shared_output_bitwidth
         self.shared_output_fanin = shared_output_fanin
+        self.same_input_scale = same_input_scale
+        self.same_output_scale = same_output_scale
 
         if fixed_sparsity_mask:
             print("All models set with the same sparsity mask")
@@ -209,6 +213,14 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
                 sparse_linear_kws={"mask": mask},
             )
             self.encoder_ensemble.insert(0, self.input_quant_layer)
+        elif self.same_input_scale:
+            for model in self.encoder_ensemble[1:]:
+                # Set all ensemble member's input quantizer to be the same as the
+                # first model's input quantizer
+                model.module_list[0].input_quant = self.encoder_ensemble[0].module_list[0].input_quant
+                print("AFTER: input quantizer for each ensemble member:")
+                for model in self.encoder_ensemble:
+                    print(f"\t{hex(id(model.module_list[0].input_quant))}")
         if self.shared_output_layer:
             feature_size = self.output_length * num_models
             bn = nn.BatchNorm1d(feature_size)
@@ -239,6 +251,12 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
                 sparse_linear_kws={"mask": mask},
             )
             self.encoder_ensemble.append(self.output_quant_layer)
+        elif self.same_output_scale:
+            for model in self.encoder_ensemble[1:]:
+                model.module_list[-1].output_quant = self.encoder_ensemble[0].module_list[-1].output_quant
+            print("AFTER: Output quantizer for each ensemble member:")
+            for model in self.encoder_ensemble:
+                print(f"\t{hex(id(model.module_list[-1].output_quant))}")
         self.decoder = Decoder(128)
         self.is_verilog_inference = False
 
