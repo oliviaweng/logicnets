@@ -1,7 +1,9 @@
 trial,accuracy,loss,ensemble_size,model_size
+averaging_l_ensemble_size16,98.59,0.074,16,mnist_l
 non_shared_l_ensemble_size32,98.57,0.048,32,mnist_l_non_shared
 averaging_l_ensemble_size8,98.55,0.08,8,mnist_l
 non_shared_l_ensemble_size16,98.52,0.051,16,mnist_l_non_shared
+non_shared_l_ensemble_size8,98.49,0.09,8,mnist_l_non_shared
 averaging_l_ensemble_size4,98.48,0.082,4,mnist_l
 non_shared_l_ensemble_size4,98.36,0.085,4,mnist_l_non_shared
 averaging_l_ensemble_size2,98.3,0.08,2,mnist_l
@@ -9,8 +11,8 @@ non_shared_l_ensemble_size2,98.28,0.082,2,mnist_l_non_shared
 averaging_xs_non_shared_ensemble_size64,98.25,0.059,64,mnist_xs_non_shared
 averaging_xs_non_shared_ensemble_size32,97.92,0.073,32,mnist_xs_non_shared
 averaging_med_ensemble_size16,97.62,0.108,16,mnist_m
-averaging_xs_ensemble_size64,97.5,0.153,64,mnist_xs
 averaging_small_ensemble_size32,97.5,0.123,32,mnist_s
+averaging_xs_ensemble_size64,97.5,0.153,64,mnist_xs
 averaging_xs_non_shared_ensemble_size16,97.48,0.087,16,mnist_xs_non_shared
 averaging_xs_shared_input_ensemble_size32,97.41,0.101,32,mnist_xs_shared_input
 averaging_small_ensemble_size16,97.2,0.118,16,mnist_s
@@ -18,8 +20,8 @@ averaging_xs_ensemble_size32,97.16,0.135,32,mnist_xs
 averaging_med_ensemble_size8,97.12,0.106,8,mnist_m
 averaging_xs_non_shared_ensemble_size8,96.84,0.111,8,mnist_xs_non_shared
 averaging_med_ensemble_size4,96.82,0.144,4,mnist_m
-averaging_xs_ensemble_size16,96.79,0.13,16,mnist_xs
 averaging_small_ensemble_size8,96.79,0.111,8,mnist_s
+averaging_xs_ensemble_size16,96.79,0.13,16,mnist_xs
 averaging_med_ensemble_size2,96.49,0.146,2,mnist_m
 averaging_xs_ensemble_size8,96.26,0.134,8,mnist_xs
 averaging_small_ensemble_size4,96.0,0.133,4,mnist_s
