@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONFIG_DIR=./ensemble_configs/averaging/deg3_shared_io
+CONFIG_DIR=./ensemble_configs/averaging/small_deg3_shared_io
 
 for i in {1..3}; do 
 new_dir=${CONFIG_DIR}_configs/config${i}

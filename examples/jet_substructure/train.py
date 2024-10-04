@@ -87,6 +87,8 @@ def main(args):
         config["shared_input_layer"] = False
     if "shared_output_layer" not in config:
         config["shared_output_layer"] = False
+    if "input_dropout" not in config:
+        config["input_dropout"] = 0
 
     if "ensemble_method" in config:
         if config["ensemble_method"] == "averaging":

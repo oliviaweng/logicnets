@@ -13,7 +13,7 @@ ensemble_hp:
   shared_output_layer: true
 ensemble_method: voting
 ensemble_size: 8
-epochs: 200
+epochs: 100
 gpu: true
 hidden_layer:
 - 512
@@ -27,6 +27,6 @@ neuron_fanin:
 - 5
 - 3
 output_bitwidth: 5
-seed: 1
-warm_restart_freq: 100
+seed: 2
+warm_restart_freq: 200
 wd: 0

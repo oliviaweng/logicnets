@@ -57,6 +57,7 @@ class JetSubstructureNeqModel(nn.Module):
             out_features = self.num_neurons[i]
             bn = nn.BatchNorm1d(out_features)
             if i == 1:
+                do_in = nn.Dropout(p=model_config["input_dropout"])
                 bn_in = nn.BatchNorm1d(in_features)
                 input_bias = ScalarBiasScale(scale=False, bias_init=-0.25)
                 input_quant = QuantBrevitasActivation(
@@ -67,7 +68,7 @@ class JetSubstructureNeqModel(nn.Module):
                         quant_type=QuantType.INT,
                         scaling_impl_type=ScalingImplType.PARAMETER,
                     ),
-                    pre_transforms=[bn_in, input_bias],
+                    pre_transforms=[do_in, bn_in, input_bias],
                 )
                 output_quant = QuantBrevitasActivation(
                     QuantReLU(

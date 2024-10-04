@@ -18,12 +18,24 @@
 # tmux new-session -d -s m03 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging/deg4_configs/config0 ./averaging"
 
 # tmux new-session -d -s m00 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging/deg3_configs/config1 ./averaging"
-tmux new-session -d -s m01 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging/deg3_configs/config2 ./averaging"
+# tmux new-session -d -s m01 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging/deg3_configs/config2 ./averaging"
 # tmux new-session -d -s m02 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging/deg3_configs/config3 ./averaging"
 
 # tmux new-session -d -s ms00 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/deg3_shared_io_configs/config1 ./averaging"
-tmux new-session -d -s ms01 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/deg3_shared_io_configs/config2 ./averaging"
+# tmux new-session -d -s ms01 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/deg3_shared_io_configs/config2 ./averaging"
 # tmux new-session -d -s ms02 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/deg3_shared_io_configs/config3 ./averaging"
+
+# Small deg 2
+# tmux new-session -d -s ms00 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/small_deg2_shared_io_configs/config1 ./averaging"
+# tmux new-session -d -s ms01 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/small_deg2_shared_io_configs/config2 ./averaging"
+# tmux new-session -d -s m00 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/small_deg2_configs/config1 ./averaging"
+# tmux new-session -d -s m01 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/small_deg2_configs/config2 ./averaging"
+
+# Small deg 3
+# tmux new-session -d -s ms00 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/small_deg3_shared_io_configs/config1 ./averaging"
+tmux new-session -d -s ms01 "./scripts/run_train_exp.sh 3 ./ensemble_configs/averaging/small_deg3_shared_io_configs/config2 ./averaging"
+# tmux new-session -d -s ms02 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging/small_deg3_shared_io_configs/config3 ./averaging"
+
 
 # Bagging
 # tmux new-session -d -s bag "./scripts/run_train_exp.sh 1 ./ensemble_configs/bagging/deg1_configs ./bagging"
