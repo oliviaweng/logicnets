@@ -2,7 +2,7 @@
 
 # model=small_shared_diagonal_output_layer_shared_output_fanin1_ensemble_size2
 model=$1
-DIR=./averaging_small_final
+DIR=./averaging_xs_1
 CONFIG=$DIR/$model/hparams.yml
 LOGDIR=$DIR/$model/verilog
 CKPT=$DIR/$model/best_accuracy.pth

@@ -221,7 +221,7 @@ def main(args):
         test_loader = DataLoader(
             dataset["test"], batch_size=config["batch_size"], shuffle=False
         )
-        test_accuracy, test_avg_roc_auc, test_loss = test(model, test_loader, args.cuda)
+        test_accuracy, test_loss = test(model, test_loader, args.cuda)
         eval_tag = "_eval" if args.evaluate else ""
         os.makedirs(experiment_dir, exist_ok=True)
         test_results_log = os.path.join(

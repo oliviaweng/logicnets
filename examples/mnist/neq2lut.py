@@ -99,7 +99,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--device", 
         type=int, 
-        default=0, 
+        default=3, 
         metavar="", 
         help="Device_id for GPU",
     )
@@ -110,6 +110,8 @@ if __name__ == "__main__":
     if not os.path.exists(args.log_dir):
         os.makedirs(args.log_dir)
 
+    if args.cuda:
+        torch.cuda.set_device(args.device)
     # Split up configuration options to be more understandable
     # model_cfg = {}
     # for k in model_config.keys():
@@ -188,70 +190,70 @@ if __name__ == "__main__":
     # lut_model = MnistLutModel(config)
     lut_model.load_state_dict(checkpoint['model_dict'])
 
-    # # Generate the truth tables in the LUT module
-    # print("Converting to NEQs to LUTs...")
-    # generate_truth_tables(lut_model, verbose=True)
+    # Generate the truth tables in the LUT module
+    print("Converting to NEQs to LUTs...")
+    generate_truth_tables(lut_model, verbose=True)
 
-    # # Test the LUT-based model
-    # print("Running inference on LUT-based model...")
-    # lut_inference(lut_model)
-    # lut_model.eval()
-    # lut_accuracy, _ = test(lut_model, test_loader, cuda=True)
-    # print("LUT-Based Model accuracy: %f" % (lut_accuracy))
-    # modelSave = {   
-    #     'model_dict': lut_model.state_dict(),
-    #     'test_accuracy': lut_accuracy
-    # }
+    # Test the LUT-based model
+    print("Running inference on LUT-based model...")
+    lut_inference(lut_model)
+    lut_model.eval()
+    lut_accuracy, _ = test(lut_model, test_loader, cuda=True)
+    print("LUT-Based Model accuracy: %f" % (lut_accuracy))
+    modelSave = {   
+        'model_dict': lut_model.state_dict(),
+        'test_accuracy': lut_accuracy
+    }
 
-    # torch.save(modelSave, args.log_dir + "/lut_based_model.pth")
+    torch.save(modelSave, args.log_dir + "/lut_based_model.pth")
 
-    # print("Generating verilog in %s..." % (args.log_dir))
-    # if "ensemble_method" in config:
-    #     ensemble_to_verilog_module(
-    #         lut_model.ensemble,
-    #         "logicnet", 
-    #         args.log_dir, 
-    #         add_registers=args.add_registers,
-    #         generate_bench=args.generate_bench,
-    #     )
-    # else: # single model
-    #     module_list_to_verilog_module(
-    #         lut_model.module_list, 
-    #         "logicnet", 
-    #         args.log_dir, 
-    #         add_registers=args.add_registers,
-    #         generate_bench=args.generate_bench,
-    #     )
-    # print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
-
-    if args.dump_io:
-        io_filename = os.path.join(args.log_dir, f"io_{args.dataset_split}.txt")
-        with open(io_filename, 'w') as f:
-            pass # Create an empty file.
-        print(f"Dumping verilog I/O to {io_filename}...")
-    else:
-        io_filename = None
-
-    if args.simulate_pre_synthesis_verilog:
-        print("Running inference simulation of Verilog-based model...")
-        lut_model.verilog_inference(
+    print("Generating verilog in %s..." % (args.log_dir))
+    if "ensemble_method" in config:
+        ensemble_to_verilog_module(
+            lut_model.ensemble,
+            "logicnet", 
             args.log_dir, 
-            "logicnet.v", 
-            logfile=io_filename, 
-            add_registers=args.add_registers
+            add_registers=args.add_registers,
+            generate_bench=args.generate_bench,
         )
-        verilog_accuracy = test(lut_model, test_loader, cuda=True)
-        print("Verilog-Based Model accuracy: %f" % (verilog_accuracy))
+    else: # single model
+        module_list_to_verilog_module(
+            lut_model.module_list, 
+            "logicnet", 
+            args.log_dir, 
+            add_registers=args.add_registers,
+            generate_bench=args.generate_bench,
+        )
+    print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
 
-    # print("Running out-of-context synthesis")
-    # ret = synthesize_and_get_resource_counts(
-    #     args.log_dir, 
-    #     "logicnet", 
-    #     # fpga_part="xcu280-fsvh2892-2L-e", 
-    #     fpga_part="xcvu9p-flgb2104-2-i", # LogicNets default
-    #     clk_period_ns=args.clock_period, 
-    #     post_synthesis=1
-    # )
+    # if args.dump_io:
+    #     io_filename = os.path.join(args.log_dir, f"io_{args.dataset_split}.txt")
+    #     with open(io_filename, 'w') as f:
+    #         pass # Create an empty file.
+    #     print(f"Dumping verilog I/O to {io_filename}...")
+    # else:
+    #     io_filename = None
+
+    # if args.simulate_pre_synthesis_verilog:
+    #     print("Running inference simulation of Verilog-based model...")
+    #     lut_model.verilog_inference(
+    #         args.log_dir, 
+    #         "logicnet.v", 
+    #         logfile=io_filename, 
+    #         add_registers=args.add_registers
+    #     )
+    #     verilog_accuracy = test(lut_model, test_loader, cuda=True)
+    #     print("Verilog-Based Model accuracy: %f" % (verilog_accuracy))
+
+    print("Running out-of-context synthesis")
+    ret = synthesize_and_get_resource_counts(
+        args.log_dir, 
+        "logicnet", 
+        # fpga_part="xcu280-fsvh2892-2L-e", 
+        fpga_part="xcvu9p-flgb2104-2-i", # LogicNets default
+        clk_period_ns=args.clock_period, 
+        post_synthesis=1
+    )
 
     # if args.simulate_post_synthesis_verilog:
     #     print("Running post-synthesis inference simulation of Verilog-based model...")

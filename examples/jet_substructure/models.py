@@ -132,10 +132,20 @@ class JetSubstructureNeqModel(nn.Module):
         self.dut = None
         self.logfile = None
 
-    def verilog_inference(self, verilog_dir, top_module_filename, logfile: bool = False, add_registers: bool = False):
+    def verilog_inference(
+        self,
+        verilog_dir,
+        top_module_filename,
+        logfile: bool = False,
+        add_registers: bool = False,
+    ):
         self.verilog_dir = realpath(verilog_dir)
         self.top_module_filename = top_module_filename
-        self.dut = PyVerilator.build(f"{self.verilog_dir}/{self.top_module_filename}", verilog_path=[self.verilog_dir], build_dir=f"{self.verilog_dir}/verilator")
+        self.dut = PyVerilator.build(
+            f"{self.verilog_dir}/{self.top_module_filename}",
+            verilog_path=[self.verilog_dir],
+            build_dir=f"{self.verilog_dir}/verilator",
+        )
         self.is_verilog_inference = True
         self.logfile = logfile
         if add_registers:
@@ -151,8 +161,8 @@ class JetSubstructureNeqModel(nn.Module):
         _, input_bitwidth = self.module_list[0].input_quant.get_scale_factor_bits()
         _, output_bitwidth = self.module_list[-1].output_quant.get_scale_factor_bits()
         input_bitwidth, output_bitwidth = int(input_bitwidth), int(output_bitwidth)
-        total_input_bits = self.module_list[0].in_features*input_bitwidth
-        total_output_bits = self.module_list[-1].out_features*output_bitwidth
+        total_input_bits = self.module_list[0].in_features * input_bitwidth
+        total_output_bits = self.module_list[-1].out_features * output_bitwidth
         num_layers = len(self.module_list)
         input_quant.bin_output()
         self.module_list[0].apply_input_quant = False
@@ -161,29 +171,34 @@ class JetSubstructureNeqModel(nn.Module):
         self.dut.io.rst = 0
         self.dut.io.clk = 0
         for i in range(x.shape[0]):
-            x_i = x[i,:]
-            y_i = self.pytorch_forward(x[i:i+1,:])[0]
+            x_i = x[i, :]
+            y_i = self.pytorch_forward(x[i : i + 1, :])[0]
             xv_i = list(map(lambda z: input_quant.get_bin_str(z), x_i))
             ys_i = list(map(lambda z: output_quant.get_bin_str(z), y_i))
-            xvc_i = reduce(lambda a,b: a+b, xv_i[::-1])
-            ysc_i = reduce(lambda a,b: a+b, ys_i[::-1])
+            xvc_i = reduce(lambda a, b: a + b, xv_i[::-1])
+            ysc_i = reduce(lambda a, b: a + b, ys_i[::-1])
             self.dut["M0"] = int(xvc_i, 2)
             for j in range(self.latency + 1):
-                #print(self.dut.io.M5)
+                # print(self.dut.io.M5)
                 res = self.dut[f"M{num_layers}"]
                 result = f"{res:0{int(total_output_bits)}b}"
                 self.dut.io.clk = 1
                 self.dut.io.clk = 0
             expected = f"{int(ysc_i,2):0{int(total_output_bits)}b}"
             result = f"{res:0{int(total_output_bits)}b}"
-            assert(expected == result)
-            res_split = [result[i:i+output_bitwidth] for i in range(0, len(result), output_bitwidth)][::-1]
+            assert expected == result
+            res_split = [
+                result[i : i + output_bitwidth]
+                for i in range(0, len(result), output_bitwidth)
+            ][::-1]
             yv_i = torch.Tensor(list(map(lambda z: int(z, 2), res_split)))
-            y[i,:] = yv_i
+            y[i, :] = yv_i
             # Dump the I/O pairs
             if self.logfile is not None:
                 with open(self.logfile, "a") as f:
-                    f.write(f"{int(xvc_i,2):0{int(total_input_bits)}b}{int(ysc_i,2):0{int(total_output_bits)}b}\n")
+                    f.write(
+                        f"{int(xvc_i,2):0{int(total_input_bits)}b}{int(ysc_i,2):0{int(total_output_bits)}b}\n"
+                    )
         return y
 
     def pytorch_forward(self, x):

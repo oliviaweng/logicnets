@@ -196,6 +196,7 @@ class AveragingMnistNeqModel(nn.Module):
             xv_i = list(map(lambda z: input_quant.get_bin_str(z), x_i))
             # xv_i = list(map(lambda z: to_twos_complement(z,6), x_i))
             ys_i = list(map(lambda z: to_twos_complement(z+(2**(output_quant_bitwidth-1))*len(self.ensemble[1:-1]),output_bitwidth+1)[1:], y_i))
+            # ys_i = list(map(lambda z: output_quant.get_bin_str(z), y_i))
             xvc_i = reduce(lambda a,b: a+b, xv_i[::-1])
             ysc_i = reduce(lambda a,b: a+b, ys_i[::-1])
             # print("x_i =",x_i)
@@ -233,6 +234,7 @@ class AveragingMnistNeqModel(nn.Module):
                 # print(f"{self.dut['out_1']:0{int(total_output_bits)}b}",f"{self.dut[f'out_2']:0{int(total_output_bits)}b}")
             expected = f"{int(ysc_i,2):0{int(total_output_bits)}b}"
             result = f"{res:0{int(total_output_bits)}b}"
+            breakpoint()
             # print(expected)
             # print(result)
             assert(expected == result)

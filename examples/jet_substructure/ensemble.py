@@ -5,7 +5,8 @@ from functools import reduce
 from os.path import realpath
 
 from pyverilator import PyVerilator
-
+from tqdm import tqdm
+import math
 from brevitas.core.quant import QuantType
 from brevitas.nn import QuantHardTanh
 from brevitas.core.scaling import ScalingImplType
@@ -152,6 +153,7 @@ class AveragingJetNeqModel(nn.Module):
                 )
         else:
             outputs = torch.stack([model(x) for model in self.ensemble], dim=0)
+        outputs = outputs.cuda()
         if self.shared_output_layer:
             outputs = self.ensemble[-1](outputs)
             # Sum every out_length elements to get the final output
@@ -188,10 +190,11 @@ class AveragingJetNeqModel(nn.Module):
         self.dut.io.clk = 0
         for i in tqdm(range(x.shape[0])):
             x_i = x[i,:]
-            y_i = self.pytorch_forward(x[i:i+1,:])[0]
+            y_i = self.pytorch_forward(x[i:i+1,:].float())[0]
             xv_i = list(map(lambda z: input_quant.get_bin_str(z), x_i))
             # xv_i = list(map(lambda z: to_twos_complement(z,6), x_i))
             ys_i = list(map(lambda z: to_twos_complement(z+(2**(output_quant_bitwidth-1))*len(self.ensemble[1:-1]),output_bitwidth+1)[1:], y_i))
+            # ys_i = list(map(lambda z: output_quant.get_bin_str(z), y_i))
             xvc_i = reduce(lambda a,b: a+b, xv_i[::-1])
             ysc_i = reduce(lambda a,b: a+b, ys_i[::-1])
             # print("x_i =",x_i)
@@ -216,11 +219,11 @@ class AveragingJetNeqModel(nn.Module):
                 # print(self.dut.internals.logicnet_1_inst)
                 # print(self.dut.internals.logicnet_2_inst)
                 # print(self.dut.internals.logicnet_0_inst)
-                m0 = hex_to_bin(str(self.dut.internals.logicnet_0_inst.M0w))
-                input1 = hex_to_bin(str(self.dut.internals.logicnet_1_inst.M0w))
-                input2 = hex_to_bin(str(self.dut.internals.logicnet_2_inst.M0w))
-                output1 = hex_to_bin(str(self.dut.internals.M2_1))
-                output2 = hex_to_bin(str(self.dut.internals.M2_2))
+                # m0 = hex_to_bin(str(self.dut.internals.logicnet_0_inst.M0w))
+                # input1 = hex_to_bin(str(self.dut.internals.logicnet_1_inst.M0w))
+                # input2 = hex_to_bin(str(self.dut.internals.logicnet_2_inst.M0w))
+                # output1 = hex_to_bin(str(self.dut.internals.M2_1))
+                # output2 = hex_to_bin(str(self.dut.internals.M2_2))
                 # print("M0 =", m0, bits_to_ints(m0,6))
                 # print("M0w_1 =", input1, bits_to_ints(input1,2))
                 # print("M0w_2 =", input2, bits_to_ints(input2,2))
@@ -229,6 +232,7 @@ class AveragingJetNeqModel(nn.Module):
                 # print(f"{self.dut['out_1']:0{int(total_output_bits)}b}",f"{self.dut[f'out_2']:0{int(total_output_bits)}b}")
             expected = f"{int(ysc_i,2):0{int(total_output_bits)}b}"
             result = f"{res:0{int(total_output_bits)}b}"
+            breakpoint()
             # print(expected)
             # print(result)
             assert(expected == result)

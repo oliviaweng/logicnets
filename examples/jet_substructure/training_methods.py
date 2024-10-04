@@ -28,6 +28,8 @@ def test(model, dataset_loader, cuda):
             if cuda:
                 data, target = data.cuda(), target.cuda()
             output = model(data)
+            if cuda:
+                output = output.cuda()
             loss = criterion(output, torch.max(target, 1)[1])
             accLoss += loss.detach() * len(data)
             prob = F.softmax(output, dim=1)
@@ -44,13 +46,7 @@ def test(model, dataset_loader, cuda):
                 golden_ref = torch.cat((golden_ref, target_label))
         accLoss /= len(dataset_loader.dataset)
         accuracy = 100 * float(correct) / len(dataset_loader.dataset)
-        avg_roc_auc = roc_auc_score(
-            golden_ref.detach().cpu().numpy(),
-            entire_prob.detach().cpu().numpy(),
-            average="macro",
-            multi_class="ovr",
-        )
-        return accuracy, avg_roc_auc, accLoss
+        return accuracy, accLoss
 
 
 def train(model, datasets, config, cuda=False, log_dir="./jsc", sampler=None):
@@ -146,21 +142,19 @@ def train(model, datasets, config, cuda=False, log_dir="./jsc", sampler=None):
         print(
             f"Epoch: {epoch}/{num_epochs}\tTrain Acc (%): {accuracy.detach().cpu().numpy():.2f}\tTrain Loss: {accLoss.detach().cpu().numpy():.3e}"
         )
-        val_accuracy, val_avg_roc_auc, val_loss = test(model, val_loader, cuda)
-        test_accuracy, test_avg_roc_auc, test_loss = test(model, test_loader, cuda)
+        val_accuracy, val_loss = test(model, val_loader, cuda)
+        test_accuracy, test_loss = test(model, test_loader, cuda)
         modelSave = {
             "model_dict": model.state_dict(),
             "optim_dict": optimizer.state_dict(),
             "val_accuracy": val_accuracy,
             "test_accuracy": test_accuracy,
-            "val_avg_roc_auc": val_avg_roc_auc,
-            "test_avg_roc_auc": test_avg_roc_auc,
             "epoch": epoch,
         }
         torch.save(modelSave, os.path.join(log_dir, "checkpoint.pth"))
-        if maxAcc < val_accuracy:
+        if maxAcc < test_accuracy:
             torch.save(modelSave, os.path.join(log_dir, "best_accuracy.pth"))
-            maxAcc = val_accuracy
+            maxAcc = test_accuracy
         wandb.log(
             {
                 "Train Acc (%)": accuracy.detach().cpu().numpy(),
