@@ -25,6 +25,8 @@ from torch.nn.parameter import Parameter
 from tqdm import tqdm
 import math
 import copy
+import multiprocessing
+multiprocessing.set_start_method('spawn')
 
 from .init import random_restrict_fanin
 from .util import fetch_mask_indices, generate_permutation_matrix
@@ -39,16 +41,35 @@ from .bench import      generate_lut_bench, \
 
 # TODO: Create a container module which performs this function.
 # Generate all truth tables for NEQs for a given nn.Module()
+def process_truth_table(args):
+    module, ensemble_shared_output_input_quants, ensemble_shared_output_in_features, ensemble_shared_input_output_features = args
+    module.calculate_truth_tables(ensemble_shared_output_input_quants, ensemble_shared_output_in_features, ensemble_shared_input_output_features)
+
+
 def generate_truth_tables(model: nn.Module, verbose: bool = False) -> None:
     training = model.training
     model.eval()
+    
+    pool_args = []
+    ensemble_shared_output_input_quants = [model.ensemble[i].module_list[-1].output_quant for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
+    ensemble_shared_output_in_features = [model.ensemble[i].module_list[-1].out_features for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
+    ensemble_shared_input_output_features = [model.ensemble[i].module_list[0].input_quant for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
+
+    # for name, module in model.named_modules():
+    #     if type(module) == SparseLinearNeq:
+    #         pool_args.append((module, ensemble_shared_output_input_quants, ensemble_shared_output_in_features, ensemble_shared_input_output_features))
+
+    # with multiprocessing.Pool() as pool:
+    #     pool.map(process_truth_table, pool_args)
+
     for name, module in model.named_modules():
         if type(module) == SparseLinearNeq:
             if verbose:
                 print(f"Calculating truth tables for {name}")
-            module.calculate_truth_tables(model)
+            module.calculate_truth_tables(ensemble_shared_output_input_quants, ensemble_shared_output_in_features, ensemble_shared_input_output_features)
             if verbose:
                 print(f"Truth tables generated for {len(module.neuron_truth_tables)} neurons")
+
     model.training = training
 
 # TODO: Create a container module which performs this function.
@@ -155,9 +176,10 @@ always @ (posedge clk) begin
         previous_signals = curr_signals
         intermediate_signals += curr_signals
         
-    output_string += f"""
-reg [{averaged_bits-1}:0] {",".join(intermediate_signals[:-1])};
-"""
+    if len(intermediate_signals) > 1:
+        output_string += f"""
+    reg [{averaged_bits-1}:0] {",".join(intermediate_signals[:-1])};
+    """
     block_code = block_code.replace(curr_signals.pop(), "out")
     output_string += block_code
 
@@ -546,6 +568,17 @@ class SparseLinearNeq(nn.Module):
     # TODO: Move the verilog string templates to elsewhere
     # TODO: Move this to another class
     # TODO: Update this code to support custom bitwidths per input/output
+    def gen_neuron_wrapper(self, args):
+        module_prefix, index, directory, generate_bench = args
+        module_name = f"{module_prefix}_N{index}"
+        neuron_verilog = self.gen_neuron_verilog(index, module_name) # Generate the contents of the neuron verilog
+        with open(f"{directory}/{module_name}.v", "w") as f:
+            f.write(neuron_verilog)
+        if generate_bench:
+            neuron_bench = self.gen_neuron_bench(index, module_name) # Generate the contents of the neuron verilog
+            with open(f"{directory}/{module_name}.bench", "w") as f:
+                f.write(neuron_bench)
+        
     def gen_layer_verilog(self, module_prefix, directory, generate_bench: bool = True):
         debug = False 
         if module_prefix == "ens0_layer0":
@@ -557,16 +590,14 @@ class SparseLinearNeq(nn.Module):
         total_output_bits = self.out_features*output_bitwidth
         layer_contents = f"module {module_prefix} (input [{total_input_bits-1}:0] M0, output [{total_output_bits-1}:0] M1);\n\n"
         output_offset = 0
+        neuron_args = [(module_prefix, index, directory, generate_bench) for index in range(self.out_features)]
+        # with multiprocessing.Pool() as pool:
+        #     pool.map(self.gen_neuron_wrapper, neuron_args)
+        for args in neuron_args:
+            self.gen_neuron_wrapper(args)
         for index in range(self.out_features):
             module_name = f"{module_prefix}_N{index}"
             indices, _, _, _ = self.neuron_truth_tables[index]
-            neuron_verilog = self.gen_neuron_verilog(index, module_name) # Generate the contents of the neuron verilog
-            with open(f"{directory}/{module_name}.v", "w") as f:
-                f.write(neuron_verilog)
-            if generate_bench:
-                neuron_bench = self.gen_neuron_bench(index, module_name) # Generate the contents of the neuron verilog
-                with open(f"{directory}/{module_name}.bench", "w") as f:
-                    f.write(neuron_bench)
             connection_string = generate_neuron_connection_verilog(indices, input_bitwidth) # Generate the string which connects the synapses to this neuron
             wire_name = f"{module_name}_wire"
             connection_line = f"wire [{len(indices)*input_bitwidth-1}:0] {wire_name} = {{{connection_string}}};\n"
@@ -684,7 +715,7 @@ class SparseLinearNeq(nn.Module):
         return x
 
     # Consider using masked_select instead of fetching the indices
-    def calculate_truth_tables(self, model: nn.Module):
+    def calculate_truth_tables(self, ensemble_shared_output_input_quants, ensemble_shared_output_in_features, ensemble_shared_input_output_quants):
         # print("in_features", self.in_features, "out_features", self.out_features)
         with torch.no_grad():
             mask = self.fc.mask()
@@ -692,8 +723,8 @@ class SparseLinearNeq(nn.Module):
             input_state_space = list() # TODO: is a list the right data-structure here?
             bin_state_space = list()
             if self.input_quant is None:
-                input_quants = [model.ensemble[i].module_list[-1].output_quant for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
-                in_features = [model.ensemble[i].module_list[-1].out_features for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
+                input_quants = ensemble_shared_output_input_quants
+                in_features = ensemble_shared_output_in_features
                 assert(in_features.count(in_features[0]) == len(in_features))
                 in_features = in_features[0]
 
@@ -733,7 +764,7 @@ class SparseLinearNeq(nn.Module):
                 if self.output_quant == None:
                     # print(type(model))
                     # print([type(model.ensemble[i]) for i in range(len(model.ensemble))])
-                    output_quants = [model.ensemble[i].module_list[0].input_quant for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
+                    output_quants = ensemble_shared_input_output_quants
                     shared_input = True
                 
                 # print(len(output_quants))

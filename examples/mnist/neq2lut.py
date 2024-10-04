@@ -165,10 +165,12 @@ if __name__ == "__main__":
     model.load_state_dict(checkpoint['model_dict'])
 
     # Test the PyTorch model
-    print("Running inference on baseline model...")
-    model.eval()
-    baseline_accuracy, _ = test(model, test_loader, cuda=False)
-    print("Baseline accuracy: %f" % (baseline_accuracy))
+    # print("Running inference on baseline model...")
+    # model.eval()
+    # baseline_accuracy, _ = test(model, test_loader, cuda=False)
+    # print("Baseline accuracy: %f" % (baseline_accuracy))
+    
+    model = None
 
     # Instantiate LUT-based model
     # lut_model = MnistLutModel(config)
@@ -182,14 +184,14 @@ if __name__ == "__main__":
     print("Running inference on LUT-based model...")
     lut_inference(lut_model)
     lut_model.eval()
-    lut_accuracy, _ = test(lut_model, test_loader, cuda=False)
-    print("LUT-Based Model accuracy: %f" % (lut_accuracy))
-    modelSave = {   
-        'model_dict': lut_model.state_dict(),
-        'test_accuracy': lut_accuracy
-    }
+    # lut_accuracy, _ = test(lut_model, test_loader, cuda=False)
+    # print("LUT-Based Model accuracy: %f" % (lut_accuracy))
+    # modelSave = {   
+    #     'model_dict': lut_model.state_dict(),
+    #     'test_accuracy': lut_accuracy
+    # }
 
-    torch.save(modelSave, args.log_dir + "/lut_based_model.pth")
+    # torch.save(modelSave, args.log_dir + "/lut_based_model.pth")
 
     print("Generating verilog in %s..." % (args.log_dir))
     if "ensemble_method" in config:
@@ -230,6 +232,8 @@ if __name__ == "__main__":
         verilog_accuracy = test(lut_model, test_loader, cuda=False)
         print("Verilog-Based Model accuracy: %f" % (verilog_accuracy))
 
+    lut_model = None
+
     print("Running out-of-context synthesis")
     ret = synthesize_and_get_resource_counts(
         args.log_dir, 
@@ -239,7 +243,16 @@ if __name__ == "__main__":
         clk_period_ns=args.clock_period, 
         post_synthesis=1
     )
-
+    print(ret)
+    ret = synthesize_and_get_resource_counts(
+        args.log_dir, 
+        "logicnet_adder_tree", 
+        # fpga_part="xcu280-fsvh2892-2L-e", 
+        fpga_part="xcvu9p-flgb2104-2-i", # LogicNets default
+        clk_period_ns=args.clock_period, 
+        post_synthesis=1
+    )
+    print(ret)
     # if args.simulate_post_synthesis_verilog:
     #     print("Running post-synthesis inference simulation of Verilog-based model...")
     #     proc_postsynth_file(options_cfg["log_dir"])

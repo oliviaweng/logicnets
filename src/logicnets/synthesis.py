@@ -30,6 +30,7 @@ def synthesize_and_get_resource_counts(verilog_dir, top_name, fpga_part = "xcku3
     script = "vivadocompile.sh"
     # vivadocompile.sh <top-level-entity> <clock-name (optional)> <fpga-part (optional)>
     call_omx = "zsh %s/%s %s %s %s %f %s" % (omx_path, script, top_name, clk_name, fpga_part, float(clk_period_ns), post_synthesis)
+    print(call_omx)
     call_omx = call_omx.split()
     proc = subprocess.Popen(call_omx, cwd=verilog_dir, stdout=subprocess.PIPE, env=os.environ)
     proc.communicate()
