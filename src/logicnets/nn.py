@@ -632,7 +632,7 @@ class SparseLinearNeq(nn.Module):
             # print(connected_input[0,:])
             # print(x.shape, connected_input.shape, indices, input_perm_matrix, bin_output_states)
             # print(self.neuron_truth_tables[i].shape)
-            y[:,i] = self.table_lookup(connected_input, input_perm_matrix, bin_output_states)
+            y[:,i] = self.table_lookup(connected_input.to('cuda:0'), input_perm_matrix.to('cuda:0'), bin_output_states.to('cuda:0'))
             if debug:
                 print("i:",i)
                 print("input_perm_matrix:",input_perm_matrix)
@@ -643,7 +643,7 @@ class SparseLinearNeq(nn.Module):
                 if self.input_quant:
                     print("connected_input:",self.input_quant.get_bin_str(connected_input[0][0]))
                 print("y:",y[:,i])
-        return y
+        return y.to('cuda:0')
 
     def forward(self, x: Tensor, debug=False) -> Tensor:
         if self.is_lut_inference:

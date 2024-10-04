@@ -109,6 +109,7 @@ def main(args):
     print(f"Preloading model weights from: {args.checkpoint}")
     # checkpoint = torch.load(args.checkpoint, map_location=torch.device("cpu"))
     checkpoint = torch.load(args.checkpoint, map_location=torch.device('cuda:0'))
+    lut_checkpoint = torch.load(experiment_dir + "/lut_model_loss=4.767_emd=2.864.pth", map_location=torch.device('cuda:0'))
     model.load_state_dict(checkpoint["model_dict"])
 
     # Test the PyTorch model
@@ -143,7 +144,7 @@ def main(args):
     lut_model.ensemble = lut_model.encoder_ensemble
 
     # Generate the truth tables in the LUT module
-    print("Converting NEQs to LUTs...")
+    # print("Converting NEQs to LUTs...")
     generate_truth_tables(lut_model, verbose=True)
 
     # Test the LUT-based model 
@@ -170,7 +171,7 @@ def main(args):
 
     print(f"Saving model to {experiment_dir}")
     checkpoint = {
-        "model_dict": model.state_dict(),
+        "model_dict": lut_model.state_dict(),
         "val_loss": lut_loss,
         "avg_emd": lut_avg_emd,
     }
@@ -185,13 +186,14 @@ def main(args):
     os.makedirs(verilog_dir, exist_ok=True)
     print(f"Generating verilog in {verilog_dir}")
     if "ensemble_method" in config:
-        ensemble_to_verilog_module(
-            lut_model.encoder_ensemble,
-            "logicnet", 
-            verilog_dir,
-            add_registers=args.add_registers,
-            generate_bench=False,
-        )
+        # ensemble_to_verilog_module(
+        #     lut_model.encoder_ensemble,
+        #     "logicnet", 
+        #     verilog_dir,
+        #     add_registers=args.add_registers,
+        #     generate_bench=False,
+        # )
+        pass
     else: # single model
         module_list_to_verilog_module(
             lut_model.encoder.module_list, 
@@ -200,16 +202,14 @@ def main(args):
             add_registers=args.add_registers,
             generate_bench=False,
         )
-    print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
     print(f"Top level entity stored at: {verilog_dir}/logicnet.v")
 
-    import pdb; pdb.set_trace()
 
     if args.simulate_pre_synthesis_verilog:
         print("Running inference simulation of Verilog-based model...")
         lut_model.verilog_inference(
             verilog_dir, 
-            "logicnet_0.v", 
+            "logicnet.v", 
             add_registers=args.add_registers,
         )
         verilog_loss, verilog_avg_emd = test(
