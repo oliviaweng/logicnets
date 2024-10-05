@@ -1,7 +1,7 @@
 batch_size: 1024
 checkpoint: null
-ensemble_method: bagging
-ensemble_size: 16
+ensemble_method: adaboost
+ensemble_size: 8
 epochs: 1000
 hidden_bitwidth: 2
 hidden_fanin: 6
