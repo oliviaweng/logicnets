@@ -34,14 +34,20 @@
 
 # tmux new-session -d -s l01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/averaging_l_configs/config1 ./averaging"
 # tmux new-session -d -s l03 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/averaging_l_configs/config3 ./averaging"
+# tmux new-session -d -s l02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/averaging_l_configs/config2 ./averaging"
 
 # tmux new-session -d -s l02 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/non_shared_l_configs/config1 ./averaging"
 # tmux new-session -d -s lns03 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/non_shared_l_configs/config3 ./averaging"
+# tmux new-session -d -s lns02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/non_shared_l_configs/config2 ./averaging"
+
+# Same output scale
+tmux new-session -d -s mscal00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/same_io_scale ./averaging"
+
 
 # Bagging
 # tmux new-session -d -s mb00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/bagging/xs_configs/config1 ./bagging"
-tmux new-session -d -s mb00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/l_configs ./bagging"
+# tmux new-session -d -s mb00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/bagging/l_configs ./bagging"
 
 # Adaboost
 # tmux new-session -d -s mada00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/xs_configs/config1 ./adaboost"
-tmux new-session -d -s mada00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/l_configs ./adaboost"
+# tmux new-session -d -s mada00 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/adaboost/l_configs ./adaboost"

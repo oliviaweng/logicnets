@@ -22,17 +22,18 @@ learning_rate: 0.001
 seed: 1
 checkpoint: null
 quantize_avg: false
-same_input_scale: false
 input_post_trans_sbs: false
 
-shared_input_quant: true
-shared_input_layer: true
-shared_input_bitwidth: 6
+same_input_scale: true
+same_output_scale: true
+same_output_scale_sum: false
+post_transform_output: false
+
+shared_input_quant: false
+shared_input_layer: false
+# shared_input_bitwidth: 6
 
 shared_output_layer: false
-post_transform_output: true
-same_output_scale: false
-same_output_scale_sum: false
 
 uniform_input_connectivity: false
 uniform_connectivity: false
@@ -40,8 +41,9 @@ uniform_connectivity: false
 # Params to grid search
 grid_search_params:
   ensemble_size:
+  # - 1
   - 2
   - 4
   - 8
-  - 16
-  - 32
+  # - 16
+  # - 32

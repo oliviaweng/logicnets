@@ -78,6 +78,10 @@ def main(args):
         config["shared_input_layer"] = False
     if "shared_output_layer" not in config:
         config["shared_output_layer"] = False
+    if "same_input_scale" not in config:
+        config["same_input_scale"] = False
+    if "same_output_scale" not in config:
+        config["same_output_scale"] = False
 
     # Instantiate the model
     if "ensemble_method" in config:
