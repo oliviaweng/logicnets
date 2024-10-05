@@ -1,0 +1,16 @@
+trial,accuracy,loss,seed,input_quant
+small_inpq_16_8_ensemble_size1_seed2,72.46,0.827,2,inpq_16_8
+small_inpq_16_8_ensemble_size1_seed1,72.31,0.825,1,inpq_16_8
+small_inpq_16_6_ensemble_size1_seed3,72.25,0.844,3,inpq_16_6
+small_inpq_16_6_ensemble_size1_seed2,72.05,0.824,2,inpq_16_6
+small_inpq_16_6_ensemble_size1_seed1,71.97,0.843,1,inpq_16_6
+small_inpq_16_8_ensemble_size1_seed3,71.95,0.824,3,inpq_16_8
+small_inpq_6_2_ensemble_size1_seed2,70.26,0.88,2,inpq_6_2
+small_inpq_8_2_ensemble_size1_seed1,70.11,0.894,1,inpq_8_2
+small_inpq_16_2_ensemble_size1_seed2,69.96,0.898,2,inpq_16_2
+small_inpq_8_2_ensemble_size1_seed3,69.93,0.91,3,inpq_8_2
+small_inpq_6_2_ensemble_size1_seed3,69.9,0.894,3,inpq_6_2
+small_inpq_8_2_ensemble_size1_seed2,69.83,0.882,2,inpq_8_2
+small_inpq_6_2_ensemble_size1_seed1,69.63,0.893,1,inpq_6_2
+small_inpq_16_2_ensemble_size1_seed1,69.16,0.877,1,inpq_16_2
+small_inpq_16_2_ensemble_size1_seed3,68.99,0.928,3,inpq_16_2

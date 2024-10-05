@@ -85,8 +85,8 @@
 # tmux new-session -d -s hinpq03 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/input_quants/small_configs/config4 ./averaging"
 
 # Same io scale
-tmux new-session -d -s hscal00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/same_io_scale/small ./averaging"
-tmux new-session -d -s hscal01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/same_io_scale/large ./averaging"
+# tmux new-session -d -s hscal00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/same_io_scale/small ./averaging"
+# tmux new-session -d -s hscal01 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/same_io_scale/large ./averaging"
 
 
 

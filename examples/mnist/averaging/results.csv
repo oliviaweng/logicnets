@@ -23,13 +23,16 @@ averaging_med_ensemble_size4,96.82,0.144,4,mnist_m
 averaging_small_ensemble_size8,96.79,0.111,8,mnist_s
 averaging_xs_ensemble_size16,96.79,0.13,16,mnist_xs
 averaging_med_ensemble_size2,96.49,0.146,2,mnist_m
+small_same_io_scale_ensemble_size8,96.34,0.184,8,mnist_xs_same_io_scale
 averaging_xs_ensemble_size8,96.26,0.134,8,mnist_xs
 averaging_small_ensemble_size4,96.0,0.133,4,mnist_s
 averaging_xs_non_shared_ensemble_size4,95.93,0.162,4,mnist_xs_non_shared
 averaging_xs_shared_input_ensemble_size8,95.92,0.173,8,mnist_xs_shared_input
 averaging_small_ensemble_size2,95.9,0.163,2,mnist_s
 averaging_xs_shared_input_ensemble_size4,95.34,0.173,4,mnist_xs_shared_input
+small_same_io_scale_ensemble_size4,95.27,0.168,4,mnist_xs_same_io_scale
 averaging_xs_ensemble_size4,95.26,0.184,4,mnist_xs
 averaging_xs_non_shared_ensemble_size2,94.99,0.174,2,mnist_xs_non_shared
 averaging_xs_ensemble_size2,94.67,0.177,2,mnist_xs
 averaging_xs_shared_input_ensemble_size2,94.4,0.191,2,mnist_xs_shared_input
+small_same_io_scale_ensemble_size2,94.24,0.201,2,mnist_xs_same_io_scale

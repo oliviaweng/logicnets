@@ -23,7 +23,7 @@
 # tmux new-session -d -s inpq02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/input_quants/small_configs/config3 ./input_quants"
 
 # Same io scale
-tmux new-session -d -s scal00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/same_io_scale ./averaging"
+tmux new-session -d -s scal00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/same_io_scale/config1 ./averaging"
 
 # Uniform connectivity
 # tmux new-session -d -s u00 "./scripts/run_gen_ensemble_exp.sh 0 ./logicnet_configs/uniform_all ./jsc_single_models/"

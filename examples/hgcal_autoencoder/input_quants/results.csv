@@ -1,0 +1,9 @@
+trial,emd,loss,seed,input_quant
+small_inpq_6_6_ensemble_size1_seed3,1.544,0.018,3,inpq_6_6
+small_inpq_6_4_ensemble_size1_seed3,1.555,0.02,3,inpq_6_4
+small_inpq_8_4_ensemble_size1_seed3,1.615,0.021,3,inpq_8_4
+small_inpq_6_6_ensemble_size1_seed2,1.686,0.024,2,inpq_6_6
+small_inpq_6_4_ensemble_size1_seed2,1.736,0.028,2,inpq_6_4
+small_inpq_6_4_ensemble_size1_seed1,1.887,0.032,1,inpq_6_4
+small_inpq_8_4_ensemble_size1_seed1,1.907,0.035,1,inpq_8_4
+small_inpq_6_6_ensemble_size1_seed1,2.008,0.034,1,inpq_6_6
