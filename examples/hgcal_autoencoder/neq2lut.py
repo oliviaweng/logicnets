@@ -22,12 +22,14 @@ from torch.utils.data import DataLoader
 
 from logicnets.nn import    generate_truth_tables, \
                             lut_inference, \
-                            module_list_to_verilog_module
+                            module_list_to_verilog_module, \
+                            ensemble_to_verilog_module
 
 from train import test
 from dataset import HGCalAutoencoderDataset
 from telescope_pt import move_constants_to_gpu
 from autoencoder import AutoencoderNeqModel, AutoencoderLutModel
+from ensemble_models import VotingAutoencoderNeqModel, VotingAutoencoderLUTModel
 from logicnets.synthesis import synthesize_and_get_resource_counts
 from logicnets.util import proc_postsynth_file
 
@@ -52,7 +54,51 @@ def main(args):
         config = yaml.safe_load(f)
 
     # Build model
-    model = AutoencoderNeqModel(config)
+    if "ensemble_method" in config:
+        if config["ensemble_method"] == "voting":
+            print("Averaging ensemble method")
+            independent = True
+            fixed_decoder = None
+            ensemble_method = None
+            fixed_sparsity_mask = False
+            shared_input_layer = False
+            shared_input_bitwidth = None
+            shared_output_layer = False
+            shared_output_bitwidth = None
+            shared_output_fanin = None
+            ensemble_method = config["ensemble_method"]
+            ensemble_size = config["ensemble_size"]
+            if "ensemble_hp" in config.keys():
+                fixed_sparsity_mask = config["ensemble_hp"]["fixed_sparsity_mask"]
+                shared_input_layer = config["ensemble_hp"]["shared_input_layer"]
+                shared_input_bitwidth = config["ensemble_hp"]["shared_input_bitwidth"]
+                shared_output_layer = config["ensemble_hp"]["shared_output_layer"]
+                if shared_output_layer:
+                    shared_output_bitwidth = config["ensemble_hp"]["shared_output_bitwidth"]  
+                    shared_output_fanin = config["ensemble_hp"]["shared_output_fanin"]
+            model = VotingAutoencoderNeqModel(
+                config, 
+                num_models=ensemble_size, 
+                fixed_sparsity_mask=fixed_sparsity_mask,
+                shared_input_layer=shared_input_layer,
+                shared_input_bitwidth=shared_input_bitwidth,
+                shared_output_layer=shared_output_layer,
+                shared_output_bitwidth=shared_output_bitwidth,
+                shared_output_fanin=shared_output_fanin,
+            )
+            lut_model = VotingAutoencoderLUTModel(
+                config, 
+                num_models=ensemble_size, 
+                fixed_sparsity_mask=fixed_sparsity_mask,
+                shared_input_layer=shared_input_layer,
+                shared_input_bitwidth=shared_input_bitwidth,
+                shared_output_layer=shared_output_layer,
+                shared_output_bitwidth=shared_output_bitwidth,
+                shared_output_fanin=shared_output_fanin,
+            )
+    else:
+        model = AutoencoderNeqModel(config)
+        lut_model = AutoencoderLutModel(config)
 
     # Push model and constants to GPU if necessary
     if args.gpu:
@@ -62,7 +108,7 @@ def main(args):
     # Load model weights
     print(f"Preloading model weights from: {args.checkpoint}")
     # checkpoint = torch.load(args.checkpoint, map_location=torch.device("cpu"))
-    checkpoint = torch.load(args.checkpoint)
+    checkpoint = torch.load(args.checkpoint, map_location=torch.device('cpu'))
     model.load_state_dict(checkpoint["model_dict"])
 
     # Test the PyTorch model
@@ -93,8 +139,8 @@ def main(args):
         print(f"Baseline average EMD: {avg_emd:.3f}")
 
     # Build LUT model
-    lut_model = AutoencoderLutModel(config)
     lut_model.load_state_dict(checkpoint['model_dict'])
+    lut_model.ensemble = lut_model.encoder_ensemble
 
     # Generate the truth tables in the LUT module
     print("Converting NEQs to LUTs...")
@@ -138,14 +184,26 @@ def main(args):
     verilog_dir = os.path.join(experiment_dir, "verilog")
     os.makedirs(verilog_dir, exist_ok=True)
     print(f"Generating verilog in {verilog_dir}")
-    module_list_to_verilog_module(
-        lut_model.encoder.module_list, 
-        "logicnet", 
-        verilog_dir, 
-        generate_bench=False, 
-        add_registers=args.add_registers,
-    )
+    if "ensemble_method" in config:
+        ensemble_to_verilog_module(
+            lut_model.encoder_ensemble,
+            "logicnet", 
+            args.log_dir, 
+            add_registers=args.add_registers,
+            generate_bench=args.generate_bench,
+        )
+    else: # single model
+        module_list_to_verilog_module(
+            lut_model.encoder.module_list, 
+            "logicnet", 
+            args.log_dir, 
+            add_registers=args.add_registers,
+            generate_bench=args.generate_bench,
+        )
+    print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
     print(f"Top level entity stored at: {verilog_dir}/logicnet.v")
+
+    import pdb; pdb.set_trace()
 
     if args.simulate_pre_synthesis_verilog:
         print("Running inference simulation of Verilog-based model...")

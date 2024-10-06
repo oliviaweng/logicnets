@@ -14,13 +14,14 @@
 #  limitations under the License.
 
 
+model=$1
 DATA_DIR=./data/hgcal22data_signal_driven_ttbar_v11/nElinks_5/
 DATA_FILE=./data/hgcal22data_signal_driven_ttbar_v11/hgcal22data_signal_driven_ttbar_v11_nELinks5.npy 
-SAVE_DIR=./autoencoder_synth
+SAVE_DIR=./logs_$model
 CLOCK=2
 EXP_NAME="large_${CLOCK}ns"
-CONFIG=./pareto_configs/large_pareto_model/large_pareto_model.yml
-CKPT=./pareto_configs/large_pareto_model/large_pareto_model_best_loss.pth
+CONFIG=./ckpts/$model/hparams.yml
+CKPT=./ckpts/$model/best_loss.pth
 
 
 CUDA_VISIBLE_DEVICES=0 python neq2lut.py \
