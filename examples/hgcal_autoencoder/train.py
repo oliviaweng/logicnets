@@ -20,7 +20,7 @@ import torch
 import random
 import datetime
 import numpy as np
-
+import wandb
 from argparse import ArgumentParser
 
 from dataset import HGCalAutoencoderDataset
@@ -35,10 +35,6 @@ from ensemble_models import (
 from training_methods import (
     train,
     test,
-    train_snapshot_ensemble,
-    train_fge,
-    train_adaboost,
-    train_bagging,
 )
 from telescope_pt import move_constants_to_gpu
 from logicnets.nn import SparseLinearNeq
@@ -125,6 +121,12 @@ def main(args):
     fixed_decoder = None
     ensemble_method = None
     fixed_sparsity_mask = False
+    shared_input_layer = False
+    shared_input_bitwidth = None
+    shared_output_layer = False
+    shared_output_bitwidth = None
+    shared_output_fanin = None
+
     if "ensemble_method" in config.keys():
         # Ensemble learning
         ensemble_method = config["ensemble_method"]
@@ -132,10 +134,21 @@ def main(args):
         if ensemble_method == "voting":
             if "ensemble_hp" in config.keys():
                 fixed_sparsity_mask = config["ensemble_hp"]["fixed_sparsity_mask"]
+                shared_input_layer = config["ensemble_hp"]["shared_input_layer"]
+                shared_input_bitwidth = config["ensemble_hp"]["shared_input_bitwidth"]
+                shared_output_layer = config["ensemble_hp"]["shared_output_layer"]
+                if shared_output_layer:
+                    shared_output_bitwidth = config["ensemble_hp"]["shared_output_bitwidth"]  
+                    shared_output_fanin = config["ensemble_hp"]["shared_output_fanin"]
             model = VotingAutoencoderNeqModel(
                 config, 
                 num_models=ensemble_size, 
-                fixed_sparsity_mask=fixed_sparsity_mask
+                fixed_sparsity_mask=fixed_sparsity_mask,
+                shared_input_layer=shared_input_layer,
+                shared_input_bitwidth=shared_input_bitwidth,
+                shared_output_layer=shared_output_layer,
+                shared_output_bitwidth=shared_output_bitwidth,
+                shared_output_fanin=shared_output_fanin,
             )
 
         elif ensemble_method == "snapshot":
@@ -216,6 +229,29 @@ def main(args):
         )
         with open(hparams_log, "w") as f:
             yaml.dump(config, f)
+        wandb.init(
+            # set the wandb project where this run will be logged
+            project="NeuraLUT-ensemble",
+            name=args.experiment_name,
+            # track hyperparameters and run metadata
+            config={
+                "activation_bitwidth": config["activation_bitwidth"],
+                "neuron_fanin": config["neuron_fanin"],
+                "hidden_layer": config["hidden_layer"],
+                "input_bitwidth": config["input_bitwidth"],
+                "output_bitwidth": config["output_bitwidth"],
+                "input_fanin": config["input_fanin"],
+                "width_n": config["width_n"],
+                "batch_size": config["batch_size"],
+                "epochs": config["epochs"],
+                "seed": config["seed"],
+                "dataset": "mnist",
+            },
+        )
+
+        wandb.define_metric("Train Loss(%)", summary="min")
+        wandb.define_metric("Val Loss", summary="min")
+        wandb.watch(model, log_freq=10)
         # Start training
         if ensemble_method == "voting":
             train(model, dataset, train_params)
@@ -299,6 +335,7 @@ def main(args):
         with open(test_results_log, "w") as f:
             f.write(str(avg_emd))
             f.close()
+    wandb.finish()
 
 
 
