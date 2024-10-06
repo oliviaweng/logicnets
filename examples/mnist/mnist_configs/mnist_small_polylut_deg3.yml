@@ -1,0 +1,20 @@
+batch_size: 256
+degree: 3
+epochs: 500
+hidden_bitwidth: 2
+hidden_fanin: 4
+hidden_layers:
+- 600
+- 300
+- 300
+input_bitwidth: 2
+output_bitwidth: 2
+input_dropout: 0.01
+input_fanin: 4
+input_length: 784
+learning_rate: 0.003
+output_fanin: 4
+output_length: 10
+post_transform_output: true
+seed: 1
+weight_decay: 0.001

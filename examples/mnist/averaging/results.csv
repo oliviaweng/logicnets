@@ -15,11 +15,14 @@ deg1_same_output_scale_post_trans_ensemble_size8,96.53,0.141,8,small_same_output
 deg3_shared_io_ensemble_size2,96.52,0.137,2,deg3_shared_io
 deg1_same_output_scale_post_trans_ensemble_size16,96.47,0.151,16,small_same_output_scale_post_trans
 deg1_same_output_scale_post_trans_ensemble_size32,96.43,0.167,32,small_same_output_scale_post_trans
+small_deg3_shared_io_ensemble_size8_seed1,96.27,0.145,8,small_deg3_shared_io
 small_deg2_ensemble_size8,95.68,0.18,8,deg2
 deg1_same_output_scale_post_trans_ensemble_size4,95.65,0.15,4,small_same_output_scale_post_trans
 averaging_ensemble_size2,95.59,0.151,2,deg1
+small_deg3_shared_io_ensemble_size4,95.47,0.174,4,small_deg3_shared_io
 small_deg2_ensemble_size4,94.3,0.194,4,deg2
 deg1_same_output_scale_post_trans_ensemble_size2,94.12,0.19,2,small_same_output_scale_post_trans
+small_deg3_shared_io_ensemble_size2,93.87,0.215,2,small_deg3_shared_io
 small_deg2_shared_io_ensemble_size8,92.64,0.28,8,deg2_shared_io
 small_deg2_ensemble_size2,92.3,0.252,2,deg2
 small_deg2_shared_io_ensemble_size4,92.04,0.274,4,deg2_shared_io

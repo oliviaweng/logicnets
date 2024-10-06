@@ -1,8 +1,8 @@
 trial,accuracy,loss,ensemble_size,model_size
 averaging_jscxl_deg2_ensemble_size16,75.42,0.681,16,jscxl_deg2
 averaging_jscxl_deg2_ensemble_size32,75.37,0.681,32,jscxl_deg2
-averaging_jscxl_deg2_ensemble_size4,75.35,0.684,4,jscxl_deg2
 averaging_jscxl_deg2_ensemble_size8,75.35,0.682,8,jscxl_deg2
+averaging_jscxl_deg2_ensemble_size4,75.35,0.684,4,jscxl_deg2
 averaging_jscxl_deg2_shared_io_ensemble_size8,75.1,0.69,8,jscxl_deg2_shared_io
 averaging_jscxl_deg2_ensemble_size2,75.04,0.693,2,jscxl_deg2
 averaging_jscxl_deg2_shared_io_ensemble_size4,74.92,0.694,4,jscxl_deg2_shared_io
@@ -14,9 +14,14 @@ averaging_jscxl_deg2_shared_io_ensemble_size1,74.59,0.707,1,jscxl_deg2_shared_io
 averaging_jscm_lite_deg2_shared_io_ensemble_size16,74.55,0.707,16,jscmlite_deg2_shared_io
 averaging_jscmlite_deg2_ensemble_size8,74.32,0.712,8,jscmlite_deg2
 averaging_jscm_lite_deg2_shared_io_ensemble_size8,74.16,0.717,8,jscmlite_deg2_shared_io
+averaging_jsc_xs_deg3_shared_io_ensemble_size2,74.07,0.721,2,jsc_xs_deg3_shared_io
 averaging_jscm_lite_deg2_shared_io_ensemble_size4,73.9,0.726,4,jscmlite_deg2_shared_io
 averaging_jscmlite_deg2_ensemble_size4,73.82,0.726,4,jscmlite_deg2
 averaging_jscm_lite_deg2_shared_io_ensemble_size2,73.06,0.753,2,jscmlite_deg2_shared_io
 averaging_jscmlite_deg2_ensemble_size2,72.94,0.752,2,jscmlite_deg2
+averaging_jsc_xxs_deg3_shared_io_ensemble_size16_seed1,72.67,0.761,16,jsc_xxs_deg3_shared_io
+averaging_jsc_xxs_deg3_shared_io_ensemble_size8,72.12,0.792,8,jsc_xxs_deg3_shared_io
 averaging_jscmlite_deg2_ensemble_size1,72.04,0.781,1,jscmlite_deg2
 averaging_jscm_lite_deg2_shared_io_ensemble_size1,71.98,0.778,1,jscmlite_deg2_shared_io
+averaging_jsc_xxs_deg3_shared_io_ensemble_size4,71.48,0.816,4,jsc_xxs_deg3_shared_io
+averaging_jsc_xxs_deg3_shared_io_ensemble_size2,69.89,0.88,2,jsc_xxs_deg3_shared_io

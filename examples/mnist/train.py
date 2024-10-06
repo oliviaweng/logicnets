@@ -174,41 +174,11 @@ def main(args):
         hparams_log = os.path.join(experiment_dir, "hparams.yml")
         with open(hparams_log, "w") as f:
             yaml.dump(config, f)
-        # # start a new wandb run to track this script
-        # wandb.init(
-        #     # set the wandb project where this run will be logged
-        #     project="PolyLUT",
-        #     name=args.experiment_name,
-        #     # track hyperparameters and run metadata
-        #     config={
-        #         "hidden_layers": config["hidden_layers"],
-        #         "input_bitwidth": config["input_bitwidth"],
-        #         "hidden_bitwidth": config["hidden_bitwidth"],
-        #         "output_bitwidth": config["output_bitwidth"],
-        #         "input_fanin": config["input_fanin"],
-        #         "degree": config["degree"],
-        #         "hidden_fanin": config["hidden_fanin"],
-        #         "output_fanin": config["output_fanin"],
-        #         "weight_decay": config["weight_decay"],
-        #         "batch_size": config["batch_size"],
-        #         "epochs": config["epochs"],
-        #         "learning_rate": config["learning_rate"],
-        #         "seed": config["seed"],
-        #         "dataset": "mnist",
-        #     },
-        # )
-
-        # wandb.define_metric("Train Acc (%)", summary="max")
-        # wandb.define_metric("Test Acc (%)", summary="max")
-        # wandb.define_metric("Valid Acc(%)", summary="max")
-        # wandb.define_metric("Train Loss(%)", summary="min")
-        # wandb.define_metric("Test Loss", summary="min")
-        # wandb.define_metric("Val Loss", summary="min")
-        # wandb.watch(model, log_freq=10)
-        if config["ensemble_method"] == "bagging":
-            train_bagging(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
-        elif config["ensemble_method"] == "adaboost":
-            train_adaboost(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
+        if "ensemble_method" in config:
+            if config["ensemble_method"] == "bagging":
+                train_bagging(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
+            elif config["ensemble_method"] == "adaboost":
+                train_adaboost(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
         else:
             train(model, dataloaders, config, cuda=args.cuda, log_dir=experiment_dir)
         
@@ -235,7 +205,8 @@ def main(args):
     elif args.train:
         evaluate_model = True  # Evaluate the model after training
         if (
-            config["ensemble_method"] in ENSEMBLING_METHODS
+            "ensemble_method" in config 
+            and config["ensemble_method"] in ENSEMBLING_METHODS
             and config["ensemble_method"] != "averaging"
         ):
             ensemble_ckpt_path = os.path.join(experiment_dir, "last_ensemble_ckpt.pth")
@@ -267,7 +238,6 @@ def main(args):
         with open(test_results_log, "w") as f:
             f.write(str(test_accuracy))
             f.close()
-    # wandb.finish()
 
 
 if __name__ == "__main__":
