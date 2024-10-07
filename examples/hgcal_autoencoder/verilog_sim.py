@@ -109,7 +109,7 @@ def main(args):
     print(f"Preloading model weights from: {args.checkpoint}")
     # checkpoint = torch.load(args.checkpoint, map_location=torch.device("cpu"))
     checkpoint = torch.load(args.checkpoint, map_location=torch.device('cuda:0'))
-    lut_checkpoint = torch.load(experiment_dir + "/lut_model_loss=4.767_emd=2.864.pth", map_location=torch.device('cuda:0'))
+    # lut_checkpoint = torch.load(experiment_dir + "/lut_model_loss=4.767_emd=2.864.pth", map_location=torch.device('cuda:0'))
     model.load_state_dict(checkpoint["model_dict"])
 
     # Test the PyTorch model
@@ -185,14 +185,15 @@ def main(args):
     verilog_dir = os.path.join(experiment_dir, "verilog")
     os.makedirs(verilog_dir, exist_ok=True)
     print(f"Generating verilog in {verilog_dir}")
+    lut_model.cpu()
     if "ensemble_method" in config:
-        # ensemble_to_verilog_module(
-        #     lut_model.encoder_ensemble,
-        #     "logicnet", 
-        #     verilog_dir,
-        #     add_registers=args.add_registers,
-        #     generate_bench=False,
-        # )
+        ensemble_to_verilog_module(
+            lut_model.encoder_ensemble,
+            "logicnet", 
+            verilog_dir,
+            add_registers=args.add_registers,
+            generate_bench=False,
+        )
         pass
     else: # single model
         module_list_to_verilog_module(
@@ -222,15 +223,15 @@ def main(args):
         print(f"Verilog model loss: {verilog_loss:.3f}")
         print(f"Verilog model average EMD: {verilog_avg_emd:.3f}")
 
-    print("Running out-of-context synthesis")
-    _ = synthesize_and_get_resource_counts(
-        verilog_dir, 
-        "logicnet_0", 
-        # fpga_part="xcu280-fsvh2892-2L-e", # xcvu9p-flgb2104-2-i
-        fpga_part="xcvu9p-flgb2104-2-i", # 
-        clk_period_ns=args.clock_period, 
-        post_synthesis=1,
-    )
+    # print("Running out-of-context synthesis")
+    # _ = synthesize_and_get_resource_counts(
+    #     verilog_dir, 
+    #     "logicnet_0", 
+    #     # fpga_part="xcu280-fsvh2892-2L-e", # xcvu9p-flgb2104-2-i
+    #     fpga_part="xcvu9p-flgb2104-2-i", # 
+    #     clk_period_ns=args.clock_period, 
+    #     post_synthesis=1,
+    # )
 
     # NOTE: Post synthesis doesn't work
     # if args.simulate_post_synthesis_verilog:

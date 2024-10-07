@@ -352,7 +352,7 @@ class VotingAutoencoderNeqModel(nn.Module): # TODO: Rename to Averaging
             outputs = outputs.sum(dim=1) / self.num_models # Need to divide for the decoder to work... or could include that in the decoder
         else:
             outputs = sum(outputs) / self.num_models
-        if self.verilog_inference:
+        if self.is_verilog_inference:
             return outputs * self.num_models
         return self.decoder(outputs)
     

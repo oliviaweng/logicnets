@@ -23,6 +23,7 @@ from torch.nn import init
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
 from tqdm import tqdm
+import torch.multiprocessing as multiprocessing
 import math
 import copy
 
@@ -36,6 +37,15 @@ from .verilog import    generate_lut_verilog, \
 from .bench import      generate_lut_bench, \
                         generate_lut_input_string, \
                         sort_to_bench
+
+def neuron_worker(queue, instance):
+    while True:
+        item = queue.get()
+        if item is None:
+            break
+        # Call gen_neuron_wrapper from the passed class instance
+        instance.gen_neuron_wrapper(item)
+
 
 # TODO: Create a container module which performs this function.
 # Generate all truth tables for NEQs for a given nn.Module()
@@ -557,6 +567,67 @@ class SparseLinearNeq(nn.Module):
 
     # TODO: Move the verilog string templates to elsewhere
     # TODO: Move this to another class
+
+    def gen_neuron_wrapper(self, args):
+        module_prefix, index, directory, generate_bench = args
+        module_name = f"{module_prefix}_N{index}"
+        neuron_verilog = self.gen_neuron_verilog(index, module_name) # Generate the contents of the neuron verilog
+        with open(f"{directory}/{module_name}.v", "w") as f:
+            f.write(neuron_verilog)
+        if generate_bench:
+            neuron_bench = self.gen_neuron_bench(index, module_name) # Generate the contents of the neuron verilog
+            with open(f"{directory}/{module_name}.bench", "w") as f:
+                f.write(neuron_bench)
+        
+    def gen_layer_verilog(self, module_prefix, directory, generate_bench: bool = True):
+        debug = False 
+        if module_prefix == "ens0_layer0":
+            debug = True
+        _, input_bitwidth = self.input_quant.get_scale_factor_bits()
+        _, output_bitwidth = self.output_quant.get_scale_factor_bits()
+        input_bitwidth, output_bitwidth = int(input_bitwidth), int(output_bitwidth)
+        total_input_bits = self.in_features*input_bitwidth
+        total_output_bits = self.out_features*output_bitwidth
+        layer_contents = f"module {module_prefix} (input [{total_input_bits-1}:0] M0, output [{total_output_bits-1}:0] M1);\n\n"
+        output_offset = 0
+        neuron_args = [(module_prefix, index, directory, generate_bench) for index in range(self.out_features)]
+        
+        queue = multiprocessing.Queue()
+        for args in neuron_args:
+            queue.put(args)
+
+        processes = []
+
+        for _ in range(8):
+            p = multiprocessing.Process(target=neuron_worker, args=(queue,self))
+            p.start()
+            processes.append(p)
+
+        for p in processes:
+            queue.put(None)  # Send termination signal
+
+        for p in processes:
+            p.join()
+
+
+        # with multiprocessing.Pool(8) as pool:
+        #     pool.map(self.gen_neuron_wrapper, neuron_args)
+        # for args in neuron_args:
+        #     self.gen_neuron_wrapper(args)
+        for index in range(self.out_features):
+            module_name = f"{module_prefix}_N{index}"
+            indices, _, _, _ = self.neuron_truth_tables[index]
+            connection_string = generate_neuron_connection_verilog(indices, input_bitwidth) # Generate the string which connects the synapses to this neuron
+            wire_name = f"{module_name}_wire"
+            connection_line = f"wire [{len(indices)*input_bitwidth-1}:0] {wire_name} = {{{connection_string}}};\n"
+            inst_line = f"{module_name} {module_name}_inst (.M0({wire_name}), .M1(M1[{output_offset+output_bitwidth-1}:{output_offset}]));\n\n"
+            layer_contents += connection_line + inst_line
+            output_offset += output_bitwidth
+        layer_contents += "endmodule"
+        with open(f"{directory}/{module_prefix}.v", "w") as f:
+            f.write(layer_contents)
+        return total_input_bits, total_output_bits
+
     def gen_neuron_verilog(self, index, module_name):
         indices, input_perm_matrix, float_output_states, bin_output_states = self.neuron_truth_tables[index]
         _, input_bitwidth = self.input_quant.get_scale_factor_bits()

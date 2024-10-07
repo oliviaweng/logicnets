@@ -203,13 +203,13 @@ def main(args):
     print("Top level entity stored at: %s/logicnet.v ..." % (args.log_dir))
     print(f"Top level entity stored at: {verilog_dir}/logicnet.v")
 
-    import pdb; pdb.set_trace()
+    # import pdb; pdb.set_trace()
 
     if args.simulate_pre_synthesis_verilog:
         print("Running inference simulation of Verilog-based model...")
         lut_model.verilog_inference(
             verilog_dir, 
-            "logicnet_0.v", 
+            "logicnet.v", 
             add_registers=args.add_registers,
         )
         verilog_loss, verilog_avg_emd = test(

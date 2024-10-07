@@ -63,6 +63,7 @@ def test(model, test_loader, val_sum=None, gpu=False, compute_emd=False):
             if gpu:
                 x = x.cuda()
             output = model(x)
+            # import pdb; pdb.set_trace()
             loss = telescopeMSE8x8(x, output)
             total_loss = total_loss + loss.detach() * len(x)
             if compute_emd:
