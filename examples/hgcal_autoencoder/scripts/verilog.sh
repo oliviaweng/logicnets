@@ -34,5 +34,5 @@ CUDA_VISIBLE_DEVICES=0 python verilog_sim.py \
    --add_registers \
    --clock_period $CLOCK \
    --compute_emd \
-   --simulate_pre_synthesis_verilog \
-   --gpu # Don't run on gpu
+   --gpu \
+   # --simulate_pre_synthesis_verilog \

@@ -24,7 +24,7 @@ CONFIG=./ckpts/$model/hparams.yml
 CKPT=./ckpts/$model/best_loss.pth
 
 
-CUDA_VISIBLE_DEVICES="" python3 neq2lut.py \
+CUDA_VISIBLE_DEVICES=0 python neq2lut.py \
    --data_dir $DATA_DIR \
    --data_file $DATA_FILE \
    --save_dir $SAVE_DIR \
@@ -36,4 +36,9 @@ CUDA_VISIBLE_DEVICES="" python3 neq2lut.py \
    # --compute_emd \
    # --add_registers \
    # --gpu \
+   # --gpu # Don't run on gpu
+   # --add_registers \
+   # --clock_period $CLOCK \
+   # --compute_emd \
+   # --test_model \
    # --gpu # Don't run on gpu
