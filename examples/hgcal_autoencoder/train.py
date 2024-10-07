@@ -140,8 +140,10 @@ def main(args):
                 shared_input_layer = config["ensemble_hp"]["shared_input_layer"]
                 shared_input_bitwidth = config["ensemble_hp"]["shared_input_bitwidth"]
                 shared_output_layer = config["ensemble_hp"]["shared_output_layer"]
-                same_input_scale = config["ensemble_hp"]["same_input_scale"]
-                same_output_scale = config["ensemble_hp"]["same_output_scale"]
+                if "same_input_scale" in config["ensemble_hp"].keys():
+                    same_input_scale = config["ensemble_hp"]["same_input_scale"]
+                if "same_output_scale" in config["ensemble_hp"].keys():
+                    same_output_scale = config["ensemble_hp"]["same_output_scale"]
                 if shared_output_layer:
                     shared_output_bitwidth = config["ensemble_hp"]["shared_output_bitwidth"]  
                     shared_output_fanin = config["ensemble_hp"]["shared_output_fanin"]
