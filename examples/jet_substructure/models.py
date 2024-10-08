@@ -58,10 +58,10 @@ class JetSubstructureNeqModel(nn.Module):
                 imask = FeatureMask(
                     in_features,
                     out_features,
-                    fan_in=model_config["hidden_fanin"],
+                    fan_in=model_config["input_fanin"],
                     gpu=model_config["gpu"],
                 )          
-                layer = SparseLinearNeq(in_features, out_features, input_quant=input_quant, output_quant=output_quant, imask=imask, fan_in=model_config["hidden_fanin"], width_n=model_config["width_n"])
+                layer = SparseLinearNeq(in_features, out_features, input_quant=input_quant, output_quant=output_quant, imask=imask, fan_in=model_config["input_fanin"], width_n=model_config["width_n"])
                 layer_list.append(layer)
             elif i == len(self.num_neurons) - 1: # Output layer
                 output_bias_scale = ScalarBiasScale(bias_init=0.33)
@@ -83,7 +83,7 @@ class JetSubstructureNeqModel(nn.Module):
                 imask = FeatureMask(
                     in_features,
                     out_features,
-                    fan_in=model_config["hidden_fanin"],
+                    fan_in=model_config["output_fanin"],
                     gpu=model_config["gpu"],
                 )
                 layer = SparseLinearNeq(
@@ -92,7 +92,7 @@ class JetSubstructureNeqModel(nn.Module):
                     input_quant=layer_list[-1].output_quant, 
                     output_quant=output_quant, 
                     imask=imask,
-                    fan_in=model_config["hidden_fanin"],
+                    fan_in=model_config["output_fanin"],
                     width_n=model_config["width_n"],
                     apply_input_quant=False
                 )
