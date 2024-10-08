@@ -47,12 +47,19 @@ def generate_truth_tables(model: nn.Module, verbose: bool = False) -> None:
             module.calculate_truth_tables()
             if verbose:
                 print(f"Truth tables generated for {len(module.neuron_truth_tables)} neurons")
+        if type(module) == SparseLinearNeq_mask:
+            if verbose:
+                print(f"Calculating truth tables for {name}")
+            module.calculate_truth_tables(model)
+            if verbose:
+                print(f"Truth tables generated for {len(module.neuron_truth_tables)} neurons")
     model.training = training
 
-# TODO: Create a container module which performs this function.
 def lut_inference(model: nn.Module) -> None:
     for name, module in model.named_modules():
-        if type(module) == SparseLinearNeq:
+        if type(module) == SparseLinearNeq or type(module) == SparseLinearNeq_mask:
+            if name != "ensemble.0":
+                module.apply_input_quant = False
             module.lut_inference()
 
 # TODO: Create a container module which performs this function.
@@ -69,7 +76,7 @@ def module_list_to_verilog_module(module_list: nn.ModuleList, module_name: str, 
     module_contents = ""
     for i in range(len(module_list)):
         m = module_list[i]
-        if type(m) == SparseLinearNeq:
+        if type(m) == SparseLinearNeq or type(m) == SparseLinearNeq_mask:
             module_prefix = f"layer{i}"
             module_input_bits, module_output_bits = m.gen_layer_verilog(module_prefix, output_directory, generate_bench=generate_bench)
             if i == 0:
@@ -497,17 +504,30 @@ class SparseLinearNeq_mask(nn.Module):
         return x
 
     # Consider using masked_select instead of fetching the indices
-    def calculate_truth_tables(self):
+    def calculate_truth_tables(self, model: nn.Module):
+        # print("in_features", self.in_features, "out_features", self.out_features)
         with torch.no_grad():
             mask = self.fc.mask()
             # Precalculate all of the input value permutations
             input_state_space = list() # TODO: is a list the right data-structure here?
             bin_state_space = list()
+            if self.input_quant is None:
+                input_quants = [model.ensemble[i].module_list[-1].output_quant for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq_mask)]
+                in_features = [model.ensemble[i].module_list[-1].out_features for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq_mask)]
+                assert(in_features.count(in_features[0]) == len(in_features))
+                in_features = in_features[0]
+
             for m in range(self.in_features):
-                neuron_state_space = self.input_quant.get_state_space() # TODO: this call should include the index of the element of interest
-                bin_space = self.input_quant.get_bin_state_space() # TODO: this call should include the index of the element of interest
+                if self.input_quant is not None:
+                    neuron_state_space = self.input_quant.get_state_space() # TODO: this call should include the index of the element of interest
+                    bin_space = self.input_quant.get_bin_state_space() # TODO: this call should include the index of the element of interest
+                else:
+                    neuron_state_space = input_quants[m//in_features].get_state_space() # TODO: this call should include the index of the element of interest
+                    bin_space = input_quants[m//in_features].get_bin_state_space() # TODO: this call should include the index of the element of interest
                 input_state_space.append(neuron_state_space)
                 bin_state_space.append(bin_space)
+            
+            print(input_state_space[0].shape, len(input_state_space))
 
             neuron_truth_tables = list()
             for n in range(self.out_features):
@@ -524,16 +544,48 @@ class SparseLinearNeq_mask(nn.Module):
                 num_permutations = input_permutation_matrix.shape[0]
                 padded_perm_matrix = torch.zeros((num_permutations, self.in_features))
                 padded_perm_matrix[:,indices] = input_permutation_matrix
+                padded_perm_matrix = padded_perm_matrix.cuda()
+
+                # print(input_permutation_matrix.shape)
+                # print(self.forward(padded_perm_matrix)[:,n])
+                
+                output_quants = [self.output_quant]
+                shared_input = False
+                if self.output_quant == None:
+                    # print(type(model))
+                    # print([type(model.ensemble[i]) for i in range(len(model.ensemble))])
+                    output_quants = [model.ensemble[i].module_list[0].input_quant for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq_mask)]
+                    shared_input = True
+                
+                # print(len(output_quants))
 
                 # TODO: Update this block to just run inference on the fc layer, once BN has been moved to output_quant
                 apply_input_quant, apply_output_quant = self.apply_input_quant, self.apply_output_quant
                 self.apply_input_quant, self.apply_output_quant = False, False
-                is_bin_output = self.output_quant.is_bin_output
-                self.output_quant.float_output()
-                output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate float for the current input
-                self.output_quant.bin_output()
-                bin_output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate bin for the current input
-                self.output_quant.is_bin_output = is_bin_output
+                is_bin_outputs = [output_quant.is_bin_output for output_quant in output_quants]
+                for output_quant in output_quants:
+                    output_quant.float_output()
+                # print(padded_perm_matrix.shape)
+                # print("forwarded", self.forward(padded_perm_matrix).shape)
+                # print(output_quant.get_scale_factor_bits())
+                ranges = [(16*i,16*(i+1)) for i in range(len(output_quants))]
+                # print(ranges)
+                if len(output_quants) == 1:
+                    output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate float for the current input
+                else:
+                    # print(ranges)
+                    # print([self.forward(padded_perm_matrix)[:,a:b].shape for a,b in ranges])
+                    input_feats = self.in_features
+                    output_states = torch.cat([output_quant(self.forward(padded_perm_matrix)[:,input_feats*i:input_feats*(i+1)]) for i,output_quant in enumerate(output_quants)], dim=1)[:,n]
+                for output_quant in output_quants:            
+                    output_quant.bin_output()
+                if len(output_quants) == 1:
+                    bin_output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate bin for the current input
+                else:
+                    input_feats = self.in_features
+                    bin_output_states = torch.cat([output_quant(self.forward(padded_perm_matrix)[:,input_feats*i:input_feats*(i+1)]) for i,output_quant in enumerate(output_quants)], dim=1)[:,n]
+                for output_quant, is_bin_output in zip(output_quants, is_bin_outputs):
+                    output_quant.is_bin_output = is_bin_output
                 self.apply_input_quant, self.apply_output_quant = apply_input_quant, apply_output_quant
 
                 # Append the connectivity, input permutations and output permutations to the neuron truth tables 
