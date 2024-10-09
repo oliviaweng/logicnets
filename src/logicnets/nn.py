@@ -284,48 +284,87 @@ class SparseLinearNeq(nn.Module):
                 x = self.output_quant(x)
         return x
 
-    # Consider using masked_select instead of fetching the indices
     def calculate_truth_tables(self):
         with torch.no_grad():
-            mask = self.fc.mask()
             # Precalculate all of the input value permutations
-            input_state_space = list() # TODO: is a list the right data-structure here?
+            input_state_space = list()  # TODO: is a list the right data-structure here?
             bin_state_space = list()
-            for m in range(self.in_features):
-                neuron_state_space = self.input_quant.get_state_space() # TODO: this call should include the index of the element of interest
-                bin_space = self.input_quant.get_bin_state_space() # TODO: this call should include the index of the element of interest
-                input_state_space.append(neuron_state_space)
-                bin_state_space.append(bin_space)
-
+            neuron_state_space = (
+                self.input_quant.get_state_space()
+            )  # TODO: this call should include the index of the element of interest
+            bin_space = (
+                self.input_quant.get_bin_state_space()
+            )  # TODO: this call should include the index of the element of interest
+            input_state_space.append(neuron_state_space)
+            bin_state_space.append(bin_space)
             neuron_truth_tables = list()
+
+            # Retrieve the possible state space of the current neuron
+            connected_state_space = [input_state_space[0] for i in range(self.fan_in)]
+            bin_connected_state_space = [bin_state_space[0] for i in range(self.fan_in)]
+            # Generate a matrix containing all possible input states
+            input_permutation_matrix = generate_permutation_matrix(
+                connected_state_space
+            ).cuda()  # matrix of all input combinations
+            bin_input_permutation_matrix = generate_permutation_matrix(
+                bin_connected_state_space
+            )
+
+            # TODO: Update this block to just run inference on the fc layer, once BN has been moved to output_quant
+            apply_input_quant, apply_output_quant = (
+                self.apply_input_quant,
+                self.apply_output_quant,
+            )
+            self.apply_input_quant, self.apply_output_quant = False, False
+            is_bin_output = self.output_quant.is_bin_output
+            self.output_quant.float_output()
+            step = input_permutation_matrix.shape[0]
+            output_states = self.output_quant(
+                self.forward_to_fill_luts(input_permutation_matrix[0:step, :])
+            )
+            for segment in range(step, input_permutation_matrix.shape[0], step):
+                output_states = torch.cat(
+                    (
+                        output_states,
+                        self.output_quant(
+                            self.forward_to_fill_luts(
+                                input_permutation_matrix[segment : segment + step, :]
+                            )
+                        ),
+                    ),
+                    0,
+                )  # Calculate float for the current input
+            self.output_quant.bin_output()
+            bin_output_states = self.output_quant(
+                self.forward_to_fill_luts(input_permutation_matrix[0:step, :])
+            )  # Calculate bin for the current input
+            for segment in range(step, input_permutation_matrix.shape[0], step):
+                bin_output_states = torch.cat(
+                    (
+                        bin_output_states,
+                        self.output_quant(
+                            self.forward_to_fill_luts(
+                                input_permutation_matrix[segment : segment + step, :]
+                            )
+                        ),
+                    ),
+                    0,
+                )  # Calculate float for the current input
+            self.output_quant.is_bin_output = is_bin_output
+            self.apply_input_quant, self.apply_output_quant = (
+                apply_input_quant,
+                apply_output_quant,
+            )
             for n in range(self.out_features):
-                # Determine the fan-in as number of synapse connections
-                input_mask = mask[n,:]
-                fan_in = torch.sum(input_mask)
-                indices = fetch_mask_indices(input_mask)
-                # Retrieve the possible state space of the current neuron
-                connected_state_space = [input_state_space[i] for i in indices]
-                bin_connected_state_space = [bin_state_space[i] for i in indices]
-                # Generate a matrix containing all possible input states
-                input_permutation_matrix = generate_permutation_matrix(connected_state_space)
-                bin_input_permutation_matrix = generate_permutation_matrix(bin_connected_state_space)
-                num_permutations = input_permutation_matrix.shape[0]
-                padded_perm_matrix = torch.zeros((num_permutations, self.in_features))
-                padded_perm_matrix[:,indices] = input_permutation_matrix
-
-                # TODO: Update this block to just run inference on the fc layer, once BN has been moved to output_quant
-                apply_input_quant, apply_output_quant = self.apply_input_quant, self.apply_output_quant
-                self.apply_input_quant, self.apply_output_quant = False, False
-                is_bin_output = self.output_quant.is_bin_output
-                self.output_quant.float_output()
-                output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate float for the current input
-                self.output_quant.bin_output()
-                bin_output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate bin for the current input
-                self.output_quant.is_bin_output = is_bin_output
-                self.apply_input_quant, self.apply_output_quant = apply_input_quant, apply_output_quant
-
-                # Append the connectivity, input permutations and output permutations to the neuron truth tables 
-                neuron_truth_tables.append((indices, bin_input_permutation_matrix, output_states, bin_output_states)) # Change this to be the binary output states
+                # Append the connectivity, input permutations and output permutations to the neuron truth tables
+                neuron_truth_tables.append(
+                    (
+                        self.imask[n],
+                        bin_input_permutation_matrix,
+                        output_states[:, n],
+                        bin_output_states[:, n],
+                    )
+                )  # Change this to be the binary output states
         self.neuron_truth_tables = neuron_truth_tables
 
 
