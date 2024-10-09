@@ -103,7 +103,7 @@ def main(args):
     # Push model and constants to GPU if necessary
     if args.gpu:
         model.cuda()
-        move_constants_to_gpu()
+        move_constants_to_gpu(0)
 
     # Load model weights
     print(f"Preloading model weights from: {args.checkpoint}")

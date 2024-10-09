@@ -15,13 +15,14 @@
 
 
 model=$1
+DIR=hgcal_autoencoder
 DATA_DIR=./data/hgcal22data_signal_driven_ttbar_v11/nElinks_5/
 DATA_FILE=./data/hgcal22data_signal_driven_ttbar_v11/hgcal22data_signal_driven_ttbar_v11_nELinks5.npy 
-SAVE_DIR=./logs_$model
+SAVE_DIR=./${DIR}/final_verilog/${model}
 CLOCK=2
 EXP_NAME="large_${CLOCK}ns"
-CONFIG=./ckpts/$model/hparams.yml
-CKPT=./ckpts/$model/best_loss.pth
+CONFIG=./${DIR}/${model}/hparams.yml
+CKPT=./${DIR}/${model}/best_loss.pth
 
 
 CUDA_VISIBLE_DEVICES=0 python neq2lut.py \
@@ -32,6 +33,7 @@ CUDA_VISIBLE_DEVICES=0 python neq2lut.py \
    --checkpoint $CKPT \
    --hparams_config $CONFIG \
    --simulate_pre_synthesis_verilog \
+   --gpu
    # --simulate_post_synthesis_verilog \
    # --compute_emd \
    # --add_registers \

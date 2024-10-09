@@ -81,16 +81,370 @@ def neq_inference(model: nn.Module) -> None:
         if type(module) == SparseLinearNeq:
             module.neq_inference()
 
+# Not sure if it's optimal to do this recursively, but it shouldn't matter unless we have some giant ensemble size I hope
+def nested_case_generator(
+    output_bits: int,
+    depth: int,
+    i: int = 0,
+    sum: int = 0
+):
+    output = f"case(i{i})\n"
+    for val in range(2**output_bits):
+        output += f"2'b{val:0{output_bits}b}:\n"
+        if i < depth-1:
+            output += nested_case_generator(output_bits, depth, i+1, sum+val)
+        else:
+            output += f"outr = 2'b{int((sum+val)/depth):0{output_bits}b};\n"
+    output += "endcase\n"
+    return output
+
+def averaging_module_verilog(
+    output_bits: int,
+    num_models: int,
+    output_dir: str,
+    module_name: str = "averaging",
+    lut: bool = True
+):
+    output_string = f"""\
+module {module_name} (input clk,
+                  input [{output_bits-1}:0] {",".join([f"i{i}" for i in range(num_models)])},
+                  output reg [{output_bits-1}:0] out);
+"""
+    if lut:
+        output_string += f"""\
+(*rom_style = "distributed"*) reg [{output_bits-1}:0] outr;
+"""
+    else:
+        output_string += f"""\
+reg [{output_bits-1}:0] outr;
+"""
+
+    output_string += f"""\
+always @ (posedge clk) begin
+    out <= outr;
+end
+
+always @ (*) begin
+"""
+    output_string += nested_case_generator(output_bits, num_models)
+    output_string += f"""\
+end
+endmodule
+"""
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        f.write(output_string)
+
+def averaging_module_adder_tree(
+    output_bits: int,
+    averaged_bits: int,
+    num_models: int,
+    output_dir: str,
+    module_name: str = "averaging",
+    lut: bool = True
+):
+    output_string = f"""\
+module {module_name} (input clk,
+                  input [{output_bits-1}:0] {",".join([f"i{i}" for i in range(num_models)])},
+                  output reg [{averaged_bits-1}:0] out);
+"""
+
+    cycles = math.ceil(math.log2(num_models))
+    # output_string += "\n".join([f"reg [{averaged_bits-1}:0] out_{i};" for i in range(cycles)])
+    block_code = f"""
+always @ (posedge clk) begin
+"""
+
+    previous_signals = [f"i{i}" for i in range(num_models)]
+    intermediate_signals = []
+    for stage in range(cycles):
+        curr_signals = []
+        wire_num = 0
+        it = iter(previous_signals)
+        for a,b in zip(it,it):
+            this_signal = f"out_{stage}_{wire_num}"
+            block_code += f"\t{this_signal} <= {a} + {b};\n"
+            curr_signals.append(this_signal)
+            wire_num += 1
+        previous_signals = curr_signals
+        intermediate_signals += curr_signals
+        
+    output_string += f"""
+reg [{averaged_bits-1}:0] {",".join(intermediate_signals[:-1])};
+"""
+    block_code = block_code.replace(curr_signals.pop(), "out")
+    output_string += block_code
+
+    output_string += f"""
+end
+
+endmodule
+"""
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        print(output_string)
+        f.write(output_string)
+
+
+def averaging_module_verilog_shared_output(
+    output_bits: int,
+    averaged_bits: int,
+    num_models: int,
+    output_dir: str,
+    module_name: str = "averaging",
+    lut: bool = True
+):
+    output_string = f"""\
+module {module_name} (input clk,
+                  input [{output_bits-1}:0] {",".join([f"i{i}" for i in range(num_models)])},
+                  output reg [{averaged_bits-1}:0] out);
+"""
+
+    cycles = math.ceil(math.log2(num_models))
+    # output_string += "\n".join([f"reg [{averaged_bits-1}:0] out_{i};" for i in range(cycles)])
+    first_out_reg = "out" if cycles == 1 else "out_0"
+    output_string += f"""
+reg [{averaged_bits-1}:0] {",".join([f"out_{i}" for i in range(cycles)])};
+always @ (posedge clk) begin
+    out_0 <= {"+".join([f"i{i}" for i in range(num_models)])};
+"""
+    output_string += "\n".join([f"\t{'out' if i == cycles-1 else f'out_{i}'} <= out_{i-1};" for i in range(1,cycles)])
+    output_string += f"""
+end
+
+// always @(*) begin
+//     out = out_{cycles-1};
+// end
+
+endmodule
+"""
+    output_string = f"""
+module {module_name} (input clk,
+                  input [{output_bits-1}:0] {",".join([f"i{i}" for i in range(num_models)])},
+                  output reg [{averaged_bits-1}:0] out);
+always @ (posedge clk) begin
+    out <= {"+".join([f"i{i}" for i in range(num_models)])};
+end
+endmodule
+    """
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        print(output_string)
+        f.write(output_string)
+    
+def ensemble_top_to_verilog(
+    ensemble: nn.ModuleList,
+    module_name: str,
+    output_dir: str
+):
+    total_input_bits = int(sum([lnet.module_list[0].input_quant.get_scale_factor_bits()[1] *lnet.module_list[0].in_features for lnet in ensemble]))
+    #total_output_bits = int(max([lnet.module_list[-1].output_quant.get_scale_factor_bits()[1]*lnet.module_list[-1].out_features for lnet in ensemble]) + math.ceil(math.log2(len(ensemble))))
+    total_output_bits = int(max([lnet.module_list[-1].output_quant.get_scale_factor_bits()[1]*lnet.module_list[-1].out_features for lnet in ensemble]))
+    output_feat_size = int(ensemble[0].module_list[-1].output_quant.get_scale_factor_bits()[1])
+    layers = len(ensemble[0].module_list)
+    averaging_module_verilog(
+        output_bits = output_feat_size,
+        num_models = len(ensemble),
+        output_dir = output_dir,
+        lut = True
+    )
+    #total_output_bits = 32
+    file_contents = f"""\
+module {module_name} (input [{total_input_bits-1}:0] M0, input clk, input rst, output reg [{total_output_bits-1}:0] out);
+"""
+    
+    for i, lnet in enumerate(ensemble):
+        i_scale_factor, i_bits = lnet.module_list[0].input_quant.get_scale_factor_bits()
+        o_scale_factor, o_bits = lnet.module_list[-1].output_quant.get_scale_factor_bits()
+        input_bits = int(i_bits) * lnet.module_list[0].in_features
+        output_bits = int(o_bits) * lnet.module_list[-1].out_features
+        file_contents += f"""\
+
+//shortreal SFo_{i} = {o_scale_factor};
+wire [{input_bits-1}:0] M0w_{i};
+wire [{output_bits-1}:0] M2_{i};
+assign M0w_{i} = M0[{32*(i+1)-1}:{32*i}];
+{module_name}_{i} {module_name}_{i}_inst (.M0(M0w_{i}), .clk(clk), .rst(rst), .M{layers}(M2_{i}));
+"""
+
+#     file_contents += f"""\
+#
+# always @(posedge clk) begin
+#     M5 <= {"+".join([f"M2_{i}" for i,_ in enumerate(ensemble)])};
+# end
+#     """
+#     file_contents += f"""
+# //wire [{total_output_bits-1}:0] M{layers}_reg;
+# //always @(*) begin
+# //    out = M{layers}_reg;
+# //end
+# """
+    for num,i in enumerate(range(0, total_output_bits, output_feat_size)):
+        hi = i+output_feat_size-1
+        lo = i
+        file_contents += f"""\
+averaging averaging_{num}_inst (
+    .clk(clk),
+    {", ".join([f".i{j}(M2_{j}[{hi}:{lo}])" for j in range(len(ensemble))])}, 
+    .out(M{layers}_reg[{hi}:{lo}])
+);
+"""
+
+    file_contents += """\
+
+endmodule
+"""
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        f.write(file_contents)
+
+def calculate_bits(num_output_bits, num_of_ensembles):
+    max_value_single_number = (2 ** num_output_bits) - 1
+    max_sum = num_of_ensembles * max_value_single_number
+    required_bits = math.ceil(math.log2(max_sum + 1))
+    return required_bits
+
+def ensemble_top_to_verilog_shared_input(
+    ensemble: nn.ModuleList,
+    module_name: str,
+    output_dir: str
+):
+    total_input_bits = int(ensemble[0].in_features * ensemble[0].input_quant.get_scale_factor_bits()[1])
+    output_feat_size = int(ensemble[-2].module_list[-1].output_quant.get_scale_factor_bits()[1])
+    total_output_bits = int(ensemble[-2].module_list[-1].out_features * output_feat_size)
+    layers = len(ensemble[1].module_list)
+    num_ensembles = len(ensemble[1:-1])
+    shared_output_features = int(ensemble[-1].out_features / num_ensembles)
+    shared_output_feat_size = int(ensemble[-1].output_quant.get_scale_factor_bits()[1])
+    shared_output_bits = shared_output_feat_size * shared_output_features
+    module_feat_size = int(calculate_bits(ensemble[-1].output_quant.get_scale_factor_bits()[1], num_ensembles))
+    total_module_bits = int(shared_output_features * module_feat_size)
+    averaging_module_verilog_shared_output(
+        output_bits = shared_output_feat_size,
+        averaged_bits = module_feat_size,
+        num_models = num_ensembles,
+        output_dir = output_dir,
+        lut = True
+    )
+    file_contents = f"""\
+module {module_name} (input [{total_input_bits-1}:0] M0, input clk, input rst, output [{total_module_bits-1}:0] out);
+"""
+    
+    print([type(lnet) for lnet in ensemble])
+    for i, lnet in enumerate(ensemble[1:-1],1):
+        i_scale_factor, i_bits = lnet.module_list[0].input_quant.get_scale_factor_bits()
+        o_scale_factor, o_bits = lnet.module_list[-1].output_quant.get_scale_factor_bits()
+        input_bits = int(i_bits) * lnet.module_list[0].in_features
+        output_bits = int(o_bits) * lnet.module_list[-1].out_features
+        file_contents += f"""\
+
+//shortreal SFo_{i} = {o_scale_factor};
+wire [{input_bits-1}:0] M0w_{i};
+wire [{output_bits-1}:0] M2_{i};
+// assign M0w_{i} = M0[{32*(i+1)-1}:{32*i}];
+{module_name}_{i} {module_name}_{i}_inst (.M0(M0w_{i}), .clk(clk), .rst(rst), .M{layers}(M2_{i}));
+"""
+
+    file_contents += f"""
+logicnet_0 logicnet_0_inst (.M0(M0), .clk(clk), .rst(rst), .M1({{{", ".join([f"M0w_{i}" for i,_ in reversed(list(enumerate(ensemble[1:-1],1)))])}}}));
+"""
+
+    file_contents += "\n".join([f"wire[{shared_output_bits-1}:0] out_{i};" for i,_ in enumerate(ensemble[1:-1],1)])
+
+    file_contents += f"""
+logicnet_{len(ensemble)-1} logicnet_{len(ensemble)-1}_inst (.M0({{{", ".join([f"M2_{i}" for i,_ in reversed(list(enumerate(ensemble[1:-1],1)))])}}}), .clk(clk), .rst(rst), .M1({{{", ".join([f"out_{i}" for i,_ in reversed(list(enumerate(ensemble[1:-1],1)))])}}}));
+"""
+#     file_contents += f"""\
+#
+# always @(posedge clk) begin
+#     M5 <= {"+".join([f"M2_{i}" for i,_ in enumerate(ensemble)])};
+# end
+#     """
+#     file_contents += f"""
+# wire [{total_output_bits-1}:0] M{layers}_reg;
+# always @(*) begin
+#     out = M{layers}_reg;
+# end
+# """
+    for num,(i,j) in enumerate(zip(range(0, shared_output_bits, shared_output_feat_size), range(0, total_module_bits, module_feat_size))):
+        hi_out = i+shared_output_feat_size-1
+        lo_out = i
+        hi_module = j+module_feat_size-1
+        lo_module = j
+        file_contents += f"""\
+averaging averaging_{num}_inst (
+    .clk(clk),
+    {", ".join([f".i{k}(out_{k+1}[{hi_out}:{lo_out}])" for k in range(len(ensemble[1:-1]))])}, 
+    .out(out[{hi_module}:{lo_module}])
+);
+"""
+
+    file_contents += """\
+
+endmodule
+"""
+    with open(f"{output_dir}/{module_name}.v", "w") as f:
+        f.write(file_contents)
+
+def ensemble_to_verilog_module(
+    ensemble: nn.ModuleList, 
+    module_name: str, # "logicnet"
+    output_dir: str, 
+    add_registers: bool = True, 
+    generate_bench: bool = True
+):
+    print([(m.input_quant.get_quant_type(), m.output_quant.get_quant_type()) for m in ensemble[1].module_list])
+    for i, lnet in tqdm(enumerate(ensemble)):
+        print(i)
+        if isinstance(lnet, SparseLinearNeq):
+            # lnet_copy = copy.deepcopy(lnet)
+            lnet_copy = lnet
+            print(ensemble[1].module_list[0].input_quant.get_quant_type(),ensemble[1].module_list[-1].output_quant.get_quant_type())
+            if not lnet_copy.output_quant:
+                lnet_copy.output_quant = ensemble[1].module_list[0].input_quant
+            if not lnet_copy.input_quant:
+                lnet_copy.input_quant = ensemble[1].module_list[-1].output_quant
+            print(lnet_copy.input_quant.get_quant_type(), lnet_copy.output_quant.get_quant_type())
+            module_list_to_verilog_module(
+                nn.ModuleList([lnet_copy]), 
+                module_name, 
+                output_dir, 
+                ensemble_member_idx=i,
+                generate_bench=generate_bench,
+                add_registers=add_registers,
+            )
+            continue
+        module_list_to_verilog_module(
+            lnet.module_list, 
+            module_name, 
+            output_dir, 
+            ensemble_member_idx=i,
+            generate_bench=generate_bench,
+            add_registers=add_registers,
+        )
+    ensemble_top_to_verilog_shared_input(
+        ensemble=ensemble,
+        module_name=module_name,
+        output_dir=output_dir
+    )
+    ensemble[0].output_quant = None
+    ensemble[-1].input_quant = None
+    print(f"Top level entity stored at: {output_dir}/{module_name}.v ...")
+
+
 # TODO: Should this go in with the other verilog functions?
 # TODO: Support non-linear topologies
-def module_list_to_verilog_module(module_list: nn.ModuleList, module_name: str, output_directory: str, add_registers: bool = True, generate_bench: bool = True):
+def module_list_to_verilog_module(
+    module_list: nn.ModuleList, 
+    module_name: str, 
+    output_directory: str, 
+    ensemble_member_idx: int = 0,
+    add_registers: bool = True, 
+    generate_bench: bool = True
+):
     input_bitwidth = None
     output_bitwidth = None
     module_contents = ""
     for i in range(len(module_list)):
         m = module_list[i]
         if type(m) == SparseLinearNeq or type(m) == SparseLinearNeq_mask:
-            module_prefix = f"layer{i}"
+            module_prefix = f"ens{ensemble_member_idx}_layer{i}"
             module_input_bits, module_output_bits = m.gen_layer_verilog(module_prefix, output_directory, generate_bench=generate_bench)
             if i == 0:
                 input_bitwidth = module_input_bits
@@ -104,17 +458,19 @@ def module_list_to_verilog_module(module_list: nn.ModuleList, module_name: str, 
                                                         output_wire=i!=len(module_list)-1,
                                                         register=add_registers)
         else:
-            raise Exception(f"Expect type(module) == SparseLinearNeq, {type(module)} found")
-    module_list_verilog = generate_logicnets_verilog(   module_name=module_name,
-                                                        input_name="M0",
-                                                        input_bits=input_bitwidth,
-                                                        output_name=f"M{len(module_list)}",
-                                                        output_bits=output_bitwidth,
-                                                        module_contents=module_contents)
+            raise Exception(f"Expect type(module) == SparseLinearNeq, {type(m)} found")
+    module_list_verilog = generate_logicnets_verilog(
+        module_name=f"{module_name}_{ensemble_member_idx}",
+        input_name="M0",
+        input_bits=input_bitwidth,
+        output_name=f"M{len(module_list)}",
+        output_bits=output_bitwidth,
+        module_contents=module_contents
+    )
     reg_verilog = generate_register_verilog()
     with open(f"{output_directory}/myreg.v", "w") as f:
         f.write(reg_verilog)
-    with open(f"{output_directory}/{module_name}.v", "w") as f:
+    with open(f"{output_directory}/{module_name}_{ensemble_member_idx}.v", "w") as f:
         f.write(module_list_verilog)
 
 class SparseLinear(nn.Linear):
@@ -344,21 +700,21 @@ class SparseLinearNeq(nn.Module):
             connected_input = x[:,indices]
             y[:,i] = self.table_lookup(connected_input, input_perm_matrix, bin_output_states)
         return y
-            # print(connected_input[0,:])
-            # print(x.shape, connected_input.shape, indices, input_perm_matrix, bin_output_states)
-            # print(self.neuron_truth_tables[i].shape)
-            y[:,i] = self.table_lookup(connected_input.to('cuda:0'), input_perm_matrix.to('cuda:0'), bin_output_states.to('cuda:0'))
-            if debug:
-                print("i:",i)
-                print("input_perm_matrix:",input_perm_matrix)
-                print("bin_output_states:",bin_output_states)
-                if self.output_quant:
-                    print("bin_output_states:",list(map(lambda z: self.output_quant.get_bin_str(z), bin_output_states)))
-                print("connected_input:",connected_input)
-                if self.input_quant:
-                    print("connected_input:",self.input_quant.get_bin_str(connected_input[0][0]))
-                print("y:",y[:,i])
-        return y.to('cuda:0')
+        #     # print(connected_input[0,:])
+        #     # print(x.shape, connected_input.shape, indices, input_perm_matrix, bin_output_states)
+        #     # print(self.neuron_truth_tables[i].shape)
+        #     y[:,i] = self.table_lookup(connected_input.to('cuda:0'), input_perm_matrix.to('cuda:0'), bin_output_states.to('cuda:0'))
+        #     if debug:
+        #         print("i:",i)
+        #         print("input_perm_matrix:",input_perm_matrix)
+        #         print("bin_output_states:",bin_output_states)
+        #         if self.output_quant:
+        #             print("bin_output_states:",list(map(lambda z: self.output_quant.get_bin_str(z), bin_output_states)))
+        #         print("connected_input:",connected_input)
+        #         if self.input_quant:
+        #             print("connected_input:",self.input_quant.get_bin_str(connected_input[0][0]))
+        #         print("y:",y[:,i])
+        # return y.to('cuda:0')
 
     def forward(self, x: Tensor) -> Tensor:
         if self.is_lut_inference:
@@ -683,7 +1039,7 @@ class SparseLinearNeq_mask(nn.Module):
                 num_permutations = input_permutation_matrix.shape[0]
                 padded_perm_matrix = torch.zeros((num_permutations, self.in_features))
                 padded_perm_matrix[:,indices] = input_permutation_matrix
-                padded_perm_matrix = padded_perm_matrix.cuda()
+                # padded_perm_matrix = padded_perm_matrix.to('cuda:0')
 
                 # print(input_permutation_matrix.shape)
                 # print(self.forward(padded_perm_matrix)[:,n])
