@@ -392,7 +392,7 @@ def ensemble_to_verilog_module(
     print([(m.input_quant.get_quant_type(), m.output_quant.get_quant_type()) for m in ensemble[1].module_list])
     for i, lnet in tqdm(enumerate(ensemble)):
         print(i)
-        if isinstance(lnet, SparseLinearNeq):
+        if isinstance(lnet, SparseLinearNeq) or isinstance(lnet, SparseLinearNeq_mask):
             # lnet_copy = copy.deepcopy(lnet)
             lnet_copy = lnet
             print(ensemble[1].module_list[0].input_quant.get_quant_type(),ensemble[1].module_list[-1].output_quant.get_quant_type())
@@ -481,7 +481,7 @@ class SparseLinear(nn.Linear):
         self.weight.data.uniform_(-y, y)
 
     def forward(self, input: Tensor) -> Tensor:
-        return (input * self.weight).sum(dim=-1) + self.bias
+        return (input * self.weight.cuda()).sum(dim=-1) + self.bias.cuda()
 
 
 class SparseLinear_mask(nn.Linear):
@@ -595,28 +595,28 @@ class SparseLinearNeq(nn.Module):
         output_offset = 0
         neuron_args = [(module_prefix, index, directory, generate_bench) for index in range(self.out_features)]
         
-        queue = multiprocessing.Queue()
-        for args in neuron_args:
-            queue.put(args)
-
-        processes = []
-
-        for _ in range(8):
-            p = multiprocessing.Process(target=neuron_worker, args=(queue,self))
-            p.start()
-            processes.append(p)
-
-        for p in processes:
-            queue.put(None)  # Send termination signal
-
-        for p in processes:
-            p.join()
+        # queue = multiprocessing.Queue()
+        # for args in neuron_args:
+        #     queue.put(args)
+        #
+        # processes = []
+        #
+        # for _ in range(8):
+        #     p = multiprocessing.Process(target=neuron_worker, args=(queue,self))
+        #     p.start()
+        #     processes.append(p)
+        #
+        # for p in processes:
+        #     queue.put(None)  # Send termination signal
+        #
+        # for p in processes:
+        #     p.join()
 
 
         # with multiprocessing.Pool(8) as pool:
         #     pool.map(self.gen_neuron_wrapper, neuron_args)
-        # for args in neuron_args:
-        #     self.gen_neuron_wrapper(args)
+        for args in neuron_args:
+            self.gen_neuron_wrapper(args)
         for index in range(self.out_features):
             module_name = f"{module_prefix}_N{index}"
             indices, _, _, _ = self.neuron_truth_tables[index]
@@ -698,8 +698,8 @@ class SparseLinearNeq(nn.Module):
         for i in range(self.out_features):
             indices, input_perm_matrix, float_output_states, bin_output_states = self.neuron_truth_tables[i]
             connected_input = x[:,indices]
-            y[:,i] = self.table_lookup(connected_input, input_perm_matrix, bin_output_states)
-        return y
+            y[:,i] = self.table_lookup(connected_input.cuda(), input_perm_matrix.cuda(), bin_output_states.cuda())
+        return y.cuda()
         #     # print(connected_input[0,:])
         #     # print(x.shape, connected_input.shape, indices, input_perm_matrix, bin_output_states)
         #     # print(self.neuron_truth_tables[i].shape)
@@ -732,6 +732,7 @@ class SparseLinearNeq(nn.Module):
     def forward_to_fill_luts(self, x: Tensor) -> Tensor:
         if self.apply_input_quant:
             x = self.input_quant(x)
+        x = x.to('cuda:0')
         x = x.repeat(1, self.out_features)
         x = x.reshape(x.shape[0], self.out_features, self.fan_in)
         x = x.unsqueeze(dim=-2).pow(self.mask).prod(dim=-1)
@@ -761,7 +762,7 @@ class SparseLinearNeq(nn.Module):
             # Generate a matrix containing all possible input states
             input_permutation_matrix = generate_permutation_matrix(
                 connected_state_space
-            ).cuda()  # matrix of all input combinations
+            )  # matrix of all input combinations
             bin_input_permutation_matrix = generate_permutation_matrix(
                 bin_connected_state_space
             )
@@ -776,7 +777,7 @@ class SparseLinearNeq(nn.Module):
             self.output_quant.float_output()
             step = input_permutation_matrix.shape[0]
             output_states = self.output_quant(
-                self.forward_to_fill_luts(input_permutation_matrix[0:step, :])
+                self.forward_to_fill_luts(input_permutation_matrix[0:step, :]).cpu()
             )
             for segment in range(step, input_permutation_matrix.shape[0], step):
                 output_states = torch.cat(
@@ -792,7 +793,7 @@ class SparseLinearNeq(nn.Module):
                 )  # Calculate float for the current input
             self.output_quant.bin_output()
             bin_output_states = self.output_quant(
-                self.forward_to_fill_luts(input_permutation_matrix[0:step, :])
+                self.forward_to_fill_luts(input_permutation_matrix[0:step, :]).cpu()
             )  # Calculate bin for the current input
             for segment in range(step, input_permutation_matrix.shape[0], step):
                 bin_output_states = torch.cat(
@@ -800,7 +801,7 @@ class SparseLinearNeq(nn.Module):
                         bin_output_states,
                         self.output_quant(
                             self.forward_to_fill_luts(
-                                input_permutation_matrix[segment : segment + step, :]
+                                input_permutation_matrix[segment : segment + step, :].cpu()
                             )
                         ),
                     ),
@@ -952,13 +953,17 @@ class SparseLinearNeq_mask(nn.Module):
 
     def lut_inference(self):
         self.is_lut_inference = True
-        self.input_quant.bin_output()
-        self.output_quant.bin_output()
+        if self.input_quant:
+            self.input_quant.bin_output()
+        if self.output_quant:
+            self.output_quant.bin_output()
 
     def neq_inference(self):
         self.is_lut_inference = False
-        self.input_quant.float_output()
-        self.output_quant.float_output()
+        if self.input_quant:
+            self.input_quant.float_output()
+        if self.output_quant:
+            self.output_quant.float_output()
 
     # TODO: This function might be a useful utility outside of this class..
     def table_lookup(self, connected_input: Tensor, input_perm_matrix: Tensor, bin_output_states: Tensor) -> Tensor:
@@ -980,8 +985,8 @@ class SparseLinearNeq_mask(nn.Module):
         for i in range(self.out_features):
             indices, input_perm_matrix, float_output_states, bin_output_states = self.neuron_truth_tables[i]
             connected_input = x[:,indices]
-            y[:,i] = self.table_lookup(connected_input, input_perm_matrix, bin_output_states)
-        return y
+            y[:,i] = self.table_lookup(connected_input.cuda(), input_perm_matrix.cuda(), bin_output_states.cuda())
+        return y.cuda()
 
     def forward(self, x: Tensor) -> Tensor:
         if self.is_lut_inference:

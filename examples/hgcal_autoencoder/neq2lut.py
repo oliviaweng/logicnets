@@ -151,28 +151,28 @@ def main(args):
         lut_model.cuda()
     lut_inference(lut_model)
     lut_model.eval()
-    lut_loss, lut_avg_emd = test(
-        lut_model, 
-        test_loader, 
-        val_sum=val_sum, 
-        gpu=args.gpu, 
-        compute_emd=args.compute_emd
-    )
-    print(f"LUT model loss: {lut_loss:.3f}")
-    print(f"LUT model average EMD: {lut_avg_emd:.3f}")
+    # lut_loss, lut_avg_emd = test(
+    #     lut_model, 
+    #     test_loader, 
+    #     val_sum=val_sum, 
+    #     gpu=args.gpu, 
+    #     compute_emd=args.compute_emd
+    # )
+    # print(f"LUT model loss: {lut_loss:.3f}")
+    # print(f"LUT model average EMD: {lut_avg_emd:.3f}")
+    #
+    # print(f"Total execution time = {time.time() - start_time}")
 
-    print(f"Total execution time = {time.time() - start_time}")
-
-    checkpoint = {
-        "model_dict": model.state_dict(),
-        "val_loss": lut_loss,
-        "avg_emd": lut_avg_emd,
-    }
-    torch.save(
-        checkpoint, 
-        os.path.join(
-            experiment_dir, f"lut_model_loss={lut_loss:.3f}_emd={avg_emd}.pth"
-    ))
+    # checkpoint = {
+    #     "model_dict": model.state_dict(),
+    #     "val_loss": lut_loss,
+    #     "avg_emd": lut_avg_emd,
+    # }
+    # torch.save(
+    #     checkpoint, 
+    #     os.path.join(
+    #         experiment_dir, f"lut_model_loss={lut_loss:.3f}_emd={avg_emd}.pth"
+    # ))
 
     # Generate verilog
     verilog_dir = os.path.join(experiment_dir, "verilog")
