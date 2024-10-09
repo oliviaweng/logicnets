@@ -284,6 +284,17 @@ class SparseLinearNeq(nn.Module):
                 x = self.output_quant(x)
         return x
 
+    def forward_to_fill_luts(self, x: Tensor) -> Tensor:
+        if self.apply_input_quant:
+            x = self.input_quant(x)
+        x = x.repeat(1, self.out_features)
+        x = x.reshape(x.shape[0], self.out_features, self.fan_in)
+        x = x.unsqueeze(dim=-2).pow(self.mask).prod(dim=-1)
+        x = self.fc(x)
+        if self.apply_output_quant:
+            x = self.output_quant(x)
+        return x
+
     def calculate_truth_tables(self):
         with torch.no_grad():
             # Precalculate all of the input value permutations
