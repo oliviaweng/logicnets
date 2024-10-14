@@ -22,6 +22,7 @@ import torch.nn as nn
 from torch.nn import init
 import torch.nn.functional as F
 from torch.nn.parameter import Parameter
+from torch import multiprocessing
 from tqdm import tqdm
 import math
 import copy
@@ -39,6 +40,14 @@ from .bench import      generate_lut_bench, \
                         generate_lut_input_string, \
                         sort_to_bench
 
+def neuron_worker(queue, instance):
+    while True:
+        item = queue.get()
+        if item is None:
+            break
+        # Call gen_neuron_wrapper from the passed class instance
+        instance.gen_neuron_wrapper(item)
+
 # TODO: Create a container module which performs this function.
 # Generate all truth tables for NEQs for a given nn.Module()
 def process_truth_table(args):
@@ -49,6 +58,9 @@ def process_truth_table(args):
 def generate_truth_tables(model: nn.Module, verbose: bool = False) -> None:
     training = model.training
     model.eval()
+
+    for name,module in model.named_modules():
+        print(name, type(module))
     
     pool_args = []
     ensemble_shared_output_input_quants = [model.ensemble[i].module_list[-1].output_quant for i in range(len(model.ensemble)) if not isinstance(model.ensemble[i], SparseLinearNeq)]
@@ -341,14 +353,14 @@ def ensemble_top_to_verilog_shared_input(
             output_dir = output_dir,
             lut = True
         )
-        averaging_module_adder_tree(
-            output_bits = shared_output_feat_size,
-            averaged_bits = module_feat_size,
-            num_models = num_ensembles,
-            output_dir = output_dir,
-            module_name = "adder_tree",
-            lut = True
-        )
+        # averaging_module_adder_tree(
+        #     output_bits = shared_output_feat_size,
+        #     averaged_bits = module_feat_size,
+        #     num_models = num_ensembles,
+        #     output_dir = output_dir,
+        #     module_name = "adder_tree",
+        #     lut = True
+        # )
     file_contents = f"""\
 module {module_name} (input [{total_input_bits-1}:0] M0, input clk, input rst, output [{total_module_bits-1}:0] out);
 """
@@ -408,9 +420,9 @@ endmodule
 """
     with open(f"{output_dir}/{module_name}.v", "w") as f:
         f.write(file_contents)
-    if not adder_tree:
-        with open(f"{output_dir}/{module_name}_adder_tree.v", "w") as f:
-            f.write(file_contents.replace("averaging","adder_tree").replace("module logicnet", "module logicnet_adder_tree"))
+    # if not adder_tree:
+    #     with open(f"{output_dir}/{module_name}_adder_tree.v", "w") as f:
+    #         f.write(file_contents.replace("averaging","adder_tree").replace("module logicnet", "module logicnet_adder_tree"))
 
 def ensemble_to_verilog_module(
     ensemble: nn.ModuleList, 
@@ -591,6 +603,28 @@ class SparseLinearNeq(nn.Module):
         layer_contents = f"module {module_prefix} (input [{total_input_bits-1}:0] M0, output [{total_output_bits-1}:0] M1);\n\n"
         output_offset = 0
         neuron_args = [(module_prefix, index, directory, generate_bench) for index in range(self.out_features)]
+        
+        # queue = multiprocessing.Queue()
+        # self_queue = multiprocessing.Queue()
+        # for args in neuron_args:
+        #     queue.put(args)
+        # for _ in range(8):
+        #     self_queue.put(self)
+
+        # processes = []
+
+        # for _ in range(8):
+        #     shared_self = self_queue.get()
+        #     p = multiprocessing.Process(target=neuron_worker, args=(queue,shared_self))
+        #     p.start()
+        #     processes.append(p)
+
+        # for p in processes:
+        #     queue.put(None)  # Send termination signal
+
+        # for p in processes:
+        #     p.join()
+
         # with multiprocessing.Pool() as pool:
         #     pool.map(self.gen_neuron_wrapper, neuron_args)
         for args in neuron_args:
@@ -783,7 +817,7 @@ class SparseLinearNeq(nn.Module):
                 ranges = [(input_feats*i,input_feats*(i+1)) for i in range(len(output_quants))]
                 # print(ranges)
                 if len(output_quants) == 1:
-                    output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate float for the current input
+                    output_states = output_quants[0](self.forward(padded_perm_matrix))[:,n] # Calculate float for the current input
                 else:
                     # print(ranges)
                     # print([self.forward(padded_perm_matrix)[:,a:b].shape for a,b in ranges])
@@ -792,7 +826,7 @@ class SparseLinearNeq(nn.Module):
                 for output_quant in output_quants:            
                     output_quant.bin_output()
                 if len(output_quants) == 1:
-                    bin_output_states = self.output_quant(self.forward(padded_perm_matrix))[:,n] # Calculate bin for the current input
+                    bin_output_states = output_quants[0](self.forward(padded_perm_matrix))[:,n] # Calculate bin for the current input
                 else:
                     input_feats = self.in_features
                     bin_output_states = torch.cat([output_quant(self.forward(padded_perm_matrix)[:,input_feats*i:input_feats*(i+1)]) for i,output_quant in enumerate(output_quants)], dim=1)[:,n]

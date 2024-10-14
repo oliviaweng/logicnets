@@ -269,25 +269,25 @@ if __name__ == "__main__":
         print("Verilog-Based Model accuracy: %f" % (verilog_accuracy))
         print("Verilog-Based AVG ROC AUC: %f" % (verilog_avg_roc_auc))
 
-    print("Running out-of-context synthesis")
-    ret = synthesize_and_get_resource_counts(
-        args.log_dir, 
-        "logicnet", 
-        # fpga_part="xcu280-fsvh2892-2L-e", 
-        fpga_part="xcvu9p-flgb2104-2-i", # LogicNets default
-        clk_period_ns=args.clock_period, 
-        post_synthesis=1
-    )
-    print(ret)
-    ret = synthesize_and_get_resource_counts(
-        args.log_dir, 
-        "logicnet_adder_tree", 
-        # fpga_part="xcu280-fsvh2892-2L-e", 
-        fpga_part="xcvu9p-flgb2104-2-i", # LogicNets default
-        clk_period_ns=args.clock_period, 
-        post_synthesis=1
-    )
-    print(ret)
+    # print("Running out-of-context synthesis")
+    # ret = synthesize_and_get_resource_counts(
+    #     args.log_dir, 
+    #     "logicnet", 
+    #     # fpga_part="xcu280-fsvh2892-2L-e", 
+    #     fpga_part="xcvu9p-flgb2104-2-i", # LogicNets default
+    #     clk_period_ns=args.clock_period, 
+    #     post_synthesis=1
+    # )
+    # print(ret)
+    # ret = synthesize_and_get_resource_counts(
+    #     args.log_dir, 
+    #     "logicnet_adder_tree", 
+    #     # fpga_part="xcu280-fsvh2892-2L-e", 
+    #     fpga_part="xcvu9p-flgb2104-2-i", # LogicNets default
+    #     clk_period_ns=args.clock_period, 
+    #     post_synthesis=1
+    # )
+    # print(ret)
 
     # if args.simulate_post_synthesis_verilog:
     #     print("Running post-synthesis inference simulation of Verilog-based model...")
