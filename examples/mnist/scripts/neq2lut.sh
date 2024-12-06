@@ -14,5 +14,5 @@ python3 neq2lut.py \
     --checkpoint $CKPT \
     --add-registers \
     --cuda \
-    --device 2 \
+    --device 3 \
     --simulate-pre-synthesis-verilog

@@ -17,9 +17,9 @@
 CUDA_DEVICE=$1
 CONFIG_DIR=$2
 
-DATA_DIR=./data/hgcal22data_signal_driven_ttbar_v11/nElinks_5/
-DATA_FILE=./data/hgcal22data_signal_driven_ttbar_v11/hgcal22data_signal_driven_ttbar_v11_nELinks5.npy 
-SAVE_DIR=./voting
+DATA_DIR=/home/ma11418/ensemblelut/logicnets/examples/hgcal_autoencoder/data
+DATA_FILE=/home/ma11418/ensemblelut/logicnets/examples/hgcal_autoencoder/data/hgcal22data_signal_driven_ttbar_v11/hgcal22data_signal_driven_ttbar_v11_nELinks5.npy 
+SAVE_DIR=./voting/seed2
 
 for config in `ls $CONFIG_DIR`; do
 exp_name="${config%.*}"
