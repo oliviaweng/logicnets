@@ -26,6 +26,6 @@ neuron_fanin:
 - 5
 - 3
 output_bitwidth: 5
-seed: 2
+seed: 3
 warm_restart_freq: 100
 wd: 0

@@ -13,6 +13,11 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+# NeuraLUT
+# tmux new-session -d -s n01 "./scripts/run_ensemble_exp.sh 0 ./ensemble_configs/averaging/neuralut/config1"
+tmux new-session -d -s n02 "./scripts/run_ensemble_exp.sh 2 ./ensemble_configs/averaging/neuralut/config2"
+# tmux new-session -d -s n03 "./scripts/run_ensemble_exp.sh 3 ./ensemble_configs/averaging/neuralut/config3"
+
 
 # xlabs51
 # Averaging
@@ -35,7 +40,7 @@
 # small polylut model
 # tmux new-session -d -s s00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_polylut_seed3_configs/config1 ./averaging"
 # tmux new-session -d -s s01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/small_polylut_seed3_configs/config2 ./averaging"
-tmux new-session -d -s s02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_polylut_seed3_configs/config3 ./averaging"
+# tmux new-session -d -s s02 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/small_polylut_seed3_configs/config3 ./averaging"
 
 # tmux new-session -d -s f00 "./scripts/run_gen_ensemble_exp.sh 0 ./ensemble_configs/averaging/large_fixed_mask_configs/config3 ./averaging"
 # tmux new-session -d -s f01 "./scripts/run_gen_ensemble_exp.sh 1 ./ensemble_configs/averaging/medium_fixed_mask_configs/config3 ./averaging"

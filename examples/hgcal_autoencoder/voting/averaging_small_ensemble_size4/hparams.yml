@@ -3,7 +3,6 @@ activation_bitwidth:
 - 3
 - 4
 batch_size: 512
-width_n: 16
 ensemble_hp:
   fixed_sparsity_mask: false
   shared_input_bitwidth: 6
@@ -12,8 +11,9 @@ ensemble_hp:
   shared_output_fanin: 1
   shared_output_layer: true
 ensemble_method: voting
-ensemble_size: 2
-epochs: 200
+ensemble_size: 4
+epochs: 100
+gpu: true
 hidden_layer:
 - 512
 - 512
@@ -26,6 +26,7 @@ neuron_fanin:
 - 5
 - 3
 output_bitwidth: 5
-seed: 1
+seed: 2
 warm_restart_freq: 100
 wd: 0
+width_n: 16
