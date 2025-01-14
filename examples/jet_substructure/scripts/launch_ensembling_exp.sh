@@ -23,12 +23,13 @@
 # tmux new-session -d -s nm01 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging_medium/config2 ./averaging_medium"
 # tmux new-session -d -s nm02 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging_medium/config3 ./averaging_medium"
 
-tmux new-session -d -s nb00 "./scripts/run_train_exp.sh 0 ./ensemble_configs/averaging_small_input_bitwidth/config1 ./averaging_small_final"
+# tmux new-session -d -s nb00 "./scripts/run_train_exp.sh 0 ./ensemble_configs/averaging_small_input_bitwidth/config1 ./averaging_small_final"
 # tmux new-session -d -s nb01 "./scripts/run_train_exp.sh 0 ./ensemble_configs/averaging_small_input_bitwidth/config2 ./averaging_small_final"
 # tmux new-session -d -s nb02 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging_small_input_bitwidth/config1 ./averaging_small_final"
-tmux new-session -d -s nb03 "./scripts/run_train_exp.sh 3 ./ensemble_configs/averaging_small_input_bitwidth/config3 ./averaging_small_final"
-tmux new-session -d -s nb04 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging_small_input_bitwidth/config4 ./averaging_small_final"
-tmux new-session -d -s nb05 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging_small_input_bitwidth/config5 ./averaging_small_final"
+# tmux new-session -d -s nb03 "./scripts/run_train_exp.sh 3 ./ensemble_configs/averaging_small_input_bitwidth/config3 ./averaging_small_final"
+# tmux new-session -d -s nb04 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging_small_input_bitwidth/config4 ./averaging_small_final"
+# tmux new-session -d -s nb05 "./scripts/run_train_exp.sh 2 ./ensemble_configs/averaging_small_input_bitwidth/config5 ./averaging_small_final"
+tmux new-session -d -s sn "./scripts/run_train_exp.sh 0 ./ensemble_configs/averaging_small_input_bitwidth/config6 ./averaging_small_final"
 
 
 # tmux new-session -d -s s00 "./scripts/run_train_exp.sh 1 ./ensemble_configs/averaging/deg1_same_output_scale_post_trans_configs/config1 ./averaging"
